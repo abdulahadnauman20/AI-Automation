@@ -4,24 +4,23 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthQuery } from '../reactQuery/hooks/useAuthQuery';
 
 
-export const getData = (data) => {
-  // console.log(data);
-  return data;
-};
+// export const getData = (data) => {
+//   console.log(data);
+//   return data;
+// };
 
 const Otp = () => {
   const navigate = useNavigate()
   const { verifyOtpMutation } = useAuthQuery(navigate);
-  // let token = JSON.parse(localStorage.getItem("token"));
   const [otpNum, setOtpNum] = useState(["", "", "", "", "", ""]);
   const[disable, setDisable] = useState(false);
 
   const [user, submitAction, isPending] = useActionState(async (previousState, formData) => {
     const otp = otpNum.join('');
-    const payload = {UserCode: otp};
+    const payload = {UserCode: otp, Login: true};
     console.log(payload);
-    // verifyOtpMutation.mutate(payload);
-    if(data){
+    verifyOtpMutation.mutate(payload);
+    if(payload){
       setOtpNum(["", "", "", "", "", ""]);
     }
   });

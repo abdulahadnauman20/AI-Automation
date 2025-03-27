@@ -1,6 +1,6 @@
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
+// import reactLogo from './assets/react.svg';
+// import viteLogo from '/vite.svg';
+// import './App.css';
 import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from 'react-router-dom';
 import Layout from './Layout/Layout';
 import DashboardPage from './routes/Dashaboard';
@@ -22,6 +22,7 @@ import Forgotpass from './routes/ForgotPass';
 import ResetPass from './routes/ResetPass';
 import Otp from './routes/Otp';
 import { Toaster } from 'react-hot-toast';
+import InvittionRoutes from './routes/InvittionRoutes';
 
 function App() {
   const router = createBrowserRouter(
@@ -47,6 +48,7 @@ function App() {
           <Route path="/ai-lead-scouts" element={<AILeadScouts />} />  
           <Route path="/settings" element={<Settings />} />           
           <Route path="/support" element={<Support />} />  
+          <Route path='/invitationAccept/:WorkspceId/:UserId' element={<InvittionRoutes /> } />
         </Route>
       </>
     )

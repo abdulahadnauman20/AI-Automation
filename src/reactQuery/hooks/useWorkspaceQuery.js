@@ -48,7 +48,7 @@ export const useWorkspaceQuery = () => {
         queryKey: ["currentWorkspace"],
         queryFn: getCurrentWorkspace,
         refetchOnWindowFocus: false,
-        // enabled: !!localStorage.getItem("user"), // Fetch only if user exists
+        enabled: !!localStorage.getItem("user"), // Fetch only if user exists
         onSuccess: (data) => console.log("Current workspace fetched:", data),
         onError: (error) => toast.error(error.response?.data?.message || "Failed to fetch workspace"),
     });
@@ -57,7 +57,7 @@ export const useWorkspaceQuery = () => {
         queryKey: ["allWorkspace"],
         queryFn: getAllWorkspace,
         refetchOnWindowFocus: false,
-        // enabled: !!localStorage.getItem("user"), // Fetch only if user exists
+        enabled: !!localStorage.getItem("user"), // Fetch only if user exists
         onSuccess: (data) => console.log("All workspaces fetched:", data),
         onError: (error) => toast.error(error.response?.data?.message || "Failed to fetch workspaces"),
     });
@@ -66,6 +66,7 @@ export const useWorkspaceQuery = () => {
         queryKey: ["teamWorkspaceMember"],
         queryFn: getWorkspaceMember,
         refetchOnWindowFocus: false,
+        enabled: !!localStorage.getItem("user"),
         onSuccess: (data) => console.log("All workspaces fetched:", data),
         onError: (error) => toast.error(error.response?.data?.message || "Failed to fetch workspaces"),
     });

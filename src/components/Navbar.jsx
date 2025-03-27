@@ -94,7 +94,7 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("user");
     navigate('/login');
-    QueryClient?.removeQueries(["userInfo"]);
+    // QueryClient?.removeQueries(["userInfo"]);
   };
 
   // Function to close all dropdowns
@@ -243,32 +243,40 @@ const Navbar = () => {
 
                 {isProfileOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg p-1 z-10 border-none">
-                    {/* <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    {/* <span className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       <User className="w-4 h-4 mr-2" />
                       <Link to='/settings'>
                         Profile
                       </Link>
                     </a> */}
-                    <a className="flex justify-between items-center px-4 py-2 text-sm text-gray-500 hover:bg-gray-100">
+                    <span className="flex justify-between items-center px-4 py-2 text-sm text-gray-500 hover:bg-gray-100">
                       <Link to='/settings'>
                         Settings
                       </Link>
                       <Settings className="w-4 h-4 mr-2 text-gray-400" />
-                    </a>
+                    </span>
                     <hr className='text-gray-300' />
-                    <a className="flex items-center justify-between px-4 py-2 text-sm text-gray-500 hover:bg-gray-100">
+                    <span className="flex items-center justify-between px-4 py-2 text-sm text-gray-500 hover:bg-gray-100">
                       <Link to='/support'>
                         Help Center
                       </Link>
                       <HelpCircle className="w-4 h-4 mr-2 text-gray-400" />
-                    </a>
+                    </span>
                     <hr className='text-gray-300' />
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left flex justify-between cursor-pointer items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                      Logout
-                      <LogOut className="w-4 h-4 mr-2" />
-                    </button>
+                    {  JSON.parse(localStorage?.getItem("user"))?.data ? 
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left flex justify-between cursor-pointer items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                        Logout
+                        <LogOut className="w-4 h-4 mr-2" />
+                      </button> :
+                      <button
+                        className="w-full text-left flex justify-between cursor-pointer items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                        <Link to='/login'>
+                          Signin
+                        </Link>
+                      </button> 
+                    }
                   </div>
                 )}
               </div>

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-import { signupUser, loginUser, logoutUser, verifyOtp, resetPassword, forgotPassword, getUserInfo, updatePassword, updateProfile } from "../services/authService";
+import { signupUser, loginUser, logoutUser, verifyOtp, resetPassword, forgotPassword, getUserInfo, updatePassword, updateProfile, switchTFA } from "../services/authService";
 
 
 export const useAuthQuery = (navigate) => {
@@ -19,11 +19,13 @@ export const useAuthQuery = (navigate) => {
   const signinMutation = useMutation({
       mutationFn: loginUser, // ✅ Fix
       onSuccess: (data) => {
-      console.log("data-query-->", data);
+      console.log("data-query-->", data?.User);
       toast.success(data.message || "Login successfully");
-      if (data?.user) {
-        localStorage.setItem("user", JSON.stringify({data: data.user, token: data.token}));
-        if(data?.user?.TFA){
+      // console.log(data?.User?.TFA);
+      if (data?.User) {
+        localStorage.setItem("user", JSON.stringify({data: data.User}));
+        data.token && localStorage?.setItem("Token", JSON.stringify({token: data.token}));
+        if(data?.User?.TFA){
           navigate("/otp");
         }else{
           navigate("/");
@@ -53,6 +55,7 @@ export const useAuthQuery = (navigate) => {
     mutationFn: verifyOtp, // ✅ Fix
     onSuccess: (data) => {
       toast.success(data.message);
+      localStorage.setItem("Token", JSON.stringify({token: data.token}));
       navigate('/');
     },
     onError: (error) => toast.error(error.response?.data?.message || "OTP verification failed"),
@@ -64,6 +67,12 @@ export const useAuthQuery = (navigate) => {
     onError: (error) => toast.error(error.response?.data?.message || "Password reset failed"),
   });
 
+  const TFAMutation = useMutation({
+    mutationFn: switchTFA, // ✅ Fix
+    onSuccess: (data) => toast.success(data.message),
+    onError: (error) => toast.error(error.response?.data?.message || "Two factor authentication failed"),
+  });
+
 
 
   // Setting route
@@ -71,7 +80,7 @@ export const useAuthQuery = (navigate) => {
     queryKey: ["userInfo"],
     queryFn: getUserInfo,
     refetchOnWindowFocus: false,
-    enabled: !!localStorage.getItem("user"),
+    enabled: !!localStorage?.getItem("Token"),
     onSuccess: (data) => console.log("User info fetched:", data),
     onError: (error) => toast.error(error.response?.data?.message || "Failed to fetch user details"),
   });
@@ -92,5 +101,5 @@ export const useAuthQuery = (navigate) => {
   });
 
 
-  return { signupMutation, signinMutation, logoutMutation, verifyOtpMutation, resetPasswordMutation, forgotPasswordMutation, userInfo, updatePasswordMutation, updateProfileMutation };
+  return { signupMutation, signinMutation, logoutMutation, verifyOtpMutation, resetPasswordMutation, forgotPasswordMutation, userInfo, updatePasswordMutation, updateProfileMutation, TFAMutation };
 };

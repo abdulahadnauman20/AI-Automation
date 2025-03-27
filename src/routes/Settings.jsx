@@ -8,13 +8,15 @@ const Settings = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalOpen2, setIsModalOpen2] = useState(false);
 
-    const { updatePasswordMutation, updateProfileMutation, userInfo } = useAuthQuery();
+    const { updatePasswordMutation, updateProfileMutation, userInfo, TFAMutation } = useAuthQuery();
 
     const [passwords, setPasswords] = useState({
         OldPassword: "",
         NewPassword: "",
         RetypePassword: "",
+        Login: false,
     });
+    
     const handlePasswordChange = (e) => {
         setPasswords({ ...passwords, [e.target.name]: e.target.value });
     };
@@ -38,6 +40,7 @@ const Settings = () => {
         password: '',
         TFA: false,
     });
+    
     
     useEffect(() => {
         if (userInfo?.User) {
@@ -66,10 +69,9 @@ const Settings = () => {
 
     // *****************************
 
-    const { currentWorkspace, allWorkspace, updateWorkspaceMutation, teamWorkspaceMember } =  useWorkspaceQuery()
+    const { currentWorkspace, updateWorkspaceMutation, teamWorkspaceMember, addMemeberMutation } =  useWorkspaceQuery()
     // console.log(currentWorkspace?.Workspace);
-    // console.log(teamWorkspaceMember);
-    // console.log(allWorkspace);
+    console.log(teamWorkspaceMember);
     
     const [workspaceData, setWorkspaceData] = useState({
         WorkspaceName: '',
@@ -103,7 +105,7 @@ const Settings = () => {
     };
 
     const createMemeber = () => {
-        // addMemeberMutation.mutate(newMember)
+        addMemeberMutation.mutate(newMember)
         console.log(newMember);
         setIsModalOpen2(false);
         setNewMember({
@@ -137,10 +139,14 @@ const Settings = () => {
     };
 
     const handleToggle = () => {
-        setProfileData((prev) => ({
-            ...prev,
-            TFA: !prev.TFA,
-        }));
+        console.log(userInfo?.User?.TFA);
+        if(userInfo?.User?.TFA !== undefined){
+            TFAMutation.mutate()
+            setProfileData((prev) => ({
+                ...prev,
+                TFA: !userInfo?.User?.TFA,
+            }));
+        }
     };
 
     const copyToClipboard = () => {
@@ -331,10 +337,10 @@ const Settings = () => {
                                 </div>
                                 <button
                                     onClick={handleToggle}
-                                    className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none ${profileData.TFA ? 'bg-green-500' : 'bg-gray-200'}`}
+                                    className={`relative inline-flex items-center cursor-pointer h-6 rounded-full w-11 transition-colors focus:outline-none ${userInfo?.User.TFA ? 'bg-green-500' : 'bg-gray-200'}`}
                                 >
                                     <span
-                                        className={`inline-block w-4 h-4 transform transition-transform bg-white rounded-full ${profileData.TFA ? 'translate-x-6' : 'translate-x-1'}`}
+                                        className={`inline-block w-4 h-4 transform transition-transform bg-white rounded-full ${userInfo?.User?.TFA ? 'translate-x-6' : 'translate-x-1'}`}
                                     />
                                 </button>
                             </div>
@@ -482,10 +488,33 @@ const Settings = () => {
                                                 </div>
                                             ))}
                                         </div>
+                                    //     <div className="space-y-4">
+                                    //     {teamWorkspaceMember?.Members.map(member => (
+                                    //         <div key={member.UserId} className="flex items-center justify-between">
+                                    //             <div className="flex items-center">
+                                    //                 <div className={`w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3`}>
+                                    //                     <span>👤</span>
+                                    //                 </div>
+                                    //                 <span className="font-medium">{member?.FirstName || 'Beeto'}</span>
+                                    //             </div>
+                                    //             <span className="text-gray-500">{member.Role}</span>
+                                    //         </div>
+                                    //     ))}
+                                    // </div>
                                     ) : (
-                                        <div className="text-center p-4 text-gray-500">
-                                            No pending invitations
-                                        </div>
+                                        <div className="space-y-4">
+                                        {teamWorkspaceMember?.Invites.map(member => (
+                                            <div key={member.UserId} className="flex items-center justify-between">
+                                                <div className="flex items-center">
+                                                    <div className={`w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3`}>
+                                                        <span>👤</span>
+                                                    </div>
+                                                    <span className="font-medium">{member?.FirstName || 'Beeto'}</span>
+                                                </div>
+                                                <span className="text-gray-500">{member.Role}</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                     )}
                                 </div>
                             </div>
