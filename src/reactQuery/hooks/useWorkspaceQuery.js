@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-import { createWorkspace, getAllWorkspace, updateWorkspace, getCurrentWorkspace, switchWorkspace, addMemeber, getWorkspaceMember, acceptInvitation, rejectInvitation, verifyInvitation, helpDesk, rejectInvitation } from "../services/workSpaceService.js";
+import { createWorkspace, getAllWorkspace, updateWorkspace, getCurrentWorkspace, switchWorkspace, addMemeber, getWorkspaceMember, acceptInvitation, rejectInvitation, verifyInvitation, helpDesk } from "../services/workSpaceService.js";
 
 export const useWorkspaceQuery = () => {
     const queryClient = useQueryClient();
