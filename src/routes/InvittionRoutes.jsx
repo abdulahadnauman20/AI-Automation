@@ -3,7 +3,7 @@ import React from 'react'
 import { useWorkspaceQuery } from '../reactQuery/hooks/useWorkspaceQuery';
 
 function InvittionRoutes() {
-    const { acceptInvitationMutation, rejectInvitationMutation, verifyMemberInvitation } = useWorkspaceQuery()
+    const { acceptInvitationMutation, rejectInvitationMutation } = useWorkspaceQuery()
     let member;
 
     const handleAccept = () => {

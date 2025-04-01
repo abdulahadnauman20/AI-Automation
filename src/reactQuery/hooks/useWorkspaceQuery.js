@@ -72,13 +72,13 @@ export const useWorkspaceQuery = () => {
     });
 
 
-    const { data: verifyMemberInvitation } = useQuery({
-        queryKey: ["verifyMemberInvitation"],
-        queryFn: verifyInvitation,
-        refetchOnWindowFocus: false,
-        onSuccess: (data) => console.log("All workspaces fetched:", data),
-        onError: (error) => toast.error(error.response?.data?.message || "Failed to fetch workspaces"),
-    });
+    // const { data: verifyMemberInvitation } = useQuery({
+    //     queryKey: ["verifyMemberInvitation"],
+    //     queryFn: verifyInvitation,
+    //     refetchOnWindowFocus: false,
+    //     onSuccess: (data) => console.log("All workspaces fetched:", data),
+    //     onError: (error) => toast.error(error.response?.data?.message || "Failed to fetch workspaces"),
+    // });
 
 
     const acceptInvitationMutation = useMutation({
@@ -108,5 +108,6 @@ export const useWorkspaceQuery = () => {
         onError: (error) => toast.error(error.response?.data?.message || "Failed to send help desk email"),
     });
 
-    return { createWorkspaceMutation, switchWorkspaceMutation, currentWorkspace, allWorkspace, updateWorkspaceMutation, addMemeberMutation, teamWorkspaceMember, helpDeskMutation, acceptInvitationMutation, rejectInvitationMutation, verifyMemberInvitation };
+    return { createWorkspaceMutation, switchWorkspaceMutation, currentWorkspace, allWorkspace, updateWorkspaceMutation, addMemeberMutation, teamWorkspaceMember, helpDeskMutation, acceptInvitationMutation, rejectInvitationMutation,  };
 };
+// verifyMemberInvitation
