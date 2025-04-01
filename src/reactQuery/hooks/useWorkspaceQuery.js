@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-import { createWorkspace, getAllWorkspace, updateWorkspace, getCurrentWorkspace, switchWorkspace, addMemeber, getWorkspaceMember, helpDesk } from "../services/workSpaceService.js";
+import { createWorkspace, getAllWorkspace, updateWorkspace, getCurrentWorkspace, switchWorkspace, addMemeber, getWorkspaceMember, acceptInvitation, rejectInvitation, verifyInvitation, helpDesk, rejectInvitation } from "../services/workSpaceService.js";
 
 export const useWorkspaceQuery = () => {
     const queryClient = useQueryClient();
@@ -72,6 +72,34 @@ export const useWorkspaceQuery = () => {
     });
 
 
+    const { data: verifyMemberInvitation } = useQuery({
+        queryKey: ["verifyMemberInvitation"],
+        queryFn: verifyInvitation,
+        refetchOnWindowFocus: false,
+        onSuccess: (data) => console.log("All workspaces fetched:", data),
+        onError: (error) => toast.error(error.response?.data?.message || "Failed to fetch workspaces"),
+    });
+
+
+    const acceptInvitationMutation = useMutation({
+        mutationFn: acceptInvitation,
+        onSuccess: (data) => {
+            toast.success(data.message);
+        },
+        onError: (error) => toast.error(error.response?.data?.message || "Failed to send help desk email"),
+    });
+
+    const rejectInvitationMutation = useMutation({
+        mutationFn: rejectInvitation,
+        onSuccess: (data) => {
+            toast.success(data.message);
+        },
+        onError: (error) => toast.error(error.response?.data?.message || "Failed to send help desk email"),
+    });
+
+
+
+
     const helpDeskMutation = useMutation({
         mutationFn: helpDesk,
         onSuccess: (data) => {
@@ -80,5 +108,5 @@ export const useWorkspaceQuery = () => {
         onError: (error) => toast.error(error.response?.data?.message || "Failed to send help desk email"),
     });
 
-    return { createWorkspaceMutation, switchWorkspaceMutation, currentWorkspace, allWorkspace, updateWorkspaceMutation, addMemeberMutation, teamWorkspaceMember, helpDeskMutation };
+    return { createWorkspaceMutation, switchWorkspaceMutation, currentWorkspace, allWorkspace, updateWorkspaceMutation, addMemeberMutation, teamWorkspaceMember, helpDeskMutation, acceptInvitationMutation, rejectInvitationMutation, verifyMemberInvitation };
 };
