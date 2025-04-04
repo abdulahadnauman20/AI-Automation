@@ -48,7 +48,7 @@ function App() {
           <Route path="/ai-lead-scouts" element={<AILeadScouts />} />  
           <Route path="/settings" element={<Settings />} />           
           <Route path="/support" element={<Support />} />  
-          <Route path='/invitationAccept/:WorkspceId/:UserId' element={<InvittionRoutes /> } />
+          <Route path='/invitationAccept/:wkid/:usid' element={<InvittionRoutes /> } />
         </Route>
       </>
     )

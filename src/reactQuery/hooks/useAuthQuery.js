@@ -19,12 +19,12 @@ export const useAuthQuery = (navigate) => {
   const signinMutation = useMutation({
       mutationFn: loginUser, // ✅ Fix
       onSuccess: (data) => {
-      console.log("data-query-->", data?.User);
+      // console.log("data-query-->", data?.User);
       toast.success(data.message || "Login successfully");
       // console.log(data?.User?.TFA);
       if (data?.User) {
-        localStorage.setItem("user", JSON.stringify({data: data.User}));
-        data.token && localStorage?.setItem("Token", JSON.stringify({token: data.token}));
+        localStorage?.setItem("user", JSON.stringify({data: data?.User}))
+        data.token && localStorage?.setItem("token", JSON.stringify({Token: data.token}));
         if(data?.User?.TFA){
           navigate("/otp");
         }else{
@@ -40,8 +40,8 @@ export const useAuthQuery = (navigate) => {
     mutationFn: logoutUser, // ✅ Fix
     onSuccess: () => {
       toast.success("Logged out successfully");
-      localStorage.removeItem("Token");
-localStorage.removeItem("user");
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
       queryClient.invalidateQueries(["user"]);
     },
   });
@@ -56,7 +56,7 @@ localStorage.removeItem("user");
     mutationFn: verifyOtp, // ✅ Fix
     onSuccess: (data) => {
       toast.success(data.message);
-      localStorage.setItem("Token", JSON.stringify({token: data.token}));
+      localStorage.setItem("token", JSON.stringify({Token: data.token}));
       navigate('/');
     },
     onError: (error) => toast.error(error.response?.data?.message || "OTP verification failed"),

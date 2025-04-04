@@ -1,17 +1,27 @@
 import { CircleCheckBig, Eye, Info, X } from 'lucide-react'
 import React from 'react'
 import { useWorkspaceQuery } from '../reactQuery/hooks/useWorkspaceQuery';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 function InvittionRoutes() {
-    const { acceptInvitationMutation, rejectInvitationMutation } = useWorkspaceQuery()
+    const {wkid, usid} = useParams();
+    console.log( wkid, usid);
+    const navigate = useNavigate();
+    const payload = {
+        wkid, 
+        usid
+    }
+    const { acceptInvitationMutation, rejectInvitationMutation , } = useWorkspaceQuery()
     let member;
 
     const handleAccept = () => {
-        // acceptInvitationMutation.mutate();
+        navigate("/")
+        // acceptInvitationMutation.mutate(payload);
     };
 
     const handleReject = () => {
-        // rejectInvitationMutation.mutate();
+        navigate("/")
+        // rejectInvitationMutation.mutate(payload);
     };
 
   return (
