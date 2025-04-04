@@ -40,7 +40,8 @@ export const useAuthQuery = (navigate) => {
     mutationFn: logoutUser, // ✅ Fix
     onSuccess: () => {
       toast.success("Logged out successfully");
-      localStorage.clear();
+      localStorage.removeItem("Token");
+localStorage.removeItem("user");
       queryClient.invalidateQueries(["user"]);
     },
   });
