@@ -2,6 +2,7 @@ import  { useState } from 'react';
 import { CircleDot } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthQuery } from '../reactQuery/hooks/useAuthQuery';
+import { BiLoaderCircle } from "react-icons/bi";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -149,7 +150,10 @@ const SignUp = () => {
               type="submit"
               className="w-full px-8 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition mt-6"
             >
-              Join Now
+              {signupMutation?.isPending ? 
+                ( <BiLoaderCircle className="size-7 animate-spin" /> ) : 
+                ( "Join now" ) 
+                }
             </button>
           </form>
 

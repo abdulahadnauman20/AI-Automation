@@ -40,7 +40,7 @@ export const useAuthQuery = (navigate) => {
     mutationFn: logoutUser, // ✅ Fix
     onSuccess: () => {
       toast.success("Logged out successfully");
-      localStorage.removeItem("user");
+      localStorage.clear();
       queryClient.invalidateQueries(["user"]);
     },
   });
@@ -80,7 +80,7 @@ export const useAuthQuery = (navigate) => {
     queryKey: ["userInfo"],
     queryFn: getUserInfo,
     refetchOnWindowFocus: false,
-    enabled: !!localStorage?.getItem("Token"),
+    enabled: !!JSON.parse(localStorage?.getItem("Token")),
     onSuccess: (data) => console.log("User info fetched:", data),
     onError: (error) => toast.error(error.response?.data?.message || "Failed to fetch user details"),
   });

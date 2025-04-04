@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CircleDot } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthQuery } from '../reactQuery/hooks/useAuthQuery';
+import { BiLoaderCircle } from "react-icons/bi";
 
 const Login = () => {
   const [Email, setEmail] = useState('');
@@ -59,9 +60,11 @@ const Login = () => {
             <div className="flex items-center justify-between">
               <button
                 type="submit"
-                className="px-8 py-3 bg-teal-500 text-white rounded-lg cursor-pointer hover:bg-teal-600 focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition"
-              >
-                Login
+                className="px-8 py-3 bg-teal-500 text-white rounded-lg cursor-pointer hover:bg-teal-600 focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition">
+                {signinMutation?.isPending ? 
+                ( <BiLoaderCircle className="size-7 animate-spin" /> ) : 
+                ( "Login" ) 
+                }
               </button>
               <p className="text-sm text-gray-600 hover:text-teal-500">
                 <Link to='/forgot'>

@@ -475,32 +475,32 @@ const Settings = () => {
                                 {/* Member List */}
                                 <div className="p-6">
                                     {activeTab2 === 'team' ? (
+                                        // <div className="space-y-4">
+                                        //     {members.map(member => (
+                                        //         <div key={member.id} className="flex items-center justify-between">
+                                        //             <div className="flex items-center">
+                                        //                 <div className={`w-10 h-10 ${member.color} rounded-full flex items-center justify-center mr-3`}>
+                                        //                     <span>{member.avatar}</span>
+                                        //                 </div>
+                                        //                 <span className="font-medium">{member.name}</span>
+                                        //             </div>
+                                        //             <span className="text-gray-500">{member.role}</span>
+                                        //         </div>
+                                        //     ))}
+                                        // </div>
                                         <div className="space-y-4">
-                                            {members.map(member => (
-                                                <div key={member.id} className="flex items-center justify-between">
-                                                    <div className="flex items-center">
-                                                        <div className={`w-10 h-10 ${member.color} rounded-full flex items-center justify-center mr-3`}>
-                                                            <span>{member.avatar}</span>
-                                                        </div>
-                                                        <span className="font-medium">{member.name}</span>
+                                        {teamWorkspaceMember?.Members.map(member => (
+                                            <div key={member.UserId} className="flex items-center justify-between">
+                                                <div className="flex items-center">
+                                                    <div className={`w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3`}>
+                                                        <span>👤</span>
                                                     </div>
-                                                    <span className="text-gray-500">{member.role}</span>
+                                                    <span className="font-medium">{member?.FirstName || 'Beeto'}</span>
                                                 </div>
-                                            ))}
-                                        </div>
-                                    //     <div className="space-y-4">
-                                    //     {teamWorkspaceMember?.Members.map(member => (
-                                    //         <div key={member.UserId} className="flex items-center justify-between">
-                                    //             <div className="flex items-center">
-                                    //                 <div className={`w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3`}>
-                                    //                     <span>👤</span>
-                                    //                 </div>
-                                    //                 <span className="font-medium">{member?.FirstName || 'Beeto'}</span>
-                                    //             </div>
-                                    //             <span className="text-gray-500">{member.Role}</span>
-                                    //         </div>
-                                    //     ))}
-                                    // </div>
+                                                <span className="text-gray-500">{member.Role}</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                     ) : (
                                         <div className="space-y-4">
                                         {teamWorkspaceMember?.Invites.map(member => (

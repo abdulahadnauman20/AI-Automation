@@ -2,7 +2,7 @@ import { CircleDot } from 'lucide-react';
 import React, { useActionState, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthQuery } from '../reactQuery/hooks/useAuthQuery';
-
+import { BiLoaderCircle } from "react-icons/bi";
 
 // export const getData = (data) => {
 //   console.log(data);
@@ -85,10 +85,14 @@ const handleKeyDown = (e, index) => {
         <div className="max-w-[260px] mx-auto mt-4">
           <button
             type='submit'
-            disabled={isPending}  
+            disabled={verifyOtpMutation.isPending}  
             className={`w-full inline-flex gap-2 items-center cursor-pointer justify-center whitespace-nowrap rounded-lg ${!disable ? 'bg-gray-300 hover:bg-gray-300 cursor-not-allowed' : 'bg-teal-500 hover:bg-teal-400'} px-3.5 py-2.5 text-sm font-medium text-white shadow-sm shadow-indigo-950/10 focus:outline-none focus:ring focus:ring-indigo-300 focus-visible:outline-none focus-visible:ring focus-visible:ring-indigo-300 transition-colors duration-150`}>
-                <div className='text-[17px]'> Verify Otp</div>
-                { isPending && <div className="w-6 h-6 border-4 border-t-blue-500 border-gray-300 rounded-full animate-spin"></div> } 
+                <div className='text-[17px]'> 
+                {verifyOtpMutation?.isPending ? 
+                ( <BiLoaderCircle className="size-7 animate-spin" /> ) : 
+                ( "Verify Otp" ) 
+                }
+              </div>
           </button>
         </div>
       </form>
