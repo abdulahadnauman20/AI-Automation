@@ -14,7 +14,11 @@ const Login = () => {
     e.preventDefault();
     const payload = { Email, Password};
     console.log(payload, "payload");
-    signinMutation.mutate(payload);
+    signinMutation.mutate(payload, {
+      onError: (error) => {
+        console.error("Login error:", error);
+      }
+    });
   };
 
   return (  

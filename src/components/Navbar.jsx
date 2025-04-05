@@ -92,7 +92,7 @@ const Navbar = () => {
     : notifications.filter(notification => notification.type === selectedFilter);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    localStorage.clear();
     navigate('/login');
     // QueryClient?.removeQueries(["userInfo"]);
   };

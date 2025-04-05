@@ -19,12 +19,11 @@ export const useAuthQuery = (navigate) => {
   const signinMutation = useMutation({
       mutationFn: loginUser, // ✅ Fix
       onSuccess: (data) => {
-      // console.log("data-query-->", data?.User);
       toast.success(data.message || "Login successfully");
       // console.log(data?.User?.TFA);
       if (data?.User) {
         localStorage?.setItem("user", JSON.stringify({data: data?.User}))
-        data.token && localStorage?.setItem("Token", JSON.stringify({token: data.token}));
+        data?.token && localStorage?.setItem("Token", JSON.stringify(data.token));
         if(data?.User?.TFA){
           navigate("/otp");
         }else{
@@ -40,8 +39,6 @@ export const useAuthQuery = (navigate) => {
     mutationFn: logoutUser, // ✅ Fix
     onSuccess: () => {
       toast.success("Logged out successfully");
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
       queryClient.invalidateQueries(["user"]);
     },
   });
