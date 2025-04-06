@@ -80,7 +80,7 @@ export const useWorkspaceQuery = () => {
         queryKey: ["verifyMemberInvitation"],
         queryFn: verifyInvitation,
         refetchOnWindowFocus: false,
-        enabled: !! wkid && usid,
+        enabled: !!wkid && !!usid,
         onSuccess: (data) => console.log("All workspaces fetched:", data),
         onError: (error) => toast.error(error.response?.data?.message || "Failed to fetch workspaces"),
     });
