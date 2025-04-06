@@ -5,23 +5,29 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 function InvittionRoutes() {
     const {wkid, usid} = useParams();
-    console.log( wkid, usid);
+    // console.log( wkid, usid);
     const navigate = useNavigate();
     const payload = {
         wkid, 
         usid
     }
-    const { acceptInvitationMutation, rejectInvitationMutation , } = useWorkspaceQuery()
+    const { acceptInvitationMutation, rejectInvitationMutation, verifyMemberInvitation} = useWorkspaceQuery()
     let member;
 
     const handleAccept = () => {
-        navigate("/")
-        // acceptInvitationMutation.mutate(payload);
+        acceptInvitationMutation.mutate(payload, {
+            onSuccess: () => {
+                navigate("/")
+            }
+        });
     };
 
     const handleReject = () => {
-        navigate("/")
-        // rejectInvitationMutation.mutate(payload);
+        rejectInvitationMutation.mutate(payload, {
+            onSuccess: () => {
+                navigate("/")
+            }
+        });
     };
 
   return (
@@ -38,8 +44,8 @@ function InvittionRoutes() {
                             <span>👤</span>
                         </div>
                         <div className='flex-col'>
-                            <span className="font-medium">Name: {member?.FirstName || 'Beeto'}</span>
-                            <div className="text-gray-500">Role: {member?.Role || 'admin'}</div>
+                            <span className="font-medium">Name: {verifyMemberInvitation?.Username || 'No name'}</span>
+                            <div className="text-gray-500">Role: {verifyMemberInvitation?.Role || 'No role'}</div>
                         </div>
                     </div>
                 </div>

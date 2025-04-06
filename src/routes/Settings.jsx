@@ -3,6 +3,7 @@ import { useAuthQuery } from '../reactQuery/hooks/useAuthQuery';
 import { Copy, Lock, Mail, Phone, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useWorkspaceQuery } from '../reactQuery/hooks/useWorkspaceQuery';
+import { BiLoaderCircle } from 'react-icons/bi';
 
 const Settings = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,7 +72,7 @@ const Settings = () => {
 
     const { currentWorkspace, updateWorkspaceMutation, teamWorkspaceMember, addMemeberMutation } =  useWorkspaceQuery()
     // console.log(currentWorkspace?.Workspace);
-    console.log(teamWorkspaceMember);
+    // console.log(teamWorkspaceMember);
     
     const [workspaceData, setWorkspaceData] = useState({
         WorkspaceName: '',
@@ -105,22 +106,24 @@ const Settings = () => {
     };
 
     const createMemeber = () => {
-        addMemeberMutation.mutate(newMember)
-        console.log(newMember);
-        setIsModalOpen2(false);
-        setNewMember({
-            Email: '',
-            Role: 'Admin',
+        addMemeberMutation.mutate(newMember, {
+            onSuccess: () => {
+                setIsModalOpen2(false);
+                setNewMember({
+                    Email: '',
+                    Role: 'Admin',
+                })
+            }
         })
     };
 
 
     const [activeTab, setActiveTab] = useState('profile');
     const [activeTab2, setActiveTab2] = useState('team');
-    const [members] = useState([
-        { id: 1, name: 'Beetoo Leru', role: 'Owner', avatar: '👤', color: 'bg-yellow-100' },
-        { id: 2, name: 'Kaiya Donin', role: 'Editor', avatar: '👤', color: 'bg-purple-100' },
-    ]);
+    // const [members] = useState([
+    //     { id: 1, name: 'Beetoo Leru', role: 'Owner', avatar: '👤', color: 'bg-yellow-100' },
+    //     { id: 2, name: 'Kaiya Donin', role: 'Editor', avatar: '👤', color: 'bg-purple-100' },
+    // ]);
 
     const handleProfileChange = (e) => {
         const { name, value } = e.target;
@@ -429,9 +432,9 @@ const Settings = () => {
                                     {isModalOpen2 && (
                                 <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-[#8684848c] bg-opacity-50">
                                     <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <h3 className="text-lg font-semibold">Add new Member</h3>
-                                            <button onClick={() => setIsModalOpen2(false)} className="text-gray-500 hover:text-gray-700 cursor-pointer bg-gray-200 px-1.5 rounded-full">✕</button>
+                                        <div className="flex justify-between cursor-pointer items-center mb-4">
+                                            <h3 className="text-lg font-semibold ">Add new Member</h3>
+                                            <button onClick={() => setIsModalOpen2(false)} className="text-gray-500 hover:text-gray-700  bg-gray-200 px-1.5 cursor-pointer rounded-full">✕</button>
                                         </div>
 
                                         <div className="space-y-4">
@@ -463,8 +466,11 @@ const Settings = () => {
                                             <button onClick={() => setIsModalOpen2(false)} className="text-black cursor-pointer border border-gray-300 rounded-full px-4 py-1">
                                                 Cancel
                                             </button>
-                                            <button onClick={createMemeber} className="bg-teal-500 cursor-pointer text-white px-4 py-2 rounded-full text-[14px]">
-                                                Send Invite
+                                            <button  onClick={createMemeber} className="bg-teal-500 cursor-pointer text-white px-4 py-2 rounded-full text-[14px]">
+                                                {addMemeberMutation?.isPending ? 
+                                                ( <BiLoaderCircle className="size-7 text-center animate-spin" /> ) : 
+                                                ( "Send invite" ) 
+                                                }
                                             </button>
                                         </div>
                                     </div>

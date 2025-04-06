@@ -13,7 +13,7 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const payload = { Email, Password};
-    console.log(payload, "payload");
+    // console.log(payload, "payload");
     signinMutation.mutate(payload, {
       onError: (error) => {
         console.error("Login error:", error);
