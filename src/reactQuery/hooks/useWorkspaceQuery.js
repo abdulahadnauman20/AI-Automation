@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 
 export const useWorkspaceQuery = () => {
     const {wkid, usid} = useParams();
-    console.log( wkid, usid);
+    // console.log( wkid, usid);
 
     const queryClient = useQueryClient();
     
@@ -75,19 +75,19 @@ export const useWorkspaceQuery = () => {
         onError: (error) => toast.error(error.response?.data?.message || "Failed to fetch workspaces"),
     });
 
-
-    const { data: verifyMemberInvitation } = useQuery({
-        queryKey: ["verifyMemberInvitation"],
-        queryFn: verifyInvitation,
-        refetchOnWindowFocus: false,
+    const verifyMemberInvitation = useMutation({
+        mutationFn: verifyInvitation,
         enabled: !!wkid && !!usid,
-        onSuccess: (data) => console.log("All workspaces fetched:", data),
-        onError: (error) => toast.error(error.response?.data?.message || "Failed to fetch workspaces"),
+        onSuccess: (data) => {
+            toast.success(data.message);
+        },
+        onError: (error) => toast.error(error.response?.data?.message || "unauthorized"),
     });
 
 
     const acceptInvitationMutation = useMutation({
         mutationFn: acceptInvitation,
+        enabled: !!wkid && !!usid,
         onSuccess: (data) => {
             toast.success(data.message);
         },
@@ -96,6 +96,7 @@ export const useWorkspaceQuery = () => {
 
     const rejectInvitationMutation = useMutation({
         mutationFn: rejectInvitation,
+        enabled: !!wkid && !!usid,
         onSuccess: (data) => {
             toast.success(data.message);
         },
@@ -115,4 +116,3 @@ export const useWorkspaceQuery = () => {
 
     return { createWorkspaceMutation, switchWorkspaceMutation, currentWorkspace, allWorkspace, updateWorkspaceMutation, addMemeberMutation, teamWorkspaceMember, helpDeskMutation, acceptInvitationMutation, rejectInvitationMutation,   verifyMemberInvitation};
 };
-//

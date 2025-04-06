@@ -11,7 +11,7 @@ export const addMemeber = (userData) => axiosInstance.post("/member/AddMember", 
 export const getWorkspaceMember = () => axiosInstance.get("/member/GetWorkspaceMembers").then(res => res.data); 
 export const acceptInvitation = (userData) => axiosInstance.put("/member/AcceptInvitation", userData).then(res => res.data); 
 export const rejectInvitation = (userData) => axiosInstance.put("/member/RejectInvitation", userData).then(res => res.data); 
-export const verifyInvitation = () => axiosInstance.get("/member/VerifyInvitation").then(res => res.data); 
+export const verifyInvitation = (userData) => axiosInstance.put("/member/VerifyInvitation", userData).then(res => res.data); 
 
 // support route work
 export const helpDesk = (userData) => axiosInstance.post("/help/AddFeedback", userData, {
