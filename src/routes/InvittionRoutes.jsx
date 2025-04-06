@@ -6,7 +6,6 @@ import { BiLoaderCircle } from 'react-icons/bi';
 
 function InvittionRoutes() {
     const {wkid, usid} = useParams();
-    // console.log( wkid, usid);
     const navigate = useNavigate();
     const payload = {
         wkid, 
@@ -14,12 +13,6 @@ function InvittionRoutes() {
     }
     const { acceptInvitationMutation, rejectInvitationMutation, verifyMemberInvitation} = useWorkspaceQuery()
     let member;
-
-    // useEffect(() => {
-    //     if (payload) {
-    //       verifyMemberInvitation.mutate(wkid, usid);
-    //     }
-    // }, []); 
     
     const handleAccept = () => {
         acceptInvitationMutation.mutate(payload, {
@@ -45,7 +38,7 @@ function InvittionRoutes() {
         <div id="alert-additional-content-3" className="p-4 max-w-[600px] mx-auto m-4 mb-4 text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-800" role="alert">
             <div className="flex gap-1 items-center">
                 <Info size={20}/>
-                <h3 className="text-lg font-medium">Invitation to join {verifyMemberInvitation?.WorkspaceName}r</h3>
+                <h3 className="text-lg font-medium">Invitation to join {verifyMemberInvitation?.WorkspaceName}</h3>
             </div>
             <div className="mt-2 mb-4">
                 <div key={member?.UserId || '1'} className="flex items-center justify-between">

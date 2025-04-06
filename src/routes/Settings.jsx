@@ -72,7 +72,7 @@ const Settings = () => {
 
     const { currentWorkspace, updateWorkspaceMutation, teamWorkspaceMember, addMemeberMutation } =  useWorkspaceQuery()
     // console.log(currentWorkspace?.Workspace);
-    // console.log(teamWorkspaceMember);
+    console.log(teamWorkspaceMember?.Members);
     
     const [workspaceData, setWorkspaceData] = useState({
         WorkspaceName: '',
@@ -501,7 +501,7 @@ const Settings = () => {
                                                     <div className={`w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3`}>
                                                         <span>👤</span>
                                                     </div>
-                                                    <span className="font-medium">{member?.FirstName || 'Beeto'}</span>
+                                                    <span className="font-medium">{member?.FullName || 'Beeto'}</span>
                                                 </div>
                                                 <span className="text-gray-500">{member.Role}</span>
                                             </div>
