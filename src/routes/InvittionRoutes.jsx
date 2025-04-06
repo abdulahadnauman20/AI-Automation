@@ -14,11 +14,11 @@ function InvittionRoutes() {
     const { acceptInvitationMutation, rejectInvitationMutation, verifyMemberInvitation} = useWorkspaceQuery()
     let member;
 
-    useEffect(() => {
-        if (payload) {
-          verifyMemberInvitation.mutate(payload);
-        }
-    }, []); 
+    // useEffect(() => {
+    //     if (payload) {
+    //       verifyMemberInvitation.mutate(wkid, usid);
+    //     }
+    // }, []); 
     
     const handleAccept = () => {
         acceptInvitationMutation.mutate(payload, {

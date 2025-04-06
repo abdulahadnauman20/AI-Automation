@@ -75,13 +75,14 @@ export const useWorkspaceQuery = () => {
         onError: (error) => toast.error(error.response?.data?.message || "Failed to fetch workspaces"),
     });
 
-    const verifyMemberInvitation = useMutation({
-        mutationFn: verifyInvitation,
+
+    const { data: verifyMemberInvitation } = useQuery({
+        queryKey: ["verifyMemberInvitation", wkid, usid],
+        queryFn: () => verifyInvitation(wkid, usid),
         enabled: !!wkid && !!usid,
-        onSuccess: (data) => {
-            toast.success(data.message);
-        },
-        onError: (error) => toast.error(error.response?.data?.message || "unauthorized"),
+        refetchOnWindowFocus: false,
+        onSuccess: (data) => console.log("All workspaces fetched:", data),
+        onError: (error) => toast.error(error.response?.data?.message || "Failed to fetch workspaces"),
     });
 
 
