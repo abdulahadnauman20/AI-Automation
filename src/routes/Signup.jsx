@@ -148,7 +148,7 @@ const SignUp = () => {
 
             <button
               type="submit"
-              className="w-full px-8 py-3 text-center cursor-pointer bg-teal-500 text-white rounded-lg hover:bg-teal-600 focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition mt-6"
+              className="w-full px-8 py-3 flex justify-center cursor-pointer bg-teal-500 text-white rounded-lg hover:bg-teal-600 focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition mt-6"
             >
               {signupMutation?.isPending ? 
                 ( <BiLoaderCircle className="size-7 animate-spin" /> ) : 
