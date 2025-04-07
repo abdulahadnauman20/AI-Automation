@@ -37,8 +37,17 @@ const Support = () => {
         formDataToSend.append("Type", formData.Type);
         formDataToSend.append("Subject", formData.Subject);
         formDataToSend.append("Message", formData.Message);
-        formDataToSend.append("Attachment", formData.Attachment); // Append file
-        helpDeskMutation.mutate(formDataToSend);
+        formDataToSend.append("Attachment", formData.Attachment);
+        helpDeskMutation.mutate(formDataToSend, {
+            onSuccess: () => {
+                setFormData({
+                    Type: "",
+                    Subject: "",
+                    Message: "",
+                    Attachment: null
+                })
+            }
+        });
         console.log(formData);
     };
     
@@ -112,8 +121,11 @@ const Support = () => {
 
                     <button
                         type="submit"
-                        className="w-full cursor-pointer bg-teal-600 hover:bg-teal-700 text-white font-medium py-3 px-4 rounded-full transition duration-300">
-                        Submit
+                        className="w-full cursor-pointer flex justify-center bg-teal-600 hover:bg-teal-700 text-white font-medium py-3 px-4 rounded-full transition duration-300">
+                        {helpDeskMutation?.isPending ? 
+                        ( <BiLoaderCircle className="size-7 animate-spin" /> ) : 
+                        ( "Submit" ) 
+                        }
                     </button>
                 </form>
             </div>
