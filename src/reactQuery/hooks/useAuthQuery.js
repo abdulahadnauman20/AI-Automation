@@ -20,7 +20,7 @@ export const useAuthQuery = (navigate) => {
       mutationFn: loginUser, // ✅ Fix
       onSuccess: (data) => {
       toast.success(data.message || "Login successfully");
-      // console.log(data?.User?.TFA);
+      console.log(data?.User.TFACode);
       if (data?.User) {
         localStorage?.setItem("user", JSON.stringify({data: data?.User}))
         data?.token && localStorage?.setItem("Token", JSON.stringify(data.token));
@@ -40,6 +40,9 @@ export const useAuthQuery = (navigate) => {
     onSuccess: () => {
       toast.success("Logged out successfully");
       queryClient.invalidateQueries(["user"]);
+      localStorage.removeItem("Token");
+      localStorage.removeItem("user");
+      navigate("/login");
     },
   });
 
