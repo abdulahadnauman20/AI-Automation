@@ -23,6 +23,7 @@ export const usePipelineQuery = () => {
             queryClient.invalidateQueries(["allLeads"]);
         },
         onError: (error) => {
+            console.log(error);
             toast.error(error.response?.data?.message || "Failed to update lead status");
         },
     });
