@@ -38,7 +38,7 @@ function App() {
           <Route index element={<DashboardPage />} />
           <Route path='/crm' element={ <Crm /> } />
           <Route path='/campaigns' element={ <Campaigns /> } />
-          <Route path='/campaigns/target' element={ <CompaignTarget /> } />
+          <Route path='/campaigns/target/:campaignId' element={ <CompaignTarget /> } />
           <Route path="/calender" element={<Calendar />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/pipelines" element={<Pipelines />} />           
