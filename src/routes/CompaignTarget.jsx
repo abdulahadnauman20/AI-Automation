@@ -19,6 +19,8 @@ Eye,
 Hand,
 CircleDollarSign,
 } from "lucide-react"
+import { useCampaignQuery } from "../reactQuery/hooks/useCampaignQuery";
+import { useParams } from "react-router-dom"
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
 import ScheduleForm from "../components/SheduleForm";
@@ -206,14 +208,24 @@ const opportunities = [
 ]
 
 export default function CompaignTarget() {
+  const { campaignId } = useParams();
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
+  const { getCampaignLeadsQuery } = useCampaignQuery();
+  const { 
+    data: leads, // Now directly the array of leads
+    isLoading: isLeadsLoading, 
+    error: leadsError 
+  } = getCampaignLeadsQuery(campaignId);
+
+
   const listItems = [
     { name: "All Statuses", icon: "⚡" },
     { name: "Play", icon: <Play size={20} className="text-blue-400" /> },
     { name: "Paused", icon: <Pause size={20} className="text-orange-400" /> },
     { name: "Completed", icon: <CircleCheck size={20} className="text-green-400" /> },
   ]
+
   const accounts = [
     {
       id: 1,
@@ -327,89 +339,89 @@ export default function CompaignTarget() {
     },
   ]
 
-  const people = [
-    {
-      email: "xmitchell@hotmail.com",
-      contact: "Lynn Tanner",
-      provider: "Microsoft",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "tbaker@outlook.com",
-      contact: "Capt. Trunk",
-      provider: "Google",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "mgonzalez@aol.com",
-      contact: "Thomas Anum",
-      provider: "Google",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "xmitchell@hotmail.com",
-      contact: "Lynn Tanner",
-      provider: "Microsoft",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "tbaker@outlook.com",
-      contact: "Capt. Trunk",
-      provider: "Google",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "mgonzalez@aol.com",
-      contact: "Thomas Anum",
-      provider: "Google",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "yrodriguez@aol.com",
-      contact: "B.A. Baracus",
-      provider: "Microsoft",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "vflores@gmail.com",
-      contact: "Devon Miles",
-      provider: "Google",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "yrodriguez@aol.com",
-      contact: "B.A. Baracus",
-      provider: "Microsoft",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-  ]
+  // const people = [
+  //   {
+  //     email: "xmitchell@hotmail.com",
+  //     contact: "Lynn Tanner",
+  //     provider: "Microsoft",
+  //     status: "Verified",
+  //     company: "Tuxedo Suits Inc.",
+  //     website: "https://tuxedosuits.com",
+  //     title: "Design manager",
+  //   },
+  //   {
+  //     email: "tbaker@outlook.com",
+  //     contact: "Capt. Trunk",
+  //     provider: "Google",
+  //     status: "Verified",
+  //     company: "Tuxedo Suits Inc.",
+  //     website: "https://tuxedosuits.com",
+  //     title: "Design manager",
+  //   },
+  //   {
+  //     email: "mgonzalez@aol.com",
+  //     contact: "Thomas Anum",
+  //     provider: "Google",
+  //     status: "Verified",
+  //     company: "Tuxedo Suits Inc.",
+  //     website: "https://tuxedosuits.com",
+  //     title: "Design manager",
+  //   },
+  //   {
+  //     email: "xmitchell@hotmail.com",
+  //     contact: "Lynn Tanner",
+  //     provider: "Microsoft",
+  //     status: "Verified",
+  //     company: "Tuxedo Suits Inc.",
+  //     website: "https://tuxedosuits.com",
+  //     title: "Design manager",
+  //   },
+  //   {
+  //     email: "tbaker@outlook.com",
+  //     contact: "Capt. Trunk",
+  //     provider: "Google",
+  //     status: "Verified",
+  //     company: "Tuxedo Suits Inc.",
+  //     website: "https://tuxedosuits.com",
+  //     title: "Design manager",
+  //   },
+  //   {
+  //     email: "mgonzalez@aol.com",
+  //     contact: "Thomas Anum",
+  //     provider: "Google",
+  //     status: "Verified",
+  //     company: "Tuxedo Suits Inc.",
+  //     website: "https://tuxedosuits.com",
+  //     title: "Design manager",
+  //   },
+  //   {
+  //     email: "yrodriguez@aol.com",
+  //     contact: "B.A. Baracus",
+  //     provider: "Microsoft",
+  //     status: "Verified",
+  //     company: "Tuxedo Suits Inc.",
+  //     website: "https://tuxedosuits.com",
+  //     title: "Design manager",
+  //   },
+  //   {
+  //     email: "vflores@gmail.com",
+  //     contact: "Devon Miles",
+  //     provider: "Google",
+  //     status: "Verified",
+  //     company: "Tuxedo Suits Inc.",
+  //     website: "https://tuxedosuits.com",
+  //     title: "Design manager",
+  //   },
+  //   {
+  //     email: "yrodriguez@aol.com",
+  //     contact: "B.A. Baracus",
+  //     provider: "Microsoft",
+  //     status: "Verified",
+  //     company: "Tuxedo Suits Inc.",
+  //     website: "https://tuxedosuits.com",
+  //     title: "Design manager",
+  //   },
+  // ]
 
   const box = [
     { amount: '214', icon: <Zap size={24} className="text-blue-500" />, text: "Sequence started", bg: "bg-blue-100" },
@@ -417,16 +429,17 @@ export default function CompaignTarget() {
     { amount: '67%', icon: <Hand size={24} className="text-pink-500" />, text: "Click rate", bg: "bg-pink-100" },
     { amount: '145', icon: <CircleDollarSign size={24} className="text-red-500" />, text: "Opportunities", bg: "bg-red-100" },
     { amount: '26', icon: <CircleDollarSign size={24} className="text-yellow-500" />, text: "Conversion", bg: "bg-yellow-100" },
- ];
- const data = [
+  ];
+
+  const data = [
     { name: "SEP", sent: 250, opens: 200, clicks: 150, opportunities: 100, conversions: 50 },
     { name: "OCT", sent: 150, opens: 120, clicks: 90, opportunities: 60, conversions: 30 },
     { name: "NOV", sent: 180, opens: 140, clicks: 100, opportunities: 80, conversions: 40 },
     { name: "DEC", sent: 220, opens: 170, clicks: 130, opportunities: 90, conversions: 60 },
-];
+  ];
 
   const [searchQuery, setSearchQuery] = useState("")
-  const [activeTab, setActiveTab] = useState("Accounts")
+  const [activeTab, setActiveTab] = useState("People")
 
   return (
     <div className="min-h-screen bg-gray-50 ps-20">
@@ -565,13 +578,13 @@ export default function CompaignTarget() {
                   </tr>
                 </thead>
                 <tbody>
-                  {people.map((person, idx) => (
+                  {leads?.map((person, idx) => (
                     <tr key={idx} className="border-b text-sm">
                       <td className="px-4 py-3">
                         <input type="checkbox" className="rounded border-muted cursor-pointer" />
                       </td>
-                      <td className="px-4 py-3 text-gray-600">{person.email}</td>
-                      <td className="px-4 py-3">{person.contact}</td>
+                      <td className="px-4 py-3 text-gray-600">{person.Email}</td>
+                      <td className="px-4 py-3">{person.Name}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center">
                           {person.provider === "Microsoft" ? (
@@ -625,9 +638,9 @@ export default function CompaignTarget() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3">{person.company}</td>
-                      <td className="px-4 py-3 text-blue-500">{person.website}</td>
-                      <td className="px-4 py-3">{person.title}</td>
+                      <td className="px-4 py-3">{person.Company}</td>
+                      <td className="px-4 py-3 text-blue-500">{person.Website}</td>
+                      <td className="px-4 py-3">{person.Title}</td>
                     </tr>
                   ))}
                 </tbody>

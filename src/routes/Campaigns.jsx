@@ -1,33 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, MoreHorizontal, Search, Filter, PlusCircle, ChevronDown, CheckCircle, AlertCircle, Circle, ArrowUpDown, X, Zap, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useCampaignQuery } from "../reactQuery/hooks/useCampaignQuery";
 
-function App() {
-  const [campaigns, setCampaigns] = useState([
-    {
-      id: 1,
-      name: 'SMB Target',
-      status: 'Error',
-      progress: 12,
-      sent: 1500,
-      clicks: 58,
-      replies: 20,
-      replyRate: 2,
-      opportunities: 5
-    },
-    {
-      id: 2,
-      name: 'My Campaign',
-      status: 'Active',
-      progress: 72,
-      sent: 89,
-      clicks: 0,
-      replies: 0,
-      replyRate: 0,
-      opportunities: 0
-    }
-  ]);
+function Campaigns() {
+  // const [campaigns, setCampaigns] = useState([
+  //   {
+  //     id: 1,
+  //     name: 'SMB Target',
+  //     status: 'Error',
+  //     progress: 12,
+  //     sent: 1500,
+  //     clicks: 58,
+  //     replies: 20,
+  //     replyRate: 2,
+  //     opportunities: 5
+  //   },
+  //   {
+  //     id: 2,
+  //     name: 'My Campaign',
+  //     status: 'Active',
+  //     progress: 72,
+  //     sent: 89,
+  //     clicks: 0,
+  //     replies: 0,
+  //     replyRate: 0,
+  //     opportunities: 0
+  //   }
+  // ]);
 
+  const {
+    campaignsObject,
+    // isCampaignsLoading,
+    // createCampaignMutation,
+    // deleteCampaignMutation,
+    // updateCampaignMutation,
+  } = useCampaignQuery();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All statuses');
   const [sortOrder, setSortOrder] = useState('Oldest first');
@@ -35,6 +43,7 @@ function App() {
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [showNewCampaignModal, setShowNewCampaignModal] = useState(false);
   const [newCampaignName, setNewCampaignName] = useState('');
+  const [campaigns, setCampaigns] = useState([]);
 
   const statusOptions = [
     { value: 'All statuses', icon: <Filter size={16} className="text-gray-400" /> },
@@ -80,12 +89,26 @@ function App() {
       setShowStatusDropdown(false);
       setShowSortDropdown(false);
     };
+    console.log(campaigns);
 
     document.addEventListener('click', handleClickOutside);
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
+
+    
   }, []);
+
+  useEffect(() => {
+    console.log("H: ", campaignsObject);
+
+    setCampaigns(campaignsObject?.campaigns || []);
+    console.log("Campaigns: ", campaigns);
+  }, [campaignsObject])
+
+  useEffect(() => {
+    console.log("Updated campaigns state:", campaigns);
+  }, [campaigns]);
 
   const handleDropdownClick = (e) => {
     e.stopPropagation();
@@ -205,7 +228,7 @@ function App() {
                 </div>
               )}
             </div>
-            <button onClick={() => setShowNewCampaignModal(true)} type="button" class="text-white flex justify-center bg-teal-600 hover:bg-teal-600 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2">
+            <button onClick={() => setShowNewCampaignModal(true)} type="button" className="text-white flex justify-center bg-teal-600 hover:bg-teal-600 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2">
               <Plus size={18} className="mr-2" />
               Add new
             </button>
@@ -262,19 +285,20 @@ function App() {
                     />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <Link to='/campaigns/target'>
-                      <div className="text-sm font-medium text-gray-900">{campaign.name}</div>
+                    {/* <Link to='/campaigns/target/'> */}
+                    <Link to={`/campaigns/target/${campaign.id}`}>
+                      <div className="text-sm font-medium text-gray-900">{campaign.Name}</div>
                     </Link>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      campaign.status === 'Active' ? 'bg-blue-100 text-blue-800' : 
-                      campaign.status === 'Error' ? 'bg-red-100 text-red-800' : 
-                      campaign.status === 'Paused' ? 'bg-yellow-100 text-yellow-800' :
-                      campaign.status === 'Draft' ? 'bg-gray-100 text-gray-800' :
+                      campaign.Status === 'Active' ? 'bg-blue-100 text-blue-800' : 
+                      campaign.Status === 'Error' ? 'bg-red-100 text-red-800' : 
+                      campaign.Status === 'Paused' ? 'bg-yellow-100 text-yellow-800' :
+                      campaign.Status === 'Draft' ? 'bg-gray-100 text-gray-800' :
                       'bg-green-100 text-green-800'
                     }`}>
-                      {campaign.status}
+                      {campaign.Status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -387,4 +411,4 @@ function App() {
   );
 }
 
-export default App;
+export default Campaigns;
