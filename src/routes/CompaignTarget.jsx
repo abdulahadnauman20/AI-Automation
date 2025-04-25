@@ -21,6 +21,8 @@ CircleDollarSign,
 } from "lucide-react"
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
+import ScheduleForm from "../components/SheduleForm";
+import EmailTemplateBuilder from "../components/EmailTemplate";
 const calls = [
   {
     id: 1,
@@ -432,7 +434,7 @@ export default function CompaignTarget() {
         {/* Navigation Tabs */}
         <div className="border-b border-gray-200 mb-6">
           <nav className="flex -mb-px">
-            {["Analytics", "People", "Opportunities", "Calls", "Meetings"].map((tab) => (
+            {["Analytics", "People", "Sequence", "Shedule", "Options"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -449,7 +451,7 @@ export default function CompaignTarget() {
         </div>
 
         {/* Search and Filters */}
-        {activeTab !== "Meetings" && activeTab !== "Opportunities" && (
+        {activeTab == "People" && (
           <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -532,24 +534,6 @@ export default function CompaignTarget() {
                 </div>
                 </div>
             ))}
-            {/* <div className="p-6 rounded-lg w-full">
-                <div className="h-[300px] md:h-[400px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
-                    <CartesianGrid stroke="#E5E7EB" strokeDasharray="0" />
-                    <XAxis dataKey="name" stroke="#4A5568" tick={{ fontSize: 12 }} />
-                    <YAxis stroke="#4A5568" tick={{ fontSize: 12 }} />
-                    <Tooltip contentStyle={{ backgroundColor: "#fff", borderRadius: "5px", padding: "10px" }} />
-                    <Legend />
-                    <Bar dataKey="conversions" stackId="a" fill="#6B21A8" barSize={40} />
-                    <Bar dataKey="opportunities" stackId="a" fill="#EC4899" barSize={40} />
-                    <Bar dataKey="clicks" stackId="a" fill="#F59E0B" barSize={40} />
-                    <Bar dataKey="opens" stackId="a" fill="#10B981" barSize={40} />
-                    <Bar dataKey="sent" stackId="a" fill="#1E40AF" barSize={40} />
-                    </BarChart>
-                </ResponsiveContainer>
-                </div>
-            </div> */}
             </>
         )}
 
@@ -671,255 +655,102 @@ export default function CompaignTarget() {
             </div>
           )}
 
-          {activeTab === "Calls" && (
+          {activeTab === "Sequence" && (
             <div className="col-span-full w-full overflow-x-auto">
-              <table className="w-full table-fixed">
-                <thead>
-                  <tr className="border-b text-sm text-muted-foreground">
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium w-[40px]">
-                      <input type="checkbox" className="rounded border-muted cursor-pointer" />
-                    </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[200px]">Lead</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">Phone</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">Date</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">
-                      Call duration
-                    </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[120px]">Notes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {calls.map((call) => (
-                    <tr key={call.id} className="border-b text-sm">
-                      <td className="px-4 py-3">
-                        <input type="checkbox" className="rounded border-muted cursor-pointer" />
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          {call.initials ? (
-                            <div
-                              className={`w-8 h-8 rounded-full ${call.bgColor} flex items-center justify-center text-sm font-medium`}
-                            >
-                              {call.initials}
-                            </div>
-                          ) : (
-                            <img
-                              src={call.avatar || "/placeholder.svg"}
-                              alt={call.name}
-                              className="w-8 h-8 rounded-full object-cover"
-                            />
-                          )}
-                          <span className="font-medium">{call.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-gray-600">{call.phone}</td>
-                      <td className="px-4 py-3 text-gray-600">{call.date}</td>
-                      <td className="px-4 py-3 text-gray-600">{call.duration}</td>
-                      <td className="px-4 py-3">
-                        <button className="text-blue-500 hover:text-blue-600">View</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="flex items-center justify-between px-4 py-3 border-t">
-                <div className="flex items-center gap-2">
-                  <button className="px-2 py-1 text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
-                    <ChevronLeft className="h-4 w-4" />
-                    Previous
-                  </button>
-                  <div className="flex items-center gap-1">
-                    <button className="px-3 py-1 text-sm bg-gray-100 text-gray-900 rounded">1</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">2</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">3</button>
-                    <span className="px-2 text-gray-600">...</span>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">45</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">46</button>
-                  </div>
-                  <button className="px-2 py-1 text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
-                    Next
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
+              <EmailTemplateBuilder />
             </div>
           )}
-          {activeTab === "Opportunities" && (
+          {activeTab === "Shedule" && (
             <div className="col-span-full w-full overflow-x-auto">
-              <div className="flex justify-between items-center mb-6">
-                <div className="relative flex-1 max-w-md">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-                    placeholder="Search..."
-                  />
-                </div>
-                <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-600">
-                  <Phone className="mr-2 h-4 w-4" />
-                  Call with AI
-                </button>
-              </div>
-              <table className="w-full table-fixed">
-                <thead>
-                  <tr className="border-b text-sm text-muted-foreground">
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium w-[40px]">
-                      <input type="checkbox" className="rounded border-muted cursor-pointer" />
-                    </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">OPPORTUNITY</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">CONTACT NAME</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">AMOUNT</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">OWNER</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">SOURCE</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">
-                      EXPECTED CLOSING DATE
-                    </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">
-                      ACTUAL CLOSING DATE
-                    </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">
-                      LAST INTERACTION
-                    </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">STAGE</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {opportunities.map((opp) => (
-                    <tr key={opp.id} className="border-b text-sm">
-                      <td className="px-4 py-3">
-                        <input type="checkbox" className="rounded border-muted cursor-pointer" />
-                      </td>
-                      <td className="px-4 py-3 text-blue-600 hover:underline cursor-pointer">{opp.opportunity}</td>
-                      <td className="px-4 py-3 text-blue-600 hover:underline cursor-pointer">{opp.contact}</td>
-                      <td className="px-4 py-3 text-gray-600">{opp.amount}</td>
-                      <td className="px-4 py-3">
-                        <div className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-600">
-                          {opp.owner}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-gray-600">{opp.source}</td>
-                      <td className="px-4 py-3 text-gray-600">{opp.expectedClosing}</td>
-                      <td className="px-4 py-3 text-gray-600">{opp.actualClosing}</td>
-                      <td className="px-4 py-3 text-gray-600">{opp.lastInteraction}</td>
-                      <td className="px-4 py-3 text-gray-600">{opp.stage}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="flex items-center justify-between px-4 py-3 border-t">
-                <div className="flex items-center gap-2">
-                  <button className="px-2 py-1 text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
-                    <ChevronLeft className="h-4 w-4" />
-                    Previous
-                  </button>
-                  <div className="flex items-center gap-1">
-                    <button className="px-3 py-1 text-sm bg-gray-100 text-gray-900 rounded">1</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">2</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">3</button>
-                    <span className="px-2 text-gray-600">...</span>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">45</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">46</button>
-                  </div>
-                  <button className="px-2 py-1 text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
-                    Next
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
+              <main className="min-h-screen bg-gray-50 py-8">
+                  <ScheduleForm />
+              </main>
             </div>
           )}
-          {activeTab === "Meetings" && (
+          {activeTab === "Options" && (
             <div className="col-span-full w-full overflow-x-auto">
-              <div className="flex justify-between items-center mb-6">
-                <div className="relative flex-1 max-w-md">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-gray-400" />
+              <div className="border border-gray-200 rounded-lg p-4 w-[900px] mx-auto bg-white my-2">
+                <div className="flex justify-between items-center mb-4 my-2">
+                  <div>
+                    <h3 className="font-semibold">Owner of Campaign</h3>
+                    <p className="text-gray-400 text-[14px] mt-2">Select the owner of thid compaign</p>
                   </div>
-                  <input
-                    type="text"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-                    placeholder="Search..."
-                  />
+                  <div className="border border-gray-50">Select</div>
                 </div>
-                <button
-                  type="button"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
-                >
-                  <Plus className="mr-2 h-5 w-5" />
-                  New Meeting
-                </button>
-              </div>
-              <table className="w-full table-fixed">
-                <thead>
-                  <tr className="border-b text-sm text-muted-foreground">
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[250px]">Lead</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">Date</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">Time</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[200px]">
-                      Created by
-                    </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[120px]">
-                      Recording
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {meetings.map((meeting) => (
-                    <tr key={meeting.id} className="border-b text-sm">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full ${meeting.bgColor} flex items-center justify-center`}>
-                            <img
-                              src={meeting.avatar || "/placeholder.svg"}
-                              alt={meeting.lead}
-                              className="w-8 h-8 rounded-full object-cover"
-                            />
-                          </div>
-                          <span className="font-medium">{meeting.lead}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-gray-600">{meeting.date}</td>
-                      <td className="px-4 py-3 text-gray-600">{meeting.time}</td>
-                      <td className="px-4 py-3">
-                        {meeting.isAI ? (
-                          <div className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-600">
-                            <Sparkles className="w-4 h-4 mr-1" />
-                            <span>{meeting.createdBy}</span>
-                          </div>
-                        ) : (
-                          <span className="text-gray-600">{meeting.createdBy}</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center">
-                          <div className="w-2 h-2 rounded-full bg-gray-400 mr-2"></div>
-                          <span className="text-gray-600">Recording</span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="flex items-center justify-between px-4 py-3 border-t">
-                <div className="flex items-center gap-2">
-                  <button className="px-2 py-1 text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
-                    <ChevronLeft className="h-4 w-4" />
-                    Previous
-                  </button>
-                  <div className="flex items-center gap-1">
-                    <button className="px-3 py-1 text-sm bg-gray-100 text-gray-900 rounded">1</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">2</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">3</button>
-                    <span className="px-2 text-gray-600">...</span>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">45</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">46</button>
+                <div className="flex justify-between items-center mb-4 my-2">
+                  <div>
+                    <h3 className="font-semibold">Daily Lmit</h3>
+                    <p className="text-gray-400 text-[14px]">Max number of emails to send per day for this compaign</p>
                   </div>
-                  <button className="px-2 py-1 text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
-                    Next
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
+                  <div className="border border-gray-200 ps-2 pe-10 py-1 rounded w-36">50</div>
+                </div>
+                <div className="flex justify-between items-center mb-4 my-2">
+                  <div>
+                    <h3 className="font-semibold">Max new leads per day</h3>
+                  </div>
+                  <div className="border border-gray-200 ps-2 pe-10 py-1 rounded w-36">No limit</div>
+                </div>
+              </div>
+
+              <div className="border border-gray-200 rounded-lg p-4 w-[900px] mx-auto bg-white my-2">
+                <div className="flex justify-between items-center mb-4 my-2">
+                  <div>
+                    <h3 className="font-semibold">Stop campaign for company on reply</h3>
+                    <p className="text-gray-400 text-[14px] mt-2">Stop the compaign automaticlly for all leads from a company if a reply is received from any of them.</p>
+                  </div>
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" value="" class="sr-only peer"/>
+                    <div class="relative w-11 h-6 bg-gray-200  rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 "></div>
+                  </label>
+                </div>
+                <div className="flex justify-between items-center mb-4 my-2">
+                  <div>
+                    <h3 className="font-semibold">Stop sending emails on Auto-reply</h3>
+                    <p className="text-gray-400 text-[14px]">Stop sending emails to a lead if a response has been received</p>
+                  </div>
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" value="" class="sr-only peer"/>
+                    <div class="relative w-11 h-6 bg-gray-200  rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 "></div>
+                  </label>
+                </div>
+                <div className="flex justify-between items-center mb-4 my-2">
+                  <div>
+                    <h3 className="font-semibold">Open tracking</h3>
+                    <p className="text-gray-400 text-[14px]">Track email opens</p>
+                  </div>
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" value="" class="sr-only peer"/>
+                    <div class="relative w-11 h-6 bg-gray-200  rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 "></div>
+                  </label>
+                </div>
+                <div className="flex justify-between items-center mb-4 my-2">
+                  <div>
+                    <h3 className="font-semibold">Insert insubscribe to link header</h3>
+                    <p className="text-gray-400 text-[14px]">Automatically adds an unsubscribe link to email headers for on-click unsubscription by supported email providers</p>
+                  </div>
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" value="" class="sr-only peer"/>
+                    <div class="relative w-11 h-6 bg-gray-200  rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 "></div>
+                  </label>
+                </div>
+              </div>
+
+
+
+              <div className="border border-gray-200 rounded-lg p-4 w-[900px] mx-auto bg-white my-2">
+                <div className="flex justify-between items-center mb-4 my-2">
+                  <div>
+                    <h3 className="font-semibold">CC</h3>
+                    <p className="text-gray-400 text-[14px] mt-2">Send a copy of the email to the addresses listed in the field</p>
+                  </div>
+                  <input type="text"className="w-80 px-10 border border-gray-500 rounded" />
+                </div>
+                <div className="flex justify-between items-center mb-4 my-2">
+                  <div>
+                    <h3 className="font-semibold">BCC</h3>
+                    <p className="text-gray-400 text-[14px] w-48">Send a copy of the email to certain receipients without the other receipients knowing about it</p>
+                  </div>
+                  <input type="text"className="w-80 px-10 border border-gray-500 rounded" />
                 </div>
               </div>
             </div>

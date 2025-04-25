@@ -105,30 +105,6 @@ export default function TopPeople() {
         </table>
       </div>
 
-      {/* Floating Contact */}
-      {/* <div className="fixed bottom-6 right-6 flex w-96 items-center gap-3 rounded-full border-b bg-background px-5 py-3 pr-4 shadow-lg">
-        <img
-          src="https://img.pikbest.com/origin/09/26/70/62VpIkbEsTv9G.png!sw800"
-          alt="Benjamin Cooper"
-          className="h-10 w-10 rounded-full"
-        />
-        <div className="mr-2">
-          <div className="font-medium">Benjamin Cooper</div>
-          <div className="text-sm text-muted-foreground">+123 456 789 101</div>
-        </div>
-        <div className="flex gap-1">
-          <button className="rounded-full bg-red-500 p-2 text-white hover:bg-red-600 cursor-pointer">
-            <MdPhone className="h-5 w-5" />
-          </button>
-          <button className="rounded-full bg-teal-500 p-2 text-white hover:bg-teal-600 cursor-pointer">
-            <MdChat className="h-5 w-5" />
-          </button>
-          <button className="rounded-full border p-2 hover:bg-accent cursor-pointer">
-            <MdMoreVert className="h-5 w-5" />
-          </button>
-        </div>
-      </div> */}
-
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-[#3a3939a3] bg-opacity-50">
@@ -249,6 +225,7 @@ export default function TopPeople() {
                         <input type="password" name="password" id="password" placeholder="••••••••" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:border-green-500 focus:bg-green-100 focus:outline-none " required />
                     </div>
                 </div>
+                <button type="button" class="text-white bg-blue-700 cursor-pointer hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Submit</button>
                 </form>
             </div>
           </div>
