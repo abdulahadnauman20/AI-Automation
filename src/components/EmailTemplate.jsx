@@ -112,18 +112,9 @@ export default function EmailTemplateBuilder() {
             />
           </div>
 
-          {/* AI Write Button */}
-          <div className="flex justify-end mb-4">
-            <div className="inline-flex items-center px-3 py-1.5 bg-[#f0f9f4] rounded-full text-sm text-teal-600">
-              Write with AI <span className="text-yellow-400 ml-1">✨</span>
-            </div>
-          </div>
-
-          {/* Save Button */}
           <div className="mt-6">
-            <button className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded flex items-center text-sm">
+            <button className="bg-teal-600  hover:bg-teal-600 text-white px-6 py-1.5 rounded-full text-[15px]">
               Save
-              <ChevronDown size={16} className="ml-1" />
             </button>
           </div>
         </div>

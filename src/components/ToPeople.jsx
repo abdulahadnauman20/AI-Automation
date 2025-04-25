@@ -172,7 +172,7 @@ export default function TopPeople() {
         </div>
       )}
 
-      {/* Second Modal (MailOpen Click) */}
+      Second Modal (MailOpen Click)
       {isSecondModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-[#3a3939a3] bg-opacity-50">
           <div className="rounded-lg bg-white p-6 shadow-lg">

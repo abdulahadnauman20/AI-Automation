@@ -18,13 +18,24 @@ Zap,
 Eye,
 Hand,
 CircleDollarSign,
+CircleCheckBig,
+Ellipsis,
+ArrowDownToLine,
+Share2,
+ListFilter,
+User,
+PhoneIncoming,
+FileMinus,
+MailOpen,
 } from "lucide-react"
 import { useCampaignQuery } from "../reactQuery/hooks/useCampaignQuery";
 import { useParams } from "react-router-dom"
 
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid, Funnel } from "recharts";
 import ScheduleForm from "../components/SheduleForm";
 import EmailTemplateBuilder from "../components/EmailTemplate";
+import { IoClose } from "react-icons/io5";
+import { FcGoogle } from "react-icons/fc";
 const calls = [
   {
     id: 1,
@@ -108,109 +119,110 @@ const meetings = [
   },
 ]
 
-const opportunities = [
-  {
-    id: 1,
-    opportunity: "BetaTech",
-    contact: "Michael Regan",
-    amount: "-",
-    owner: "Beeto Leru",
-    source: "Phone",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Discovery",
-  },
-  {
-    id: 2,
-    opportunity: "Greenfield",
-    contact: "Jordyn Botosh",
-    amount: "$12,839",
-    owner: "Beeto Leru",
-    source: "Email",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Discovery",
-  },
-  {
-    id: 3,
-    opportunity: "Acme Corp.",
-    contact: "Emerson Saris",
-    amount: "-",
-    owner: "Beeto Leru",
-    source: "Phone",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Proposal",
-  },
-  {
-    id: 4,
-    opportunity: "Vertex Health",
-    contact: "Emerson Franci",
-    amount: "-",
-    owner: "Beeto Leru",
-    source: "Phone",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Evaluation",
-  },
-  {
-    id: 5,
-    opportunity: "EcoBuild",
-    contact: "Aspen Vaccaro",
-    amount: "$200",
-    owner: "Beeto Leru",
-    source: "Email",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Evaluation",
-  },
-  {
-    id: 6,
-    opportunity: "EcoBuild",
-    contact: "Ruben Torff",
-    amount: "$12,839",
-    owner: "Beeto Leru",
-    source: "Phone",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Evaluation",
-  },
-  {
-    id: 7,
-    opportunity: "OmniTech",
-    contact: "Carter Rosser",
-    amount: "$12,839",
-    owner: "Beeto Leru",
-    source: "Email",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Evaluation",
-  },
-  {
-    id: 8,
-    opportunity: "Zenoth Co.",
-    contact: "Lynn Tanner",
-    amount: "$12,839",
-    owner: "Beeto Leru",
-    source: "Email",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Sales",
-  },
-]
+// const opportunities = [
+//   {
+//     id: 1,
+//     opportunity: "BetaTech",
+//     contact: "Michael Regan",
+//     amount: "-",
+//     owner: "Beeto Leru",
+//     source: "Phone",
+//     expectedClosing: "12/2/2025",
+//     actualClosing: "12/4/2025",
+//     lastInteraction: "12/2/2025 9:23 AM",
+//     stage: "Discovery",
+//   },
+//   {
+//     id: 2,
+//     opportunity: "Greenfield",
+//     contact: "Jordyn Botosh",
+//     amount: "$12,839",
+//     owner: "Beeto Leru",
+//     source: "Email",
+//     expectedClosing: "12/2/2025",
+//     actualClosing: "12/4/2025",
+//     lastInteraction: "12/2/2025 9:23 AM",
+//     stage: "Discovery",
+//   },
+//   {
+//     id: 3,
+//     opportunity: "Acme Corp.",
+//     contact: "Emerson Saris",
+//     amount: "-",
+//     owner: "Beeto Leru",
+//     source: "Phone",
+//     expectedClosing: "12/2/2025",
+//     actualClosing: "12/4/2025",
+//     lastInteraction: "12/2/2025 9:23 AM",
+//     stage: "Proposal",
+//   },
+//   {
+//     id: 4,
+//     opportunity: "Vertex Health",
+//     contact: "Emerson Franci",
+//     amount: "-",
+//     owner: "Beeto Leru",
+//     source: "Phone",
+//     expectedClosing: "12/2/2025",
+//     actualClosing: "12/4/2025",
+//     lastInteraction: "12/2/2025 9:23 AM",
+//     stage: "Evaluation",
+//   },
+//   {
+//     id: 5,
+//     opportunity: "EcoBuild",
+//     contact: "Aspen Vaccaro",
+//     amount: "$200",
+//     owner: "Beeto Leru",
+//     source: "Email",
+//     expectedClosing: "12/2/2025",
+//     actualClosing: "12/4/2025",
+//     lastInteraction: "12/2/2025 9:23 AM",
+//     stage: "Evaluation",
+//   },
+//   {
+//     id: 6,
+//     opportunity: "EcoBuild",
+//     contact: "Ruben Torff",
+//     amount: "$12,839",
+//     owner: "Beeto Leru",
+//     source: "Phone",
+//     expectedClosing: "12/2/2025",
+//     actualClosing: "12/4/2025",
+//     lastInteraction: "12/2/2025 9:23 AM",
+//     stage: "Evaluation",
+//   },
+//   {
+//     id: 7,
+//     opportunity: "OmniTech",
+//     contact: "Carter Rosser",
+//     amount: "$12,839",
+//     owner: "Beeto Leru",
+//     source: "Email",
+//     expectedClosing: "12/2/2025",
+//     actualClosing: "12/4/2025",
+//     lastInteraction: "12/2/2025 9:23 AM",
+//     stage: "Evaluation",
+//   },
+//   {
+//     id: 8,
+//     opportunity: "Zenoth Co.",
+//     contact: "Lynn Tanner",
+//     amount: "$12,839",
+//     owner: "Beeto Leru",
+//     source: "Email",
+//     expectedClosing: "12/2/2025",
+//     actualClosing: "12/4/2025",
+//     lastInteraction: "12/2/2025 9:23 AM",
+//     stage: "Sales",
+//   },
+// ]
 
 export default function CompaignTarget() {
   const { campaignId } = useParams();
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
+  const [isOpen2, setIsOpen2] = useState(false)
   const { getCampaignLeadsQuery } = useCampaignQuery();
   const { 
     data: leads, // Now directly the array of leads
@@ -431,12 +443,13 @@ export default function CompaignTarget() {
     { amount: '26', icon: <CircleDollarSign size={24} className="text-yellow-500" />, text: "Conversion", bg: "bg-yellow-100" },
   ];
 
-  const data = [
-    { name: "SEP", sent: 250, opens: 200, clicks: 150, opportunities: 100, conversions: 50 },
-    { name: "OCT", sent: 150, opens: 120, clicks: 90, opportunities: 60, conversions: 30 },
-    { name: "NOV", sent: 180, opens: 140, clicks: 100, opportunities: 80, conversions: 40 },
-    { name: "DEC", sent: 220, opens: 170, clicks: 130, opportunities: 90, conversions: 60 },
-  ];
+  const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+
+  const handleAnother = () => {
+    setIsSecondModalOpen(true);
+    setIsModalOpen(false);
+  }
+
 
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("People")
@@ -445,13 +458,13 @@ export default function CompaignTarget() {
     <div className="min-h-screen bg-gray-50 ps-20">
       <div className="container mx-auto px-4 py-6">
         {/* Navigation Tabs */}
-        <div className="border-b border-gray-200 mb-6">
+        <div className="border-b border-gray-200 mb-6 flex justify-between items-center">
           <nav className="flex -mb-px">
             {["Analytics", "People", "Sequence", "Shedule", "Options"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`mr-8 py-4 px-1 border-b-2 font-medium text-sm ${
+                className={`mr-8 py-4 px-1 border-b-2 cursor-pointer font-medium text-sm ${
                   activeTab === tab
                     ? "border-teal-500 text-teal-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -461,75 +474,210 @@ export default function CompaignTarget() {
               </button>
             ))}
           </nav>
+          <div className="flex gap-4">
+
+            {activeTab !== "People"  && activeTab !== "Options" && <button className="bg-gradient-to-br from-green-400 to-orange-500 shrink-0 text-white text-[14px] font-semibold border border-gray-400 flex gap-1 items-center rounded-full px-3 cursor-pointer">
+                <p>AI Sequence</p>
+            </button>}
+
+            <div className="border border-gray-300 flex gap-1 items-center rounded-full px-2.5 py-1.5">
+              <Pause size={20} className="text-gray-400" />
+              <p className="text-gray-400 text-[14px]">Pause campaign</p>
+            </div>
+
+            <div className="relative inline-block text-left">
+              <button
+                onClick={() => setIsOpen2(!isOpen2)}
+                className="p-2 border cursor-pointer border-gray-300 text-gray-600 rounded-lg">
+                <Ellipsis />
+              </button>
+              {isOpen2 && (
+                <div className="absolute z-10 mt-2 right-0 bg-white shadow-md w-48 rounded-lg">
+                  <ul className="py-1 text-sm text-gray-700">
+                    <li className="px-3 py-2 flex text-gray-400 text-[13px] gap-2 items-center hover:bg-gray-100">
+                    <ArrowDownToLine size={20} className="text-green-500" /> Download Analytics CSV
+                    </li>
+                    <li className="px-3 py-2 flex text-gray-400 text-[13px] gap-2 items-center hover:bg-gray-100">
+                    <Share2 size={20} /> Share Compaign
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+
+          </div>
         </div>
 
         {/* Search and Filters */}
         {activeTab == "People" && (
-          <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
+          <div className="flex flex-col md:flex-row justify-between mb-6 gap-3">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-gray-400" />
               </div>
               <input
                 type="text"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex gap-2">
               <div className="relative inline-block text-left">
                 <button
                   onClick={() => setIsOpen(!isOpen)}
-                  className="px-4 py-2 border border-gray-300 text-gray-600 rounded-full flex gap-1 items-center"
-                >
-                  All Statuses <ChevronDown />
+                  className="px-4 py-2 cursor-pointer border  border-gray-300 text-gray-500 rounded-full flex gap-1 items-center">
+                  <ListFilter size={20} /> Filter 
                 </button>
                 {isOpen && (
                   <div className="absolute z-10 mt-2 bg-white shadow-md w-44 rounded-lg">
                     <ul className="py-2 text-sm text-gray-700">
-                      {listItems.map((val, index) => (
-                        <li key={index} className="px-4 py-2 flex gap-2 items-center hover:bg-gray-100">
-                          {val.icon} {val.name}
-                        </li>
-                      ))}
+                    <li className="px-4 py-2 hover:bg-gray-100">Newest first</li>
+                    <li className="px-4 py-2 hover:bg-gray-100">Oldest first</li>
+                    <li className="px-4 py-2 hover:bg-gray-100">Name A-Z</li>
+                    <li className="px-4 py-2  hover:bg-gray-100">Name Z-A</li>
                     </ul>
                   </div>
                 )}
               </div>
-
-              <div className="relative inline-block text-left">
                 <button
                   type="button"
-                  className="inline-flex justify-between w-40 rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-teal-500"
-                >
-                  <span>Oldest first</span>
-                  <svg
-                    className="h-5 w-5 text-gray-400"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  onClick={() => setIsModalOpen(true)}
+                  className="inline-flex items-center cursor-pointer px-4 py-2 border border-transparent text-sm font-normal rounded-full shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none"  >
+                  <User className="mr-2 h-5 w-5" />
+                  Add lead
                 </button>
-              </div>
+              {isModalOpen && (
+                <div className="fixed inset-0 flex items-center justify-center bg-[#3a3939a3] bg-opacity-50">
+                  <div className="w-96 rounded-lg bg-white p-6 shadow-lg">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-semibold">Add leads</h3>
+                      <button onClick={() => setIsModalOpen(false)}>
+                        <IoClose className="h-6 w-6 text-gray-500 hover:text-gray-700 cursor-pointer" />
+                      </button>
+                    </div>
+                    <div className="mt-4 space-y-4">
+                      <div className="shadow-lg p-2">
+                        <div className="flex gap-4 cursor-pointer items-center px-10">
+                          <div>
+                          <FileMinus className="text-green-400" size={35} />
+                          </div>
+                          <p className="h-8 border border-gray-200"></p>
+                          <div>
+                            <p className="text-gray-400">Upload</p>
+                            <p className="font-semibold">CSV</p>
+                          </div>
+                        </div>
+                      </div>
 
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
-              >
-                <Plus className="mr-2 h-5 w-5" />
-                Add new
+                      <div className="shadow-lg p-2">
+                        <div className="flex gap-4 items-center px-10">
+                          <div>
+                          <FileMinus className="text-green-400" size={35} />
+                          </div>
+                          <p className="h-8 border border-gray-200"></p>
+                          <div>
+                            <p className="text-gray-400">Use</p>
+                            <p className="font-semibold">AI lead Finder</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="shadow-lg p-2">
+                        <div  onClick={handleAnother} className="flex gap-4 cursor-pointer items-center px-10">
+                          <div>
+                          <MailOpen size={30}  className="cursor-pointer" />
+                          </div>
+                          <p className="h-8 border border-gray-200"></p>
+                          <div>
+                            <p className="text-gray-400">Enter</p>
+                            <p className="font-semibold">Email Manually</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="shadow-lg p-2">
+                        <div className="flex gap-4 cursor-pointer items-center px-10">
+                          <div>
+                            <FcGoogle size={27} />
+                          </div>
+                          <p className="h-8 border border-gray-200"></p>
+                          <div>
+                            <p className="text-gray-400">Use</p>
+                            <p className="font-semibold">Google Sheets</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+                {/* Second M`odal (MailOpen Click) */}
+                {isSecondModalOpen && (
+                  <div className="fixed inset-0 flex items-center justify-center bg-[#3a3939a3] bg-opacity-50">
+                    <div className="rounded-lg bg-white p-6 shadow-lg">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold inline-flex gap-1"> <User className="text-gray-300" /> Add new lead</h3>
+                        <button onClick={() => setIsSecondModalOpen(false)}>
+                          <IoClose className="h-6 w-6 text-gray-500 hover:text-gray-700 cursor-pointer" />
+                        </button>
+                      </div>
+                      <div className="mt-4">
+                        lead owner
+                        <div className="bg-gray-200 w-fit rounded-full px-2 flex gap-2 items-center my-2 border border-gray-300">
+                          <img src="https://img.freepik.com/free-photo/lifestyle-people-emotions-casual-concept-confident-nice-smiling-asian-woman-cross-arms-chest-confident-ready-help-listening-coworkers-taking-part-conversation_1258-59335.jpg" className="h-10 w-10 rounded-full object-cover " alt="" />
+                          Beetao lenu
+                        </div>
+                        <p className="bg-gray-200 rounded p-1">Personal Information</p>
+                        <form className="space-y-4" action="#">
+                          <div className="flex gap-2 my-2">
+                              <div className="w-72">
+                                  <label for="email" className="block mb-2 text-sm font-medium text-gray-900">First Name</label>
+                                  <input type="email" name="email" id="email"className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:border-green-500 focus:bg-green-100 focus:outline-none "  placeholder="name@company.com" required />
+                              </div>
+                              <div className="w-72">
+                                  <label for="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Lead Status</label>
+                                  <input type="password" name="password" id="password" placeholder="••••••••" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:border-green-500 focus:bg-green-100 focus:outline-none "  required />
+                              </div>
+                          </div>
+                          <div className="flex gap-2">
+                              <div className="w-72">
+                                  <label for="email" className="block mb-2 text-sm font-medium text-gray-900">Last Name</label>
+                                  <input type="email" name="email" id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:border-green-500 focus:bg-green-100 focus:outline-none "  placeholder="name@company.com" required />
+                              </div>
+                              <div className="w-72">
+                                  <label for="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
+                                  <input type="password" name="password" id="password" placeholder="••••••••" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:border-green-500 focus:bg-green-100 focus:outline-none "  required />
+                              </div>
+                          </div>
+                              <div className="w-72">
+                                  <label for="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Phone Number</label>
+                                  <input type="password" name="password" id="password" placeholder="••••••••" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:border-green-500 focus:bg-green-100 focus:outline-none " required />
+                              </div>
+                              <p className="bg-gray-200 rounded p-1">Company Information</p>
+                              <div className="flex gap-2">
+                              <div className="w-72">
+                                  <label for="email" className="block mb-2 text-sm font-medium text-gray-900">Company</label>
+                                  <input type="email" name="email" id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:border-green-500 focus:bg-green-100 focus:outline-none " placeholder="name@company.com" required />
+                              </div>
+                              <div className="w-72">
+                                  <label for="password" className="block mb-2  text-sm font-medium text-gray-900 dark:text-white">Website</label>
+                                  <input type="password" name="password" id="password" placeholder="••••••••" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:border-green-500 focus:bg-green-100 focus:outline-none " required />
+                              </div>
+                          </div>
+                          <button type="button" class="text-white bg-blue-700 cursor-pointer hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Submit</button>
+                          </form>
+                      </div>
+                    </div>
+                  </div>
+                )}`
+
+              <button className="bg-gradient-to-br border-none from-green-400 to-orange-500 shrink-0 text-white text-[14px] font-semibold border border-gray-400 flex gap-1 items-center rounded-full px-3 cursor-pointer">
+              <PhoneIncoming size={15} /> <p>Call with AI</p>
               </button>
+
             </div>
           </div>
         )}
@@ -551,35 +699,35 @@ export default function CompaignTarget() {
         )}
 
           {activeTab === "People" && (
-            <div className="col-span-full w-full overflow-x-auto">
+            <div className="col-span-full w-full overflow-x-hidden">
               <table className="w-full table-fixed">
                 <thead>
-                  <tr className="border-b text-sm text-muted-foreground">
+                  <tr className="border-none text-sm text-muted-foreground">
                     <th className="whitespace-nowrap px-4 py-3 text-left font-medium w-[40px]">
                       <input type="checkbox" className="rounded border-muted cursor-pointer" />
                     </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[200px]">EMAIL</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-[13px] text-gray-400 w-[220px]">EMAIL</th>
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-[13px] text-gray-400 w-[150px]">
                       CONTACT
                     </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-[13px] text-gray-400 w-[140px]">
                       EMAIL PROVIDER
                     </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[200px]">
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-[13px] text-gray-400 w-[260px]">
                       STATUS
                     </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-[13px] text-gray-400 w-[200px]">
                       COMPANY
                     </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[200px]">
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-[13px] text-gray-400 w-[200px]">
                       WEBSITE
                     </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">TITLE</th>
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-[13px] text-gray-400 w-[140px]">TITLE</th>
                   </tr>
                 </thead>
                 <tbody>
                   {leads?.map((person, idx) => (
-                    <tr key={idx} className="border-b text-sm">
+                    <tr key={idx} className="border border-gray-300 text-sm">
                       <td className="px-4 py-3">
                         <input type="checkbox" className="rounded border-muted cursor-pointer" />
                       </td>
@@ -628,9 +776,9 @@ export default function CompaignTarget() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                            <span className="text-blue-500">Verified</span>
+                          <div className="flex items-center gap-1 bg-blue-100 rounded-full px-2 py-0.5 text-sm">
+                            <CircleCheckBig size={13} className="text-blue-500" />
+                            <span className="text-blue-500 ">Verified</span>
                           </div>
                           <div className="flex items-center gap-1 text-gray-400">
                             <Clock className="h-4 w-4" />
@@ -645,26 +793,6 @@ export default function CompaignTarget() {
                   ))}
                 </tbody>
               </table>
-              <div className="flex items-center justify-between px-4 py-3 border-t">
-                <div className="flex items-center gap-2">
-                  <button className="px-2 py-1 text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
-                    <ChevronLeft className="h-4 w-4" />
-                    Previous
-                  </button>
-                  <div className="flex items-center gap-1">
-                    <button className="px-3 py-1 text-sm bg-gray-100 text-gray-900 rounded">1</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">2</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">3</button>
-                    <span className="px-2 text-gray-600">...</span>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">45</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">46</button>
-                  </div>
-                  <button className="px-2 py-1 text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
-                    Next
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
             </div>
           )}
 
