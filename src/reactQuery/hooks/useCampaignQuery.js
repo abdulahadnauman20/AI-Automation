@@ -84,7 +84,7 @@ export const useCampaignQuery = () => {
     });
   };
 
-  const { mutate: updateCampaignSequenceMutation, isLoading: isUpdatingCampaignSequence } = useMutation({
+  const updateCampaignSequenceMutation = useMutation({
     mutationFn: ({ campaignId, sequenceData }) => updateCampaignSequence(campaignId, sequenceData),
     onSuccess: (data) => {
       console.log("Campaign sequence updated successfully:", data);
@@ -104,7 +104,7 @@ export const useCampaignQuery = () => {
     onError: () => toast.error("Failed to send email"),
   });
 
-  const { mutate: generateEmailWithAI, isLoading: isGeneratingAI } = useMutation({
+  const generateEmailWithAI = useMutation({
     mutationFn: ({ campaignId, emailData }) => generateAIEmail(campaignId, emailData),
     onSuccess: (data) => {
       console.log("AI Email generated successfully:", data);
@@ -116,7 +116,7 @@ export const useCampaignQuery = () => {
     },
   });
 
-  const { mutate: generateSequenceWithAI, isLoading: isGeneratingSequence } = useMutation({
+  const generateSequenceWithAI = useMutation({
     mutationFn: ({ campaignId, sequenceData }) => generateAISequence(campaignId, sequenceData),
     onSuccess: (data) => {
       console.log("AI Sequence generated successfully:", data);
@@ -130,7 +130,7 @@ export const useCampaignQuery = () => {
   
 
   // -------------------- Schedule --------------------
-  const updateScheduleMutation = useMutation({
+  const updateScheduleMutationQuery = useMutation({
     mutationFn: ({ campaignId, data }) => updateCampaignSchedule(campaignId, data),
     onSuccess: () => {
       toast.success("Schedule updated");
@@ -138,6 +138,18 @@ export const useCampaignQuery = () => {
     },
     onError: () => toast.error("Failed to update schedule"),
   });
+
+  const getCampaignScheduleQuery = (campaignId) => {
+    return useQuery({
+      queryKey: ["campaignSchedule", campaignId],
+      queryFn: () => getCampaignSchedule(campaignId), 
+      enabled: !!campaignId,
+      onSuccess: (schedule) => console.log("Campaign schedule fetched:", schedule),
+      onError: (error) => toast.error(`Failed to fetch campaign schedule: ${error.message}`),
+    });
+  };
+
+
 
   const getCampaignLeadsQuery = (campaignId) => useQuery({
     queryKey: ["campaignLeads", campaignId],
@@ -171,16 +183,13 @@ export const useCampaignQuery = () => {
     sendMailMutation,
 
     generateEmailWithAI,
-    isGeneratingAI,
     generateSequenceWithAI,
-    isGeneratingSequence,
     updateCampaignSequenceMutation,
-    isUpdatingCampaignSequence,
     
 
     // Schedule
-    getCampaignSchedule,
-    updateScheduleMutation,
+    getCampaignScheduleQuery,
+    updateScheduleMutationQuery,
     generateAISchedule,
   };
 };

@@ -892,7 +892,7 @@ export default function CompaignTarget() {
                     </div>
 
                     <div className="mt-6">
-                      <button onClick={handleSaveSequence} className="bg-teal-600 hover:bg-teal-600 text-white px-6 py-1.5 rounded-full text-[15px]">
+                      <button onClick={handleSaveSequence} className="flex items-center cursor-pointer bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-md focus:outline-none">
                         Save
                       </button>
                     </div>
@@ -905,7 +905,7 @@ export default function CompaignTarget() {
           {activeTab === "Shedule" && (
             <div className="col-span-full w-full overflow-x-auto">
               <main className="min-h-screen bg-gray-50 py-8">
-                  <ScheduleForm />
+                  <ScheduleForm campaignId={campaignId} />
               </main>
             </div>
           )}
