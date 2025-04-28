@@ -73,13 +73,28 @@ export const useCampaignQuery = () => {
   });
 
   // -------------------- Sequence --------------------
-  const updateSequenceMutation = useMutation({
-    mutationFn: ({ campaignId, data }) => updateCampaignSequence(campaignId, data),
-    onSuccess: () => {
-      toast.success("Sequence updated");
-      queryClient.invalidateQueries(["campaignSequence"]);
+
+  const getCampaignSequenceQuery = (campaignId) => {
+    return useQuery({
+      queryKey: ["campaignSequence", campaignId],
+      queryFn: () => getCampaignSequence(campaignId), // Fetch the sequence data
+      enabled: !!campaignId, // Only run the query if campaignId is valid
+      onSuccess: (sequence) => console.log("Campaign sequence fetched:", sequence),
+      onError: (error) => toast.error(`Failed to fetch campaign sequence: ${error.message}`),
+    });
+  };
+
+  const { mutate: updateCampaignSequenceMutation, isLoading: isUpdatingCampaignSequence } = useMutation({
+    mutationFn: ({ campaignId, sequenceData }) => updateCampaignSequence(campaignId, sequenceData),
+    onSuccess: (data) => {
+      console.log("Campaign sequence updated successfully:", data);
+      toast.success("Campaign sequence updated successfully!");
+      // No automatic state update — leave it to the component if needed
     },
-    onError: () => toast.error("Failed to update sequence"),
+    onError: (error) => {
+      toast.error(`Failed to update campaign sequence: ${error.message}`);
+      console.log(error);
+    },
   });
   
 
@@ -87,6 +102,30 @@ export const useCampaignQuery = () => {
     mutationFn: ({ campaignId, data }) => sendCampaignMail(campaignId, data),
     onSuccess: () => toast.success("Email sent"),
     onError: () => toast.error("Failed to send email"),
+  });
+
+  const { mutate: generateEmailWithAI, isLoading: isGeneratingAI } = useMutation({
+    mutationFn: ({ campaignId, emailData }) => generateAIEmail(campaignId, emailData),
+    onSuccess: (data) => {
+      console.log("AI Email generated successfully:", data);
+      // We won't directly update the state here. We'll return the data to the component for handling.
+    },
+    onError: (error) => {
+      toast.error(`Failed to generate AI email: ${error.message}`);
+      console.log(error);
+    },
+  });
+
+  const { mutate: generateSequenceWithAI, isLoading: isGeneratingSequence } = useMutation({
+    mutationFn: ({ campaignId, sequenceData }) => generateAISequence(campaignId, sequenceData),
+    onSuccess: (data) => {
+      console.log("AI Sequence generated successfully:", data);
+      // We won't directly update the state here. We'll return the data to the component for handling.
+    },
+    onError: (error) => {
+      toast.error(`Failed to generate AI sequence: ${error.message}`);
+      console.log(error);
+    },
   });
   
 
@@ -125,15 +164,19 @@ export const useCampaignQuery = () => {
     getCampaignById,
 
     // Leads
-    // getCampaignLeads,
     getCampaignLeadsQuery,
 
     // Sequence
-    getCampaignSequence,
-    updateSequenceMutation,
+    getCampaignSequenceQuery,
     sendMailMutation,
-    generateAIEmail,
-    generateAISequence,
+
+    generateEmailWithAI,
+    isGeneratingAI,
+    generateSequenceWithAI,
+    isGeneratingSequence,
+    updateCampaignSequenceMutation,
+    isUpdatingCampaignSequence,
+    
 
     // Schedule
     getCampaignSchedule,

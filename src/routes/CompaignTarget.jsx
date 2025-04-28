@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
 Search,
 MoreVertical,
@@ -27,97 +27,18 @@ User,
 PhoneIncoming,
 FileMinus,
 MailOpen,
+X,
 } from "lucide-react"
 import { useCampaignQuery } from "../reactQuery/hooks/useCampaignQuery";
 import { useParams } from "react-router-dom"
-
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid, Funnel } from "recharts";
 import ScheduleForm from "../components/SheduleForm";
 import EmailTemplateBuilder from "../components/EmailTemplate";
 import { IoClose } from "react-icons/io5";
 import { FcGoogle } from "react-icons/fc";
-const calls = [
-  {
-    id: 1,
-    name: "Alexis Sanchez",
-    avatar: "https://s3-alpha-sig.figma.com/img/ad23/2f1a/673fe1645ff06837351bc6292fd60f72?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=VVDq6rfQ2pWWTaAOpfg8tli0UbUgcDVHfFCIY7aJsQ93u9eSOdHxJMbBfGkZGbcw1gkl5Pdqfvp4VlKR-NUq4MesVpJtlCZY~kEf09IG6ryLnYULwWPfmy3VUrg0UanQQzpvb31sq3Lpdv0Bzjaccq56B1Nbdg5TB5XQWmCM6taNTrqCTQwNh7e9k~xQaBsh80nmLp6jzaUW61hj7i8POSXayfkWVpDOUuazUmb~GbMfscuO27o1ReIRRpn0m2ztRpbNtSAvi-tpzZx6V3bVqhoHAnfubJ-vGHPvDaX2MSokCbwAJZ8WW2ulnpW73XTuo8tZjdasWOBsmkt6Rz9~YQ__",
-    phone: "+1263 263513",
-    date: "6 mins ago",
-    duration: "54:230000000",
-    bgColor: "bg-orange-100",
-  },
-  {
-    id: 2,
-    name: "Emily Carter",
-    avatar: "https://s3-alpha-sig.figma.com/img/c5f3/e84e/4fb2f97bf20e33c2b8cdf9197e1f2409?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=k0Pgv~SnS1HG-3jj4WyeozE4GXVYpBnxgHWQRBz1m0ufyD04WpA5PjOhZEux8AqIh73kZ4UQZBt2Lw1V2Nsd83WZUm8mEkade8p~Rnr6KSMysZmO8Mv0kJuQnM6TTIGG05Czd5dHPUeD4KwVn11w8JMgkzlk82Q5iPUZqMWZLMWY3Up4yRJ0Vlpo7E7y4XnkCkRwKGXnECxwHzAphCum1yY~MQvDkrCfwBksGlQqA6laZNPuLaGhiFMc5HdP1Go2Aom~x29r7iZUygikzeF9p82mGCMPCRdup1ws98jaFXcn~yuq0t0LEwN4S5Eb5bvEo1GkemvRely0bH-piVkEZQ__",
-    phone: "+1263 263513",
-    date: "4 hours ago",
-    duration: "54:230000000",
-    bgColor: "bg-yellow-100",
-  },
-  {
-    id: 3,
-    name: "James Harrison",
-    avatar: "https://s3-alpha-sig.figma.com/img/afac/9044/1bd1b90f58b13b3dfe5637587e1b9661?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=hZaJTeiHMtAhzF0mzQMmpkDUh-7avxHcOP-zvd16gSFWASUQ8-PQGei8q321bz9DPoGyEKIBtPVl-x9FKbWoC1EaUp384DYHTDdJlQRBt9TOZs8zRr6poYGmVNk15L-wa4BBFydAbk1uHo081eN3-dyi1hIcH4YmwL1h4IzMi8lnMo4Z5KINfXUvE4gzA-y2-jYAD4Tzip2uL9hTod-gsDFMXHLbQx4Ftl0Uufs5cG6pnBNuNOVRowcWjDDSftVVqB2J8NhV6WvgVGwAF-4mQ3QFGiWH653f4dxWNIAea9G3hniSYcT800qrv5kj2ouDBrgm~IkzzAe~VW0zPmeGfw__",
-    initials: "JH",
-    phone: "+1263 263513",
-    date: "Yesterday",
-    duration: "54:230000000",
-    bgColor: "bg-blue-100",
-  },
-  {
-    id: 4,
-    name: "Olivia Bennett",
-    avatar: "https://s3-alpha-sig.figma.com/img/b52b/ff87/4bd5e2c4056e2551724da86e02902466?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=eOAGmt7-rcQLSTD1Uvx8ckUBaduhmCRhRaSuSvHvNYSkMmPN1vt0DtBcIl7AE0yx3rk3561v75b6XrnAFnMdEkcWEIkLR5N4-ao6ZuABD4h31TcSdklnw5c9c4PLGkt50YQ1asl7b6po34yCwLyJ3M3W8CBKIGZZVZdAFOuTq6uZ4BTJSSa~EU~Od-AZBKSnnoms2e3FpyRTLc4Y1Zh4HpYpUDpeBmLVaXXVbrzAAyRdOTVPPsOBB5Re8-Pqcx-~iNviVTPyqRfa2sh2dpXydMfDhZr1lOgsG8F19EXUX5b0RFM3Uo91iy0mq9txnXQhGdFoqw6Lvdj-JiYsoDWclw__",
-    phone: "+1263 263513",
-    date: "June 2025",
-    duration: "54:230000000",
-    bgColor: "bg-green-100",
-  },
-]
+import { Editor } from '@tinymce/tinymce-react';
+import { toast } from "react-hot-toast";
 
-const meetings = [
-  {
-    id: 1,
-    lead: "Alexis Sanchez",
-    avatar: "https://s3-alpha-sig.figma.com/img/b303/3293/64981872de114f9afc9909268c41d532?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=URL1KYG3YLKQ89ddu0Jv1TknY~LtQQm4vrS4MT6UO~0MTMshLNI5NQTrJuCL79W2hFegObJrrbhnkD~lX2cR2m9yaP6a8iW8PZ8q0KGOR2GF64isOkuSozI54zgUP9hDU8rEFWU5erXwuwhwgXJ1NtuzBXP2J9fQwocbL4R-qYjLrMYGS2KrM3FNZ31U1~L18YLYwkQfOphOZv6SBvFEH9jPbjNj66YCmMrUDC0GOOJfag65yc4u546JnCc3XQx7Uq2UpJ-ViBOv1VjQ3CgGyqrl5E2Hp11Z6fSSsiSBfQYnRB4LtnafLLCvdJ5Nm9Qvc7e0EMpPsdm8izUgR6xmWQ__",
-    date: "27 Feb 2025",
-    time: "06 minutes ago",
-    createdBy: "Quickpipe AI",
-    isAI: true,
-    bgColor: "bg-purple-100",
-  },
-  {
-    id: 2,
-    lead: "Ruben Schleifer",
-    avatar: "https://s3-alpha-sig.figma.com/img/ae49/d0da/6115d464049091b9698d07b84562a8f0?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=kgeen2FpNLgv3BcZknG3W-~zL8O1m8BTAiJB-gBBbbxfLAsOSLkql3~rFms~l8dEi3CjzVyxnm7IWEm-d2At-UXDDjteybAmYUWfjYJbZYPhDBJqlYsZTV3WON1u2rpX6KiOKCRjaBs8YXTBNOFTuPYjcHwL~W0TTicsR2bR75VKQx1lqqFO1wA1aU3iITRqRlVhG91~R7DrVC8~xvy0s06xYuizao6WlS8zy-PPixaK4GDYw8oTY66dXQwncShOvPxKwQb2aMZ8mSRVik1bHrNNnpKGGbq1mpvbf5HPNqXb8i-5wu6rx8PIyyRSeH-fGdHaSq391TcTAH75ipISiA__",
-    date: "27 Feb 2025",
-    time: "06 minutes ago",
-    createdBy: "Beeto Leru",
-    isAI: false,
-    bgColor: "bg-green-100",
-  },
-  {
-    id: 3,
-    lead: "Kaylynn Geidt",
-    avatar: "https://s3-alpha-sig.figma.com/img/c5f3/e84e/4fb2f97bf20e33c2b8cdf9197e1f2409?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=k0Pgv~SnS1HG-3jj4WyeozE4GXVYpBnxgHWQRBz1m0ufyD04WpA5PjOhZEux8AqIh73kZ4UQZBt2Lw1V2Nsd83WZUm8mEkade8p~Rnr6KSMysZmO8Mv0kJuQnM6TTIGG05Czd5dHPUeD4KwVn11w8JMgkzlk82Q5iPUZqMWZLMWY3Up4yRJ0Vlpo7E7y4XnkCkRwKGXnECxwHzAphCum1yY~MQvDkrCfwBksGlQqA6laZNPuLaGhiFMc5HdP1Go2Aom~x29r7iZUygikzeF9p82mGCMPCRdup1ws98jaFXcn~yuq0t0LEwN4S5Eb5bvEo1GkemvRely0bH-piVkEZQ__",
-    date: "27 Feb 2025",
-    time: "06 minutes ago",
-    createdBy: "Quickpipe AI",
-    isAI: true,
-    bgColor: "bg-yellow-100",
-  },
-  {
-    id: 4,
-    lead: "Rayna Vetrovs",
-    avatar: "https://s3-alpha-sig.figma.com/img/b333/a10d/f8c23fab456b1b430a98b7405fb49665?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=NbQfy3MRcNWFqJmOnGMb0A52Zqh6ve7Svq6yIPwjBi-5w8CumHKoaO~rYMr3BW3b6AeM3yfaD7W~A0vw93q8TmUVWAiWEt34iCaawNPTrwaKERehUzFUoNyrGFDesBOPjMrkOS3sKs61g5s4q1SfMJq-rsUxXp10TkChwnMYfg9JofNbrGFETstK7h5B7kqvwQkvaRKkOSrusC185AXbvUJ~tlGAaGIVO7Ko1lyKDAe8WA3x9yoah7lThXw6qMXJTh~DIH2dK9MLGLxRlODO5~u7Ljy63B8jIabenWnmE8vYh4XzWoHd0JaetfCqlfz2TjR2lskQV~7JUQza8jsH1w__",
-    date: "27 Feb 2025",
-    time: "06 minutes ago",
-    createdBy: "Quickpipe AI",
-    isAI: true,
-    bgColor: "bg-pink-100",
-  },
-]
 
 // const opportunities = [
 //   {
@@ -223,133 +144,25 @@ export default function CompaignTarget() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isOpen2, setIsOpen2] = useState(false)
-  const { getCampaignLeadsQuery } = useCampaignQuery();
+  const { getCampaignLeadsQuery, getCampaignSequenceQuery, generateEmailWithAI, generateSequenceWithAI, updateCampaignSequenceMutation } = useCampaignQuery();
+
+  const [selectStep, setSelectStep] = useState(null);
+  const [steps, setSteps] = useState([]);
+  const [content, setContent] = useState("");
+  const [subject, setSubject] = useState("");
+
   const { 
     data: leads, // Now directly the array of leads
     isLoading: isLeadsLoading, 
     error: leadsError 
   } = getCampaignLeadsQuery(campaignId);
+  const {
+    data: campaignSequence,
+    isLoading: isSequenceLoading,
+    isError: isSequenceError,
+    error: sequenceError,
+  } = getCampaignSequenceQuery(campaignId);
 
-
-  const listItems = [
-    { name: "All Statuses", icon: "⚡" },
-    { name: "Play", icon: <Play size={20} className="text-blue-400" /> },
-    { name: "Paused", icon: <Pause size={20} className="text-orange-400" /> },
-    { name: "Completed", icon: <CircleCheck size={20} className="text-green-400" /> },
-  ]
-
-  const accounts = [
-    {
-      id: 1,
-      name: "Microsoft Inc.",
-      logo: "https://s3-alpha-sig.figma.com/img/88be/db6f/bd548b0155aebe1afeb8b51e2375808a?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=qHU-nuSC~~S2~zKp-lsc7efOtqjPuiuq-p1j8P1YRN2MtsltQEcaj4uQVM2iy9w6K4MvfNsru6P~xT9Q1UNecBkwAqz2yvP8VsxZxuqFeGiTEn8tlS20hcELBIOVmeAB6Hg31i0-Tm4XtLBbFx61FcSj2vuXlCNmgznUyCEF1f-F1Oq6ap1zqMtCm-h5qqY32W2sfarNh16sJPFpd-uxrfsWVsVqwA5~bWOiuKB5K6ZgatoDqDdOqrNMvww1r1dVcvGEl-dA64oG6hcUHCCDAv0-ZDLKsVpgHJN3tpM1pjSaCSl0Nd40LpmPVxziZPCrDbnazK9VQHUFLs58qDgNUw__",
-      logoBackground: "bg-[#f25022]",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 2,
-      name: "M & M Boutique",
-      logo: "https://s3-alpha-sig.figma.com/img/d3a5/92fa/910daf59226b7dc72d3256ae806bb9a0?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=H31~qoUjyEWlRaGZlONcbmslv-1gm-xi6ucbcEw~~euBZuTR~UmJCrDRH2PaV7F3W3ha~UjdcXnOq~fmLWYkduWq0qQ0SfeWNJzGdAkYKlhfaDgTvDIu1u4qPusaemHPo4wiCzil8spnkB3ZTwNoWEGI-ljG8JthW9zu32zU139bPeLTPQZ34WP~RKn-jBDiPhT-VcdNGs3sKIKAPtHbXkfDf298vCEPLFdVgsHDjNdHnKd0JLwML-sgjysVM-OD4-d-GyKPd228gyqFNJx5bFrnZa9GbSXI7tJUzK~MbVHQdG4xDPw~xsBl1iKxGoXw2v7fVWWXXsCv44v2ZqPkzw__",
-      logoBackground: "bg-teal-500",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["BM", "CE", "HR"],
-    },
-    {
-      id: 3,
-      name: "X (FormelyTwitter)",
-      logo: "https://s3-alpha-sig.figma.com/img/3af9/0560/3d2392ebd00db1775b555cf4dbcd29fe?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=FArFoTGANntS9Pa5S62qv8wKtlUWfeZg9K2aIfrxfMg3XLbSGzG2b4VF1V~Y13aaTuQrFI8s7bi3Vu8TFxF5o~hRd9xtnLmR2xswDhqKmuyth0gkmS9O0bvpC5qezFwL0UX1CySpVn1wn29CcTrnN8t3jfs~q~NSTtLL6Hz0iLE-3sm2IKAWoO43YIEw8UKg88yllbA01XRNs14p1YUMUjT-gJQCgsbZOVEp41sJunr3EO8eagmay4xiEWwcaae7vPfcbwLoJLI3Pt2DIruTqH7G~Q8VUkNOVhq0-NbvdPQGydEsg-5Ei52cn-EreX8eijq7cWsJ2K~T7RU39idcbw__",
-      logoBackground: "bg-black",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["HR", "CE", "BM"],
-    },
-    {
-      id: 4,
-      name: "PWC",
-      logo: "https://s3-alpha-sig.figma.com/img/7f7b/2b28/1d9939016d1ce03eceab3ff1479444b5?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=WdmG4FqTaxvZg7-KZYkLuWC44k2aXbQuA1Md3P~zf~lGjzChRvij5tRMqgyv4KJxdWj9KuKGu9DgBzb5elK9KuTBSh4adyY2nBLih08TMnekoYNgtYLXD2PS0YoiXatjyC-phFOP6aCpL8Dvgy3gR1emdSyeGEnqY-Ai6PFftFjkcAlkIkhvrJPaeDHOELxasSRVuoo-Ggcxxz52v3WyqaxgHkZfK4iEIR1A5Ew~MDEQgQcod255HN5RdPvWvBCK2AtTYBE7Ytp4Ent5FBEOU5c4emo4nW2QGaGcqCSF66t73H2N0NxTocvD7by-6vEKBGVx4FRqRgTONisoRTnwvg__",
-      logoBackground: "bg-orange-500",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 5,
-      name: "Deloitte",
-      logo: "https://s3-alpha-sig.figma.com/img/26a9/3a53/926d61cbf18c17def36384b764b4b0cf?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=fhOyIx2E6lslg1MrCiCcZsWlTqMcSjMJ3~-EnkaHHjbV700vvReadjDjGAUWcXFRSwPJUfXeSqpRIfZgFiq41jpgv1qg9CX19JE1q5bhp2C-m38Ns6BvV~5lbUIQE2MkoZT4HbkGbn-TcOqJaM8WpcDSA83E1wdOg-ikjU6Zk2KyNhZ2wPOLeDSdKnDFK9ap-bM7PGCrXP0QmRnFRbbWNoY0Y0Q6Ua8D0wiDXR4D4007rbA2Ud~-CaX2Tun3ntqWcMCDCZrIRrLQqcD8Dp~NlJkTlYt9hUA9wG9eZ5g5AZuGZmEhy12RZtxMw~LhWyAyP76QPXnSKm52b~S3c4PasA__",
-      logoBackground: "bg-black",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 6,
-      name: "Life Planner Inc.",
-      logo: "https://s3-alpha-sig.figma.com/img/f065/d635/7b4c9d42acc4e1793d19e8f503259f3f?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=U75ZXRJyKN0yRHGyM4f~zF9HkagsU46radwUCqIbGoEuc1QB5CCrEzmQ50HEzkLw08aapFcs5jJ7GPrELvgI9a~D8nnOiABtRGntFcaoxWpB~ntDnk~DRjzB0kE6paqbX7sS03kIvqF-0cyTfpAe5381Qw4LyYMtvEHZScng2S6r-DbDfokzTNeT9SpFiJmMycZO54B~QBU3W3GyftJT7OTz9dLE5S9JcAgymLTfyflFz-ASBv~tstTrUusw39TqCvILgjcrnHQ5cQDTBV7VlCBYq7AfSLEDaZKS4HILkIbFzxv2sN7m5sNhgWQ4ztM6R9zv7IXPB8Eo2LkT1JPobQ__",
-      logoBackground: "bg-pink-500",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 7,
-      name: "Hop's Bakery",
-      logo: "https://s3-alpha-sig.figma.com/img/d3a5/92fa/910daf59226b7dc72d3256ae806bb9a0?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=H31~qoUjyEWlRaGZlONcbmslv-1gm-xi6ucbcEw~~euBZuTR~UmJCrDRH2PaV7F3W3ha~UjdcXnOq~fmLWYkduWq0qQ0SfeWNJzGdAkYKlhfaDgTvDIu1u4qPusaemHPo4wiCzil8spnkB3ZTwNoWEGI-ljG8JthW9zu32zU139bPeLTPQZ34WP~RKn-jBDiPhT-VcdNGs3sKIKAPtHbXkfDf298vCEPLFdVgsHDjNdHnKd0JLwML-sgjysVM-OD4-d-GyKPd228gyqFNJx5bFrnZa9GbSXI7tJUzK~MbVHQdG4xDPw~xsBl1iKxGoXw2v7fVWWXXsCv44v2ZqPkzw__",
-      logoBackground: "bg-teal-500",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 8,
-      name: "Manaflow",
-      logo: "https://s3-alpha-sig.figma.com/img/d7f8/22b6/a7b41a5661bb413219ff939af1b3080b?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=XmFx226EEYmqLvjD4PUJuhEEXvgl9KjTcv26MlqpsuLgthWKm53MHvqK8dRoajKwwGTJ8tNoTzn-6DgYf4OMKQhdEXF5oN4vYN7z3L3tQlE2LJYRHOIOHFAyoN-t~BPouW6UeNWcJgShXtZyyi4MYKlPSeJF8wPcEUwNYINIwGfBTFYNcjEMLaeayu0BR-yiTpO1Hjl18T8xYhK7CPXNWJqBK1GPyKN0HWxTQn55-GSau9NxYjvc1hoaax9gg3rxR6Vi3OF01-QSXdt0rEBDjXzks9gB7bKa7AN86Q2u4Iah8GXakVcnteV4vqFnCJWhgjxono1ck~OUSSKDglYqbg__",
-      logoBackground: "bg-yellow-500",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 9,
-      name: "Volvo Inc.",
-      logo: "https://s3-alpha-sig.figma.com/img/8c51/4065/2b9ef4d97e29fed246db94dce3a10bae?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=aoR3-ZepYLStw5s2sK5ImbmolWCkLul-r3WNi6qHWsUlGSv4u9IetxLmKEBAVJ0L4duUtUAEo5X~Ml7fT4dS9lAmm1MsgsIs-uBYLnxupyclXlMdsoomDgufX~U3qDQV1VilGTYbdeqSS32mgZ7M~On9y96GvyVHJ6~KfXN3B2j0Y03oYjzh-7IjNRaylEbKEWLkpZhLKVD31cLRYh8h8JEQdFGtNRi3qYQUfNYTYWFc0EkEWxB8d9S6YPMdrQTzOZcE3ourZwseqToJDlmLewbWXOlYb49MFQd49kiXUBKjFtg9RzumnIvdjxJ6uw2Ca8SjR8W3ZrRBZRK6Fassyw__",
-      logoBackground: "bg-gray-200",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 10,
-      name: "Epidemic Sounds",
-      logo: "https://s3-alpha-sig.figma.com/img/32e8/f97f/3e08f0d9af04efd8aca9339225a039fe?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=AYW2OQkevtzFybikPVCb6Pyd~GwPk~8On3A-qZtd5Pv~zx-whUg~7k1RU2ltyMS4cwh27sv~E-k1Pl-A2UaPWbtw4w1~qQFXLtNDHl3jyGP0C0d9ADA6PYqYSpb9z~FLFws~~WJ8IsNfAvOHb8eZe5MZLGpUKVFBiR294yFRWE6NCGhek34Jh2BYfpRIOdk420KbsVY6BUMvFVQzFoHJi6bGiIN8eDrsYxIft-XdaUFonv03E-L2d5lK7x3nZy8hbjSf~7vBfrdZD3L6ancFbKJIc85~aK0WX85ozOgbakRa4P2J-oH69z9yZZYK4q2JELUvYroEC5txM-0tA3uKgg__",
-      logoBackground: "bg-black",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 11,
-      name: "Future Designers",
-      logo: "https://s3-alpha-sig.figma.com/img/d3a5/92fa/910daf59226b7dc72d3256ae806bb9a0?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=H31~qoUjyEWlRaGZlONcbmslv-1gm-xi6ucbcEw~~euBZuTR~UmJCrDRH2PaV7F3W3ha~UjdcXnOq~fmLWYkduWq0qQ0SfeWNJzGdAkYKlhfaDgTvDIu1u4qPusaemHPo4wiCzil8spnkB3ZTwNoWEGI-ljG8JthW9zu32zU139bPeLTPQZ34WP~RKn-jBDiPhT-VcdNGs3sKIKAPtHbXkfDf298vCEPLFdVgsHDjNdHnKd0JLwML-sgjysVM-OD4-d-GyKPd228gyqFNJx5bFrnZa9GbSXI7tJUzK~MbVHQdG4xDPw~xsBl1iKxGoXw2v7fVWWXXsCv44v2ZqPkzw__",
-      logoBackground: "bg-black",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-  ]
 
   // const people = [
   //   {
@@ -435,6 +248,185 @@ export default function CompaignTarget() {
   //   },
   // ]
 
+  // Fetch and populate steps when campaign sequence is available
+  useEffect(() => {
+    if (campaignSequence?.sequence?.Emails) {
+      const emailSteps = campaignSequence.sequence.Emails.map((email, index, arr) => {
+        const isFollowUp = email.Subject === "" && index > 0; // No subject and not first email
+        return {
+          id: index + 1,
+          value: isFollowUp ? `Follow-up to "${arr[index - 1]?.Name || 'Previous Email'}"` : email.Name,
+          subject: email.Subject,
+          body: email.Body,
+          delay: email.Delay
+        };
+      });
+
+      setSteps(emailSteps);
+      setSelectStep(emailSteps[0]?.id);
+      setSubject(emailSteps[0]?.subject);
+      setContent(emailSteps[0]?.body);
+    }
+  }, [campaignSequence]);
+
+  // Update step data when subject/content changes
+  useEffect(() => {
+    if (selectStep !== null) {
+      setSteps(prevSteps => 
+        prevSteps.map(step =>
+          step.id === selectStep ? { ...step, subject, body: content } : step
+        )
+      );
+    }
+  }, [subject, content, selectStep]);
+
+  const addSeqStep = () => {
+    if (steps.length < 3) {
+      setSteps([...steps, { id: steps.length + 1, value: "", subject: "", body: "" }]);
+    }
+  };
+
+  const deleteSeqStep = (id) => {
+    setSteps(steps.filter(step => step.id !== id));
+    if (selectStep === id) {
+      setSelectStep(null);
+    }
+  };
+
+  const handleEmailSubjectChange = (id, subject) => {
+    setSteps(prevSteps => 
+      prevSteps.map(step => 
+        step.id === id ? { ...step, subject } : step
+      )
+    );
+
+    if (id === selectStep) {
+      setSubject(subject); // Also update subject displayed above editor
+    }
+  };
+  
+
+  const handleSelectSeqStep = (id) => {
+    const selectedStep = steps.find(step => step.id === id);
+    if (selectedStep) {
+      setSelectStep(id);
+      setSubject(selectedStep.subject);
+      setContent(selectedStep.body);
+    }
+  };
+  
+  const handleWriteEmailWithAI = () => {
+    const emailIndex = selectStep - 1;
+  
+    const emailObject = {
+      Emails: campaignSequence.sequence.Emails.map((email) => ({
+        Name: email.Name,
+        Subject: email.Subject,
+        Body: email.Body,
+      })),
+      EmailIndex: emailIndex,
+    };
+  
+    console.log("Generated Object to Send:", emailObject);
+  
+    // Use the mutation hook to generate the email with AI
+    generateEmailWithAI(
+      { campaignId, emailData: emailObject },
+      {
+        onSuccess: (response) => {
+          console.log("AI Email generated successfully:", response);
+    
+          if (response?.content) {
+            const { Subject, Body } = response.content;
+    
+            setSteps(prevSteps =>
+              prevSteps.map((step, idx) =>
+                idx === emailIndex
+                  ? {
+                      ...step,
+                      subject: Subject ?? step.subject,
+                      body: Body ?? step.body,
+                    }
+                  : step
+              )
+            );
+    
+            if (selectStep - 1 === emailIndex) {
+              if (Subject) setSubject(Subject);
+              if (Body) setContent(Body);
+            }
+          }
+        },
+      }
+    );
+  };
+
+  const handleWriteFullSequenceWithAI = () => {
+    const sequenceData = {
+      Emails: steps.map(step => ({
+        Name: step.value || "",
+        Subject: step.subject || "",
+        Body: step.body || "",
+      })),
+    };
+  
+    console.log("Generated Sequence Object to Send:", sequenceData);
+  
+    generateSequenceWithAI(
+      { campaignId, sequenceData },
+      {
+        onSuccess: (response) => {
+          console.log("AI Sequence generated successfully:", response);
+  
+          if (response?.content?.Emails?.length) {
+            const updatedSteps = response.content.map((email, index, arr) => {
+              const isFollowUp = !email.Subject && index > 0;
+              return {
+                id: index + 1,
+                value: isFollowUp ? `Follow-up to "${arr[index - 1]?.Name || 'Previous Email'}"` : email.Name,
+                subject: email.Subject,
+                body: email.Body,
+                delay: email.Delay
+              };
+            });
+  
+            setSteps(updatedSteps);
+  
+            if (updatedSteps.length > 0) {
+              setSelectStep(updatedSteps[0].id);
+              setSubject(updatedSteps[0].subject);
+              setContent(updatedSteps[0].body);
+            }
+          }
+        },
+      }
+    );
+  };
+  
+  const handleSaveSequence = () => {
+    const sequenceData = {
+      Emails: steps.map(step => ({
+        Name: step.value || "",
+        Subject: step.subject || "",
+        Body: step.body || "",
+        Delay: step.delay || 0, 
+      })),
+    };
+
+    console.log("Saving Sequence Object:", sequenceData);
+
+    updateCampaignSequenceMutation(
+      { campaignId, sequenceData },
+      {
+        onSuccess: (response) => {
+          console.log("Campaign sequence updated!", response);
+          toast.success("Sequence saved successfully!");
+        },
+      }
+    );
+  };
+
+
   const box = [
     { amount: '214', icon: <Zap size={24} className="text-blue-500" />, text: "Sequence started", bg: "bg-blue-100" },
     { amount: '45%', icon: <Eye size={24} className="text-purple-500" />, text: "Open rate", bg: "bg-purple-100" },
@@ -476,9 +468,12 @@ export default function CompaignTarget() {
           </nav>
           <div className="flex gap-4">
 
-            {activeTab !== "People"  && activeTab !== "Options" && <button className="bg-gradient-to-br from-green-400 to-orange-500 shrink-0 text-white text-[14px] font-semibold border border-gray-400 flex gap-1 items-center rounded-full px-3 cursor-pointer">
+            {activeTab !== "People" && activeTab !== "Options" && 
+              <button onClick={handleWriteFullSequenceWithAI} className="bg-gradient-to-br from-green-400 to-orange-500 shrink-0 text-white text-[14px] font-semibold border border-gray-400 flex gap-1 items-center rounded-full px-3 cursor-pointer">
                 <p>AI Sequence</p>
-            </button>}
+              </button>
+            }
+
 
             <div className="border border-gray-300 flex gap-1 items-center rounded-full px-2.5 py-1.5">
               <Pause size={20} className="text-gray-400" />
@@ -798,7 +793,114 @@ export default function CompaignTarget() {
 
           {activeTab === "Sequence" && (
             <div className="col-span-full w-full overflow-x-auto">
-              <EmailTemplateBuilder />
+              {/* <EmailTemplateBuilder campaignId={campaignId}/> */}
+              <div className="flex min-h-screen bg-white">
+                {/* Sidebar */}
+                <div className="w-80 p-4 flex flex-col gap-4">
+                  {steps.map((step) => (
+                    <div
+                      key={step.id}
+                      onClick={() => handleSelectSeqStep(step.id)}
+                      className={`p-4 border rounded-lg cursor-pointer 
+                        ${selectStep === step.id ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-white'}`}
+                    >
+                      <div className="flex justify-between items-center my-2">
+                        <p className="font-semibold">{step.value}</p>
+                        <button
+                          onClick={() => deleteSeqStep(step.id)}
+                          className="text-red-500 ml-2 cursor-pointer"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                      <hr className="my-2 text-gray-300" />
+                      <input
+                        type="text"
+                        value={step.subject}
+                        onChange={(e) => handleEmailSubjectChange(step.id, e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        placeholder={`Step ${step.id}`}
+                      />
+                    </div>
+                  ))}
+
+                  <button
+                    onClick={addSeqStep}
+                    disabled={steps.length >= 3}
+                    className="w-full py-2 border border-gray-300 rounded-full flex items-center justify-center gap-2 text-gray-500 hover:bg-gray-100 transition-colors border-dashed"
+                  >
+                    <Plus size={16} />
+                    <span className="cursor-pointer">Add step</span>
+                  </button>
+                </div>
+
+                {/* Main */}
+                <div className="flex-1 border-l border-gray-200 p-4 overflow-y-auto">
+                  <div className="max-w-4xl mx-auto">
+                    {/* Subject and Action Buttons */}
+                    <div className="flex justify-between items-center mb-6">
+                      <div className="text-gray-700 text-sm">
+                        <span className="font-medium">Subject: </span>
+                        {subject || "No Subject"}
+                      </div>
+                      <div className="flex gap-2">
+                        <button className="px-3 py-2 border border-teal-500 text-teal-500 hover:bg-teal-50 text-sm rounded flex items-center gap-1">
+                          <Eye size={16} />
+                          <span>Preview</span>
+                        </button>
+                        <button className="p-2 border border-gray-300 text-gray-500 rounded hover:bg-gray-100">
+                          <Share2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* TinyMCE Editor */}
+                    <div className="mb-6 relative">
+                      <Editor
+                        apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
+                        value={content}
+                        onEditorChange={(newContent) => setContent(newContent)}
+                        init={{
+                          height: 400,
+                          menubar: false,
+                          plugins: [
+                            "advlist autolink lists link image charmap print preview anchor",
+                            "searchreplace visualblocks code fullscreen",
+                            "insertdatetime media table paste code help wordcount",
+                          ],
+                          toolbar:
+                            "undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+                          statusbar: false,
+                          branding: false,
+                          inline: false,
+                        }}
+                      />
+
+                      {/* Write with AI Button */}
+                      <div className="bg-gray-100 bottom-8 right-8 absolute mr-2 mb-2 rounded-full z-10">
+                        <button
+                          onClick={handleWriteEmailWithAI}
+                          className="cursor-pointer transform px-6 py-2 rounded-full font-semibold"
+                          style={{
+                            color: 'transparent',
+                            background: 'linear-gradient(90deg, #FB8805 0%, #15A395 100%)',
+                            WebkitBackgroundClip: 'text',
+                          }}
+                        >
+                          Write with AI
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="mt-6">
+                      <button onClick={handleSaveSequence} className="bg-teal-600 hover:bg-teal-600 text-white px-6 py-1.5 rounded-full text-[15px]">
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           )}
           {activeTab === "Shedule" && (

@@ -14,11 +14,11 @@ export const updateCampaignSequence = (campaignId, data) =>
 export const sendCampaignMail = (campaignId, data) =>
   axiosInstance.put(`/campaign/SendCampaignMail/${campaignId}/sequence`, data).then(res => res.data);
 
-export const generateAIEmail = (campaignId) =>
-  axiosInstance.get(`/campaign/GenerateAIEmail/${campaignId}/sequence`).then(res => res.data);
+export const generateAIEmail = (campaignId, data) =>
+  axiosInstance.post(`/campaign/GenerateAIEmail/${campaignId}/sequence`, data).then(res => res.data);
 
-export const generateAISequence = (campaignId) =>
-  axiosInstance.get(`/campaign/GenerateAISequence/${campaignId}/sequence`).then(res => res.data);
+export const generateAISequence = (campaignId, data) =>
+  axiosInstance.post(`/campaign/GenerateAISequence/${campaignId}/sequence`, data).then(res => res.data);
 
 // -------------------- Schedule --------------------
 export const getCampaignSchedule = (campaignId) =>
