@@ -378,7 +378,7 @@ export default function CompaignTarget() {
         onSuccess: (response) => {
           console.log("AI Sequence generated successfully:", response);
   
-          if (response?.content?.Emails?.length) {
+          if (response?.content?.length) {
             const updatedSteps = response.content.map((email, index, arr) => {
               const isFollowUp = !email.Subject && index > 0;
               return {
@@ -420,7 +420,6 @@ export default function CompaignTarget() {
       {
         onSuccess: (response) => {
           console.log("Campaign sequence updated!", response);
-          toast.success("Sequence saved successfully!");
         },
       }
     );
