@@ -144,7 +144,8 @@ export default function CompaignTarget() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isOpen2, setIsOpen2] = useState(false)
-  const { getCampaignLeadsQuery, getCampaignSequenceQuery, generateEmailWithAI, generateSequenceWithAI, updateCampaignSequenceMutation } = useCampaignQuery();
+  const { getCampaignLeadsQuery, getCampaignSequenceQuery, generateEmailWithAI, generateSequenceWithAI, updateCampaignSequenceMutation, generateAIScheduleQuery } = useCampaignQuery();
+  const [scheduleMadeByAI, setScheduleMadeByAI] = useState(null);
 
   const [selectStep, setSelectStep] = useState(null);
   const [steps, setSteps] = useState([]);
@@ -402,6 +403,33 @@ export default function CompaignTarget() {
       }
     );
   };
+
+  const handleWriteScheduleWithAI = () => {
+    
+  
+    const emailObject = {
+      Emails: campaignSequence.sequence.Emails.map((email) => ({
+        Name: email.Name,
+        Subject: email.Subject,
+        Body: email.Body,
+        Delay: email.Delay
+      })),
+      Leads: leads
+    };
+  
+    console.log("Generated Object to Send:", emailObject);
+  
+    // Use the mutation hook to generate the email with AI
+    generateAIScheduleQuery.mutate(
+      { campaignId, data: emailObject },
+      {
+        onSuccess: (response) => {
+          console.log("AI Schedule generated successfully:", response);
+          setScheduleMadeByAI(response.content);
+        },
+      }
+    );
+  };
   
   const handleSaveSequence = () => {
     const sequenceData = {
@@ -451,7 +479,7 @@ export default function CompaignTarget() {
         {/* Navigation Tabs */}
         <div className="border-b border-gray-200 mb-6 flex justify-between items-center">
           <nav className="flex -mb-px">
-            {["Analytics", "People", "Sequence", "Shedule", "Options"].map((tab) => (
+            {["Analytics", "People", "Sequence", "Schedule", "Options"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -467,9 +495,15 @@ export default function CompaignTarget() {
           </nav>
           <div className="flex gap-4">
 
-            {activeTab !== "People" && activeTab !== "Options" && 
+            {activeTab === "Sequence" && 
               <button onClick={handleWriteFullSequenceWithAI} className="bg-gradient-to-br from-green-400 to-orange-500 shrink-0 text-white text-[14px] font-semibold border border-gray-400 flex gap-1 items-center rounded-full px-3 cursor-pointer">
                 <p>AI Sequence</p>
+              </button>
+            }
+
+            {activeTab === "Schedule" && 
+              <button onClick={handleWriteScheduleWithAI} className="bg-gradient-to-br from-green-400 to-orange-500 shrink-0 text-white text-[14px] font-semibold border border-gray-400 flex gap-1 items-center rounded-full px-3 cursor-pointer">
+                <p>AI Schedule</p>
               </button>
             }
 
@@ -902,10 +936,11 @@ export default function CompaignTarget() {
 
             </div>
           )}
-          {activeTab === "Shedule" && (
+          {activeTab === "Schedule" && (
             <div className="col-span-full w-full overflow-x-auto">
               <main className="min-h-screen bg-gray-50 py-8">
-                  <ScheduleForm campaignId={campaignId} />
+                  {/* <ScheduleForm campaignId={campaignId} /> */}
+                  <ScheduleForm campaignId={campaignId} newSchedulesData={scheduleMadeByAI} />
               </main>
             </div>
           )}

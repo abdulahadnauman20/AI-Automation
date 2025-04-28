@@ -719,7 +719,7 @@ import { useState, useEffect } from "react";
 import { useCampaignQuery } from "../reactQuery/hooks/useCampaignQuery";
 import { ChevronDown, Plus, Calendar, X } from "lucide-react";
 
-function ScheduleForm({ campaignId }) {
+function ScheduleForm({ campaignId, newSchedulesData  }) {
   const [schedules, setSchedules] = useState([]);
   const [activeSchedule, setActiveSchedule] = useState(null);
   const [scheduleName, setScheduleName] = useState("");
@@ -763,6 +763,31 @@ function ScheduleForm({ campaignId }) {
       setScheduleName(scheduleData[0]?.name);
     }
   }, [campaignSchedule]);
+
+  useEffect(() => {
+    console.log("Schedules by AI: ", newSchedulesData);
+    setSchedules(null);
+    if (newSchedulesData && newSchedulesData.length > 0) {
+      console.log("Received new schedules from parent:", newSchedulesData);
+  
+      const formattedSchedules = newSchedulesData.map((schedule, index) => ({
+        id: index + 1,
+        name: schedule.Name,
+        fromTime: schedule.TimingFrom,
+        toTime: schedule.TimingTo,
+        timezone: schedule.Timezone,
+        days: schedule.Days.reduce((acc, day) => {
+          acc[day] = true;
+          return acc;
+        }, {}),
+      }));
+  
+      setSchedules(formattedSchedules);
+      setActiveSchedule(formattedSchedules[0]?.id);
+      setScheduleName(formattedSchedules[0]?.name);
+    }
+  }, [newSchedulesData]);
+  
   
   const handleDayToggle = (day) => {
     setSelectedDays((prev) => ({
