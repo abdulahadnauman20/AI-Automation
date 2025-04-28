@@ -820,7 +820,7 @@ function ScheduleForm({ campaignId }) {
 
     console.log("Saving schedule Object:", scheduleData);
 
-    updateScheduleMutationQuery(
+    updateScheduleMutationQuery.mutate(
       { campaignId, scheduleData },
       {
         onSuccess: (response) => {

@@ -330,7 +330,7 @@ export default function CompaignTarget() {
     console.log("Generated Object to Send:", emailObject);
   
     // Use the mutation hook to generate the email with AI
-    generateEmailWithAI(
+    generateEmailWithAI.mutate(
       { campaignId, emailData: emailObject },
       {
         onSuccess: (response) => {
@@ -372,7 +372,7 @@ export default function CompaignTarget() {
   
     console.log("Generated Sequence Object to Send:", sequenceData);
   
-    generateSequenceWithAI(
+    generateSequenceWithAI.mutate(
       { campaignId, sequenceData },
       {
         onSuccess: (response) => {
@@ -415,7 +415,7 @@ export default function CompaignTarget() {
 
     console.log("Saving Sequence Object:", sequenceData);
 
-    updateCampaignSequenceMutation(
+    updateCampaignSequenceMutation.mutate(
       { campaignId, sequenceData },
       {
         onSuccess: (response) => {
