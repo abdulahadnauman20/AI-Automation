@@ -4,37 +4,9 @@ import { Link } from 'react-router-dom';
 import { useCampaignQuery } from "../reactQuery/hooks/useCampaignQuery";
 
 function Campaigns() {
-  // const [campaigns, setCampaigns] = useState([
-  //   {
-  //     id: 1,
-  //     name: 'SMB Target',
-  //     status: 'Error',
-  //     progress: 12,
-  //     sent: 1500,
-  //     clicks: 58,
-  //     replies: 20,
-  //     replyRate: 2,
-  //     opportunities: 5
-  //   },
-  //   {
-  //     id: 2,
-  //     name: 'My Campaign',
-  //     status: 'Active',
-  //     progress: 72,
-  //     sent: 89,
-  //     clicks: 0,
-  //     replies: 0,
-  //     replyRate: 0,
-  //     opportunities: 0
-  //   }
-  // ]);
 
   const {
     campaignsObject,
-    // isCampaignsLoading,
-    // createCampaignMutation,
-    // deleteCampaignMutation,
-    // updateCampaignMutation,
   } = useCampaignQuery();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All statuses');
@@ -114,25 +86,55 @@ function Campaigns() {
     e.stopPropagation();
   };
 
-  const handleCreateCampaign = () => {
-    if (newCampaignName.trim()) {
-      const newCampaign = {
-        id: campaigns.length + 1,
-        name: newCampaignName.trim(),
-        status: 'Draft',
-        progress: 0,
-        sent: 0,
-        clicks: 0,
-        replies: 0,
-        replyRate: 0,
-        opportunities: 0
-      };
+  // const handleCreateCampaign = () => {
+  //   if (newCampaignName.trim()) {
+  //     const newCampaign = {
+  //       id: campaigns.length + 1,
+  //       name: newCampaignName.trim(),
+  //       status: 'Draft',
+  //       progress: 0,
+  //       sent: 0,
+  //       clicks: 0,
+  //       replies: 0,
+  //       replyRate: 0,
+  //       opportunities: 0
+  //     };
       
-      setCampaigns([...campaigns, newCampaign]);
-      setNewCampaignName('');
-      setShowNewCampaignModal(false);
+  //     setCampaigns([...campaigns, newCampaign]);
+  //     setNewCampaignName('');
+  //     setShowNewCampaignModal(false);
+  //   }
+  // };
+
+  const handleCreateCampaign = async () => {
+    if (newCampaignName.trim()) {
+      try {
+        const response = await fetch('https://quick-pipe-backend.vercel.app/campaign/CreateCampaign', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ Name: newCampaignName.trim() }),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to create campaign');
+        }
+  
+        const createdCampaign = await response.json();
+  
+        // Assuming the API returns the created campaign object
+        setCampaigns([...campaigns, createdCampaign]);
+        setNewCampaignName('');
+        setShowNewCampaignModal(false);
+      } catch (error) {
+        console.error('Error creating campaign:', error);
+        // Optionally: show an error message to the user
+      }
     }
   };
+  
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Main content */}
@@ -228,7 +230,7 @@ function Campaigns() {
                 </div>
               )}
             </div>
-            <button onClick={() => setShowNewCampaignModal(true)} type="button" className="text-white flex justify-center bg-teal-600 hover:bg-teal-600 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2">
+            <button onClick={() => setShowNewCampaignModal(true)} type="button" className="cursor-pointer text-white flex justify-center bg-teal-600 hover:bg-teal-600 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2">
               <Plus size={18} className="mr-2" />
               Add new
             </button>
