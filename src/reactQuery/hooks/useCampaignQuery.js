@@ -17,7 +17,7 @@ import {
   deleteCampaign,
   activePauseCampaign,
   runCampaign,
-  // getAllCompaign
+  getAllTemplate
 } from "../services/campaignService";
 
 export const useCampaignQuery = () => {
@@ -173,10 +173,10 @@ export const useCampaignQuery = () => {
   });
 
 
-  const getAllCampaignsQuery = () => {
+  const getAllTemaplteQuery = () => {
     return useQuery({
-      queryKey: ["allCampaigns"],
-      queryFn: getAllCampaigns,
+      queryKey: ["allTemplate"],
+      queryFn: getAllTemplate,
       onSuccess: (data) => {
         console.log("All campaigns fetched:", data);
       },
@@ -232,7 +232,7 @@ export const useCampaignQuery = () => {
     getCampaignScheduleQuery,
     updateScheduleMutationQuery,
     generateAIScheduleQuery,
-    getAllCampaignsQuery
+    getAllTemaplteQuery,
 
   };
 };

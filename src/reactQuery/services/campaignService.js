@@ -30,13 +30,13 @@ export const updateCampaignSchedule = (campaignId, data) =>
 export const generateAISchedule = (campaignId, data) =>
   axiosInstance.post(`/campaign/GenerateAISchedule/${campaignId}/schedule`, data).then(res => res.data);
 
-// export const getAllCompaign = () =>
-//   axiosInstance.get('/campaign/GetAllCampaigns').then(res => res.data);
+export const getAllTemplate = () =>
+  axiosInstance.get('/campaign/GetAllTemplates/sequence').then(res => res.data); 
 
 
 // -------------------- Campaign CRUD --------------------
 export const getAllCampaigns = () =>
-  axiosInstance.get("/campaign/GetAllCampaigns").then(res => res.data);
+  axiosInstance.get("/campaign/getAllCampaigns").then(res => res.data);
 
 export const createCampaign = (data) =>
   axiosInstance.post("/campaign/CreateCampaign", data).then(res => res.data);
