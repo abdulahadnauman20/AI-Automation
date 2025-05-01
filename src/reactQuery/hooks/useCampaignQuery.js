@@ -34,12 +34,16 @@ export const useCampaignQuery = () => {
   });
 
   const createCampaignMutation = useMutation({
-    mutationFn: createCampaign,
-    onSuccess: () => {
+    mutationFn: (data) => createCampaign(data),
+    onSuccess: (data) => {
+      console.log("Create Campaign Success:", data); // Check what data is returned
       toast.success("Campaign created");
       queryClient.invalidateQueries(["campaigns"]);
     },
-    onError: () => toast.error("Failed to create campaign"),
+    onError: (error) => {
+      console.log("Create Campaign Error:", error); // Check if the error is expected
+      toast.error("Failed to create campaign");
+    },
   });
 
   const updateCampaignMutation = useMutation({
@@ -52,7 +56,7 @@ export const useCampaignQuery = () => {
   });  
 
   const deleteCampaignMutation = useMutation({
-    mutationFn: deleteCampaign,
+    mutationFn: (data) => deleteCampaign(data),
     onSuccess: () => {
       toast.success("Campaign deleted");
       queryClient.invalidateQueries(["campaigns"]);
@@ -62,13 +66,19 @@ export const useCampaignQuery = () => {
 
   const activePauseMutation = useMutation({
     mutationFn: activePauseCampaign,
-    onSuccess: () => toast.success("Campaign status updated"),
+    onSuccess: () => {
+      toast.success("Campaign status updated");
+      queryClient.invalidateQueries(["campaigns"]);
+    },
     onError: () => toast.error("Failed to update campaign status"),
   });
 
   const runCampaignMutation = useMutation({
     mutationFn: runCampaign,
-    onSuccess: () => toast.success("Campaign started"),
+    onSuccess: () => {
+      toast.success("Campaign status updated");
+      queryClient.invalidateQueries(["campaigns"]);
+    },
     onError: () => toast.error("Failed to start campaign"),
   });
 

@@ -1,186 +1,3 @@
-// const people = [
-//   {
-//     email: "xmitchell@hotmail.com",
-//     contact: "Lynn Tanner",
-//     provider: "Microsoft",
-//     status: "Verified",
-//     company: "Tuxedo Suits Inc.",
-//     website: "https://tuxedosuits.com",
-//     title: "Design manager",
-//   },
-//   {
-//     email: "tbaker@outlook.com",
-//     contact: "Capt. Trunk",
-//     provider: "Google",
-//     status: "Verified",
-//     company: "Tuxedo Suits Inc.",
-//     website: "https://tuxedosuits.com",
-//     title: "Design manager",
-//   },
-//   {
-//     email: "mgonzalez@aol.com",
-//     contact: "Thomas Anum",
-//     provider: "Google",
-//     status: "Verified",
-//     company: "Tuxedo Suits Inc.",
-//     website: "https://tuxedosuits.com",
-//     title: "Design manager",
-//   },
-//   {
-//     email: "xmitchell@hotmail.com",
-//     contact: "Lynn Tanner",
-//     provider: "Microsoft",
-//     status: "Verified",
-//     company: "Tuxedo Suits Inc.",
-//     website: "https://tuxedosuits.com",
-//     title: "Design manager",
-//   },
-//   {
-//     email: "tbaker@outlook.com",
-//     contact: "Capt. Trunk",
-//     provider: "Google",
-//     status: "Verified",
-//     company: "Tuxedo Suits Inc.",
-//     website: "https://tuxedosuits.com",
-//     title: "Design manager",
-//   },
-//   {
-//     email: "mgonzalez@aol.com",
-//     contact: "Thomas Anum",
-//     provider: "Google",
-//     status: "Verified",
-//     company: "Tuxedo Suits Inc.",
-//     website: "https://tuxedosuits.com",
-//     title: "Design manager",
-//   },
-//   {
-//     email: "yrodriguez@aol.com",
-//     contact: "B.A. Baracus",
-//     provider: "Microsoft",
-//     status: "Verified",
-//     company: "Tuxedo Suits Inc.",
-//     website: "https://tuxedosuits.com",
-//     title: "Design manager",
-//   },
-//   {
-  //     email: "vflores@gmail.com",
-//     contact: "Devon Miles",
-//     provider: "Google",
-//     status: "Verified",
-//     company: "Tuxedo Suits Inc.",
-//     website: "https://tuxedosuits.com",
-//     title: "Design manager",
-//   },
-//   {
-//     email: "yrodriguez@aol.com",
-//     contact: "B.A. Baracus",
-//     provider: "Microsoft",
-//     status: "Verified",
-//     company: "Tuxedo Suits Inc.",
-//     website: "https://tuxedosuits.com",
-//     title: "Design manager",
-//   },
-// ]
-
-// const opportunities = [
-  //   {
-    //     id: 1,
-    //     opportunity: "BetaTech",
-    //     contact: "Michael Regan",
-    //     amount: "-",
-    //     owner: "Beeto Leru",
-    //     source: "Phone",
-    //     expectedClosing: "12/2/2025",
-    //     actualClosing: "12/4/2025",
-    //     lastInteraction: "12/2/2025 9:23 AM",
-    //     stage: "Discovery",
-    //   },
-    //   {
-      //     id: 2,
-      //     opportunity: "Greenfield",
-      //     contact: "Jordyn Botosh",
-      //     amount: "$12,839",
-      //     owner: "Beeto Leru",
-      //     source: "Email",
-      //     expectedClosing: "12/2/2025",
-      //     actualClosing: "12/4/2025",
-//     lastInteraction: "12/2/2025 9:23 AM",
-//     stage: "Discovery",
-//   },
-//   {
-  //     id: 3,
-  //     opportunity: "Acme Corp.",
-  //     contact: "Emerson Saris",
-  //     amount: "-",
-//     owner: "Beeto Leru",
-//     source: "Phone",
-//     expectedClosing: "12/2/2025",
-//     actualClosing: "12/4/2025",
-//     lastInteraction: "12/2/2025 9:23 AM",
-//     stage: "Proposal",
-//   },
-//   {
-  //     id: 4,
-  //     opportunity: "Vertex Health",
-  //     contact: "Emerson Franci",
-  //     amount: "-",
-  //     owner: "Beeto Leru",
-  //     source: "Phone",
-  //     expectedClosing: "12/2/2025",
-  //     actualClosing: "12/4/2025",
-  //     lastInteraction: "12/2/2025 9:23 AM",
-  //     stage: "Evaluation",
-  //   },
-  //   {
-    //     id: 5,
-    //     opportunity: "EcoBuild",
-    //     contact: "Aspen Vaccaro",
-    //     amount: "$200",
-    //     owner: "Beeto Leru",
-    //     source: "Email",
-    //     expectedClosing: "12/2/2025",
-    //     actualClosing: "12/4/2025",
-    //     lastInteraction: "12/2/2025 9:23 AM",
-    //     stage: "Evaluation",
-    //   },
-    //   {
-      //     id: 6,
-      //     opportunity: "EcoBuild",
-      //     contact: "Ruben Torff",
-      //     amount: "$12,839",
-      //     owner: "Beeto Leru",
-      //     source: "Phone",
-      //     expectedClosing: "12/2/2025",
-      //     actualClosing: "12/4/2025",
-      //     lastInteraction: "12/2/2025 9:23 AM",
-      //     stage: "Evaluation",
-      //   },
-      //   {
-        //     id: 7,
-        //     opportunity: "OmniTech",
-        //     contact: "Carter Rosser",
-        //     amount: "$12,839",
-        //     owner: "Beeto Leru",
-        //     source: "Email",
-        //     expectedClosing: "12/2/2025",
-        //     actualClosing: "12/4/2025",
-        //     lastInteraction: "12/2/2025 9:23 AM",
-        //     stage: "Evaluation",
-        //   },
-        //   {
-          //     id: 8,
-          //     opportunity: "Zenoth Co.",
-          //     contact: "Lynn Tanner",
-          //     amount: "$12,839",
-          //     owner: "Beeto Leru",
-          //     source: "Email",
-          //     expectedClosing: "12/2/2025",
-          //     actualClosing: "12/4/2025",
-          //     lastInteraction: "12/2/2025 9:23 AM",
-//     stage: "Sales",
-//   },
-// ]
-
 import { useState, useEffect } from "react"
 import { Search, Plus,Pause, Clock,Zap, Eye,Hand,CircleDollarSign,CircleCheckBig,Ellipsis,ArrowDownToLine,Share2,ListFilter,User,PhoneIncoming,FileMinus,MailOpen, X,ChevronDown,} from "lucide-react"
 import { useCampaignQuery } from "../reactQuery/hooks/useCampaignQuery";
@@ -204,6 +21,7 @@ export default function CompaignTarget() {
   const [steps, setSteps] = useState([]);
   const [content, setContent] = useState("");
   const [subject, setSubject] = useState("");
+  const [delay, setDelay] = useState(0);
 
   const { 
     data: leads, // Now directly the array of leads
@@ -280,6 +98,18 @@ const data = [
 
     if (id === selectStep) {
       setSubject(subject); // Also update subject displayed above editor
+    }
+  };
+
+  const handleEmailDelayChange = (id, delay) => {
+    setSteps(prevSteps => 
+      prevSteps.map(step => 
+        step.id === id ? { ...step, delay } : step
+      )
+    );
+
+    if (id === selectStep) {
+      setDelay(delay); // Also update subject displayed above editor
     }
   };
   
@@ -912,6 +742,16 @@ const data = [
                         className="w-full px-3 py-2 rounded-xl border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                         placeholder={`Step ${step.id}`}
                       />
+                      <div className="p-2">
+                        <span>Delay: </span>
+                        <input 
+                          type="number"
+                          value={step.delay}
+                          onChange={(e) => handleEmailDelayChange(step.id, e.target.value)}
+                          className="w-12 pl-1 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        />
+                        <span> days</span>
+                      </div>
                     </div>
                   ))}
 
