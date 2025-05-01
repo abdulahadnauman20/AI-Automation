@@ -1,24 +1,5 @@
-"use client"
-
 import { useState } from "react"
-import {
-  Search,
-  MoreVertical,
-  Plus,
-  MapPin,
-  Globe,
-  ChevronDown,
-  Play,
-  Pause,
-  CircleCheck,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  Sparkles,
-  Phone,
-  Zap,
-  Ellipsis,
-  PhoneOutgoing,
+import {Search,Plus,MapPin,Globe,ChevronDown,Play,Pause,CircleCheck,ChevronLeft,ChevronRight,Clock,Sparkles,Zap,Ellipsis,PhoneOutgoing,SquarePen,ShieldX, Disc,
 } from "lucide-react"
 import { FcGoogle } from "react-icons/fc";
 
@@ -205,14 +186,6 @@ const opportunities = [
 ]
 
 export default function Crm() {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isOpen, setIsOpen] = useState(false)
-  const listItems = [
-    { name: "All Statuses", icon: "⚡" },
-    { name: "Play", icon: <Play size={20} className="text-blue-400" /> },
-    { name: "Paused", icon: <Pause size={20} className="text-orange-400" /> },
-    { name: "Completed", icon: <CircleCheck size={20} className="text-green-400" /> },
-  ]
   const accounts = [
     {
       id: 1,
@@ -325,7 +298,7 @@ export default function Crm() {
       contactAvatars: ["CE", "BM", "HR"],
     },
   ]
-
+  
   const people = [
     {
       email: "xmitchell@hotmail.com",
@@ -410,6 +383,26 @@ export default function Crm() {
     },
   ]
 
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
+  const[showSortDropdown, setShowSortDropdown] = useState(false);
+  const listItems = [
+    { name: "All Statuses", icon: "⚡" },
+    { name: "Active", icon: <Play size={20} className="text-blue-400" /> },
+    { name: "Draft", icon: <SquarePen size={20} className="text-gray-600" /> },
+    { name: "Paused", icon: <Pause size={20} className="text-orange-400" /> },
+    { name: "Error", icon: <ShieldX size={20} className="text-red-600" /> },
+    { name: "Completed", icon: <CircleCheck size={20} className="text-green-400" /> },
+  ]
+
+  const sortOptions = [
+    { value: 'Newest first', label: 'Newest first' },
+    { value: 'Oldest first', label: 'Oldest first' },
+    { value: 'Name A - Z', label: 'Name A - Z' },
+    { value: 'Name Z - A', label: 'Name Z - A' }
+  ];
+
+
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("Accounts")
 
@@ -455,19 +448,19 @@ export default function Crm() {
               <div className="relative inline-block text-left">
                 <button
                   onClick={() => setIsOpen(!isOpen)}  
-                  className="px-4 py-2 border border-gray-300 text-gray-400 rounded-full flex gap-1 items-center"
-                >
-                 <Zap size={18} className="text-gray-400" /> All Statuses <ChevronDown className="text-gray-400" />
+                  className="px-4 py-2 border border-gray-300 text-[15px] text-gray-400 cursor-pointer rounded-full flex gap-1 items-center">
+                 <Zap size={18} className="text-gray-400 " /> All Statuses <ChevronDown className="text-gray-400" />
                 </button>
                 {isOpen && (
-                  <div className="absolute z-10 mt-2 bg-white shadow-md w-44 rounded-lg">
-                    <ul className="py-2 text-sm text-gray-700">
-                      {listItems.map((val, index) => (
-                        <li key={index} className="px-4 py-2 flex gap-2 items-center hover:bg-gray-100">
+                  <div className="absolute z-10 mt-2 bg-white shadow-md w-full rounded-lg">
+                      {listItems.map((val) => (
+                        <>
+                        <button key={val.name} onClick={() => handleStatusChange(val.name)} className="px-4 py-2 w-full flex gap-2 cursor-pointer items-center hover:text-[#15a395] hover:bg-[#defffcf7]">
                           {val.icon} {val.name}
-                        </li>
+                        </button>
+                        <hr className="text-gray-100" />
+                        </>
                       ))}
-                    </ul>
                   </div>
                 )}
               </div>
@@ -475,28 +468,50 @@ export default function Crm() {
               <div className="relative inline-block text-left">
                 <button
                   type="button"
-                  className="px-4 py-2 border border-gray-300 text-gray-600 rounded-full flex gap-1 items-center">
+                  onClick={() => setShowSortDropdown(!showSortDropdown)} 
+                  className="px-4 py-2 border border-gray-300 cursor-pointer text-gray-600 rounded-full flex gap-1 items-center">
                   <span className="text-gray-400"> Oldest first</span>
                   <ChevronDown className="text-gray-400" />
                 </button>
+                {showSortDropdown && (
+                <div 
+                  className="origin-top-right absolute right-0  left-1 mt-2 w-56 rounded-md shadow-lg bg-white ring-opacity-5 focus:outline-none z-10"
+                >
+                  <div className="py-1">
+                    {sortOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        className={`w-full text-left px-4 cursor-pointer py-2 text-sm hover:bg-gray-100 flex items-center ${
+                           'text-gray-700'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               </div>
 
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:ring-teal-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-teal-600 cursor-pointer hover:bg-teal-700 focus:ring-teal-500"
               >
                 <Plus className="mr-2 h-5 w-5" />
                 Add new
               </button>
+
+              {activeTab !== "Meetings" && activeTab !== "Accounts" &&(
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-[rgb(224,140,23)] to-[rgb(84,156,110)] hover:from-[rgb(204,130,20)] hover:to-[rgb(184,120,18)] focus:ring-[rgb(224,140,23)]"
-              >
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-[rgb(224,140,23)] to-[rgb(84,156,110)] hover:from-[rgb(204,130,20)] hover:to-[rgb(184,120,18)] focus:ring-[rgb(224,140,23)]">
                 <PhoneOutgoing className="mr-2 h-5 w-5" />
                 Call with AI
               </button>
+                )
+              }
             </div>
           </div>
         )}
@@ -855,21 +870,22 @@ export default function Crm() {
               </div>
               <table className="w-full table-fixed">
                 <thead>
-                  <tr className="border-b text-sm text-muted-foreground">
+                  <tr className="border-none text-sm text-muted-foreground">
                     <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[250px]">Lead</th>
                     <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">Date</th>
                     <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">Time</th>
                     <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[200px]">
                       Created by
                     </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[120px]">
+                    <th className="whitespace-nowrap px-4 py-3 flex items-center gap-1 text-left font-medium text-gray-400 w-[120px]">
+                      <Disc />
                       Recording
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {meetings.map((meeting) => (
-                    <tr key={meeting.id} className="border-b border-gray-300 text-sm">
+                    <tr key={meeting.id} className="border cursor-pointer group hover:bg-[#dbf2ef]  border-gray-300 text-sm ">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className={`w-8 h-8 rounded-full ${meeting.bgColor} flex items-center justify-center`}>
@@ -879,14 +895,14 @@ export default function Crm() {
                               className="w-8 h-8 rounded-full object-cover"
                             />
                           </div>
-                          <span className="font-medium">{meeting.lead}</span>
+                          <span className="text-gray-600">{meeting.lead}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-gray-600">{meeting.date}</td>
                       <td className="px-4 py-3 text-gray-600">{meeting.time}</td>
                       <td className="px-4 py-3">
                         {meeting.isAI ? (
-                          <div className="inline-flex items-center px-2 py-1 rounded-full bg-green-200 text-green-600">
+                          <div className="inline-flex items-center px-2 py-1 rounded-full text-[#15a395] bg-[#d1eeebf7] ">
                             <Sparkles className="w-4 h-4 mr-1" />
                             <span>{meeting.createdBy}</span>
                           </div>
@@ -895,7 +911,7 @@ export default function Crm() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                       
+                        <Play size={20} className="text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                       </td>
                     </tr>
                   ))}
