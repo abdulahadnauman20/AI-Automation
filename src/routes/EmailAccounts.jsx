@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaEllipsisH, FaFilter, FaChevronDown } from "react-icons/fa";
 import { FaBackward } from "react-icons/fa";
+import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const contacts = [
   {
@@ -65,10 +67,103 @@ const contacts = [
   },
 ];
 
+// OAuth Callback Component
+const OAuthCallback = () => {
+  const [status, setStatus] = useState('Processing...');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleCallback = async () => {
+      try {
+        // Get all URL parameters
+        const params = new URLSearchParams(location.search);
+        const code = params.get('code');
+        const error = params.get('error');
+        const provider = params.get('provider') || 'google'; // Default to google if not specified
+
+        // Get Google-specific parameters if provider is Google
+        let callbackUrl;
+        if (provider === 'google' || 'Google' ) {
+          const scope = params.get('scope');
+          const authuser = params.get('authuser');
+          const prompt = params.get('prompt');
+          callbackUrl = `https://quick-pipe-backend.vercel.app/EmailAccount/google/callback?code=${code}&scope=${scope}&authuser=${authuser}&prompt=${prompt}`;
+        } else {
+          // Microsoft callback only needs the code
+          callbackUrl = `https://quick-pipe-backend.vercel.app/EmailAccount/microsoft/callback?code=${code}`;
+        }
+
+        if (error) {
+          setStatus(`Error: ${error}`);
+          return;
+        }
+
+        if (!code) {
+          setStatus('No authorization code received');
+          return;
+        }
+
+        // Get token from localStorage
+        const tokenData = localStorage.getItem('Token');
+        if (!tokenData) {
+          setStatus('No authentication token found');
+          return;
+        }
+
+        const { token } = JSON.parse(tokenData);
+
+        console.log('Making callback request to:', callbackUrl);
+
+        // Send the request to your backend
+        const response = await axios.get(callbackUrl, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        console.log('Callback response:', response.data);
+
+        if (response.data.success) {
+          setStatus('Successfully connected!');
+          // Close this window and notify the opener
+          window.opener.postMessage({
+            type: 'OAUTH_SUCCESS',
+            data: response.data,
+            provider: provider
+          }, window.opener.origin);
+          setTimeout(() => window.close(), 2000);
+        } else {
+          setStatus('Failed to connect: ' + response.data.message);
+        }
+      } catch (error) {
+        console.error('Callback error:', error);
+        setStatus('Error: ' + (error.response?.data?.message || error.message));
+      }
+    };
+
+    handleCallback();
+  }, [location]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-lg">
+        <h2 className="text-2xl font-bold text-center mb-4">Connecting Your Account</h2>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#15A395] mx-auto mb-4"></div>
+          <p className="text-gray-600">{status}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const EmailAccounts = () => {
   const [selected, setSelected] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [showAccountsPage, setShowAccountsPage] = useState(false);
+  const [authWindow, setAuthWindow] = useState(null);
+  const [error, setError] = useState(null);
 
   const toggleSelect = (id) => {
     setSelected((prev) =>
@@ -85,6 +180,220 @@ const EmailAccounts = () => {
     setSelectAll(!selectAll);
   };
 
+  // Function to validate OAuth URL
+  const validateOAuthUrl = (url) => {
+    try {
+      const urlObj = new URL(url);
+      const params = new URLSearchParams(urlObj.search);
+
+      const missingParams = [];
+      if (!params.get('client_id')) missingParams.push('client_id');
+      if (!params.get('redirect_uri') || params.get('redirect_uri').includes('undefined')) {
+        missingParams.push('redirect_uri');
+      }
+      if (!params.get('scope')) missingParams.push('scope');
+      if (!params.get('response_type')) missingParams.push('response_type');
+
+      if (missingParams.length > 0) {
+        throw new Error(`Missing or invalid parameters: ${missingParams.join(', ')}`);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('URL validation error:', error);
+      return false;
+    }
+  };
+
+  // Function to handle Google OAuth
+  const handleGoogleAuth = async () => {
+    try {
+      setError(null);
+      // Get token from localStorage
+      const tokenData = localStorage.getItem('Token');
+      console.log('Token from localStorage:', tokenData);
+
+      if (!tokenData) {
+        setError('No authentication token found');
+        console.error('No authentication token found');
+        return;
+      }
+
+      const { token } = JSON.parse(tokenData);
+      console.log('Extracted token:', token);
+
+      // Get the Google OAuth URL from your backend
+      console.log('Making request to backend...');
+      const response = await axios.get('https://quick-pipe-backend.vercel.app/EmailAccount/ReadyGmailAccount', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('Full backend response:', response);
+      console.log('Response data:', response.data);
+      console.log('Auth URL from backend:', response.data.url);
+
+      if (response.data.success) {
+        const authUrl = response.data.url;
+
+        // Validate the URL before opening
+        if (!validateOAuthUrl(authUrl)) {
+          setError('Invalid OAuth configuration. Please contact support.');
+          console.error('Invalid OAuth URL:', authUrl);
+          return;
+        }
+
+        console.log('Opening Google auth URL:', authUrl);
+        const width = 500;
+        const height = 600;
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2;
+
+        const authWindow = window.open(
+          authUrl,
+          'Google Auth',
+          `width=${width},height=${height},left=${left},top=${top}`
+        );
+
+        // Listen for the success message from the callback page
+        const handleMessage = (event) => {
+          if (event.data.type === 'OAUTH_SUCCESS') {
+            console.log('OAuth successful:', event.data);
+            // Update your UI or refresh data here
+            authWindow.close();
+          }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        // Add event listener for window close
+        const checkWindow = setInterval(() => {
+          if (authWindow.closed) {
+            console.log('Auth window was closed');
+            clearInterval(checkWindow);
+            window.removeEventListener('message', handleMessage);
+            // You might want to refresh the page or update the UI here
+          }
+        }, 1000);
+
+      } else {
+        setError(response.data.message || 'Failed to get Google auth URL');
+        console.error('Failed to get Google auth URL:', response.data.message);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || 'An error occurred';
+      setError(errorMessage);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        headers: error.response?.headers
+      });
+    }
+  };
+
+  // Function to handle Microsoft OAuth
+  const handleMicrosoftAuth = async () => {
+    try {
+      setError(null);
+      // Get token from localStorage
+      const tokenData = localStorage.getItem('Token');
+      console.log('Token from localStorage:', tokenData);
+
+      if (!tokenData) {
+        setError('No authentication token found');
+        console.error('No authentication token found');
+        return;
+      }
+
+      const { token } = JSON.parse(tokenData);
+      console.log('Extracted token:', token);
+
+      // Get the Microsoft OAuth URL from your backend
+      console.log('Making request to backend...');
+      const response = await axios.get('https://quick-pipe-backend.vercel.app/EmailAccount/ReadyMicrosoftAccount', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('Full backend response:', response);
+      console.log('Response data:', response.data);
+      console.log('Auth URL from backend:', response.data.url);
+
+      if (response.data.success) {
+        const authUrl = response.data.url;
+
+        // Validate the URL before opening
+        if (!authUrl) {
+          setError('Invalid OAuth configuration. Please contact support.');
+          console.error('Invalid OAuth URL:', authUrl);
+          return;
+        }
+
+        console.log('Opening Microsoft auth URL:', authUrl);
+        const width = 500;
+        const height = 600;
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2;
+
+        let authWindow = null;
+        try {
+          authWindow = window.open(
+            authUrl,
+            'Microsoft Auth',
+            `width=${width},height=${height},left=${left},top=${top}`
+          );
+
+          if (!authWindow) {
+            throw new Error('Popup window was blocked. Please allow popups for this site.');
+          }
+
+          // Listen for the success message from the callback page
+          const handleMessage = (event) => {
+            if (event.data.type === 'OAUTH_SUCCESS' && event.data.provider === 'microsoft') {
+              console.log('Microsoft OAuth successful:', event.data);
+              // Update your UI or refresh data here
+              if (authWindow) {
+                authWindow.close();
+              }
+            }
+          };
+
+          window.addEventListener('message', handleMessage);
+
+          // Add event listener for window close
+          const checkWindow = setInterval(() => {
+            if (authWindow && authWindow.closed) {
+              console.log('Auth window was closed');
+              clearInterval(checkWindow);
+              window.removeEventListener('message', handleMessage);
+              // You might want to refresh the page or update the UI here
+            }
+          }, 1000);
+
+        } catch (windowError) {
+          console.error('Error opening auth window:', windowError);
+          setError(windowError.message || 'Failed to open authentication window. Please allow popups for this site.');
+        }
+
+      } else {
+        setError(response.data.message || 'Failed to get Microsoft auth URL');
+        console.error('Failed to get Microsoft auth URL:', response.data.message);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || 'An error occurred';
+      setError(errorMessage);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        headers: error.response?.headers
+      });
+    }
+  };
+
   const AccountsSelectionPage = () => (
     <div className="p-4 md:p-24 px-auto pt-[20px] md:pt-[40px] bg-white min-h-screen flex justify-center flex-col">
       <div className="flex items-center mb-4">
@@ -94,7 +403,7 @@ const EmailAccounts = () => {
         >
           <span className="mr-2">
             <FaBackward />
-            </span> Back
+          </span> Back
         </button>
       </div>
 
@@ -151,7 +460,10 @@ const EmailAccounts = () => {
           <h3 className="text-lg font-semibold text-center mb-4">Hassle-free email setup</h3>
 
           <div className="mb-6">
-            <button className="flex items-center justify-center bg-gray-100 text-gray-800 py-2 px-4 rounded-full w-full mb-2">
+            <button
+              onClick={handleGoogleAuth}
+              className="flex items-center justify-center bg-gray-100 text-gray-800 py-2 px-4 rounded-full w-full mb-2 hover:bg-gray-200 transition-colors"
+            >
               <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4 mr-2" />
               Gmail/ Google Suite
             </button>
@@ -199,17 +511,25 @@ const EmailAccounts = () => {
           <h3 className="text-lg font-semibold text-center mb-4">Ready-to-send accounts</h3>
 
           <div className="mb-6 space-y-2">
-            <button className="flex items-center justify-center bg-gray-100 text-gray-800 py-2 px-4 rounded-full w-full">
+            {/* <button className="flex items-center justify-center bg-gray-100 text-gray-800 py-2 px-4 rounded-full w-full">
               <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4 mr-2" />
               Gmail/ Google Suite
-            </button>
-            <button className="flex items-center justify-center bg-gray-100 text-gray-800 py-2 px-4 rounded-full w-full">
+            </button> */}
+            <button
+              onClick={handleMicrosoftAuth}
+              className="flex items-center justify-center bg-gray-100 text-gray-800 py-2 px-4 rounded-full w-full mb-2 hover:bg-gray-200 transition-colors"
+            >
               <img src="https://c.s-microsoft.com/favicon.ico" alt="Microsoft" className="w-4 h-4 mr-2" />
               Microsoft Office 365 Suite
             </button>
-            <button className="flex items-center justify-center bg-gray-100 text-gray-800 py-2 px-4 rounded-full w-full">
+            {error && (
+              <div className="text-red-500 text-sm mt-2 text-center">
+                {error}
+              </div>
+            )}
+            {/* <button className="flex items-center justify-center bg-gray-100 text-gray-800 py-2 px-4 rounded-full w-full">
               SMTP/IMAP
-            </button>
+            </button> */}
           </div>
 
           <div className="space-y-4 mt-2">
@@ -251,7 +571,7 @@ const EmailAccounts = () => {
                 Oldest First
               </button>
               <button className="px-3 py-2 bg-[#15A395] text-white rounded-full"
-              onClick={() => setShowAccountsPage(true)}>
+                onClick={() => setShowAccountsPage(true)}>
                 + Add new
               </button>
             </div>
@@ -308,4 +628,5 @@ const EmailAccounts = () => {
   );
 };
 
+export { OAuthCallback };
 export default EmailAccounts;
