@@ -719,7 +719,7 @@ import { useState, useEffect } from "react";
 import { useCampaignQuery } from "../reactQuery/hooks/useCampaignQuery";
 import { ChevronDown, Plus, Calendar, X } from "lucide-react";
 
-function ScheduleForm({ campaignId, newSchedulesData  }) {
+function ScheduleForm({ campaignId, newSchedulesData }) {
   const [schedules, setSchedules] = useState([]);
   const [activeSchedule, setActiveSchedule] = useState(null);
   const [scheduleName, setScheduleName] = useState("");

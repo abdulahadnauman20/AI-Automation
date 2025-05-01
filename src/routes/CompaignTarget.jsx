@@ -198,8 +198,8 @@ export default function CompaignTarget() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isOpen2, setIsOpen2] = useState(false)
-  const { getCampaignLeadsQuery, getCampaignSequenceQuery, generateEmailWithAI, generateSequenceWithAI, updateCampaignSequenceMutation } = useCampaignQuery();
-
+  const { getCampaignLeadsQuery, getCampaignSequenceQuery, generateEmailWithAI, generateSequenceWithAI, updateCampaignSequenceMutation, generateAIScheduleQuery } = useCampaignQuery();
+  const [scheduleMadeByAI, setScheduleMadeByAI] = useState(null);
   const [selectStep, setSelectStep] = useState(null);
   const [steps, setSteps] = useState([]);
   const [content, setContent] = useState("");
@@ -472,7 +472,7 @@ const data = [
           </nav>
           <div className="flex gap-4">
 
-            {activeTab !== "People" && activeTab !== "Options" && 
+          {activeTab === "Sequence" && 
               <button onClick={handleWriteFullSequenceWithAI} className="bg-gradient-to-br from-green-400 to-orange-500 shrink-0 text-white text-[14px] font-semibold border border-gray-400 flex gap-1 items-center rounded-full px-3 cursor-pointer">
                 <p>AI Sequence</p>
               </button>
