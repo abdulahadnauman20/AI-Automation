@@ -17,6 +17,7 @@ import {
   deleteCampaign,
   activePauseCampaign,
   runCampaign,
+  // getAllCompaign
 } from "../services/campaignService";
 
 export const useCampaignQuery = () => {
@@ -172,6 +173,20 @@ export const useCampaignQuery = () => {
   });
 
 
+  const getAllCampaignsQuery = () => {
+    return useQuery({
+      queryKey: ["allCampaigns"],
+      queryFn: getAllCampaigns,
+      onSuccess: (data) => {
+        console.log("All campaigns fetched:", data);
+      },
+      onError: (error) => {
+        toast.error(`Failed to fetch campaigns: ${error.message}`);
+      },
+    });
+  };  
+  
+
 
   const getCampaignLeadsQuery = (campaignId) => useQuery({
     queryKey: ["campaignLeads", campaignId],
@@ -182,6 +197,10 @@ export const useCampaignQuery = () => {
     enabled: !!campaignId,
     onSuccess: (leads) => console.log("Campaign leads fetched:", leads),
   });
+
+
+
+
 
   return {
     // Data
@@ -213,5 +232,7 @@ export const useCampaignQuery = () => {
     getCampaignScheduleQuery,
     updateScheduleMutationQuery,
     generateAIScheduleQuery,
+    getAllCampaignsQuery
+
   };
 };

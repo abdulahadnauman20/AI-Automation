@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Search, Plus,Pause, Clock,Zap, Eye,Hand,CircleDollarSign,CircleCheckBig,Ellipsis,ArrowDownToLine,Share2,ListFilter,User,PhoneIncoming,FileMinus,MailOpen, X,ChevronDown,} from "lucide-react"
+import { Search, Plus,Pause, Clock,Zap, Eye,Hand,CircleDollarSign,CircleCheckBig,Ellipsis,ArrowDownToLine,Share2,ListFilter,User,PhoneIncoming,FileMinus,MailOpen, X,ChevronDown, Package2,} from "lucide-react"
 import { useCampaignQuery } from "../reactQuery/hooks/useCampaignQuery";
 import { useParams } from "react-router-dom"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid, Funnel } from "recharts";
@@ -8,6 +8,7 @@ import EmailTemplateBuilder from "../components/EmailTemplate";
 import { IoClose } from "react-icons/io5";
 import { FcGoogle } from "react-icons/fc";
 import { Editor } from '@tinymce/tinymce-react';
+import SideDrawer2 from "../components/SideDrawer2";
 
 
 export default function CompaignTarget() {
@@ -302,11 +303,17 @@ const data = [
           </nav>
           <div className="flex gap-4">
 
-          {activeTab === "Sequence" && 
+          {activeTab === "Sequence" &&
+          <>
               <button onClick={handleWriteFullSequenceWithAI} className="bg-gradient-to-br from-green-400 to-orange-500 shrink-0 text-white text-[14px] font-semibold border border-gray-400 flex gap-1 items-center rounded-full px-3 cursor-pointer">
                 <p>AI Sequence</p>
               </button>
-            }
+               <div onClick={() => setIsOpen(!isOpen)} className="border cursor-pointer border-gray-300 flex gap-1 items-center rounded hover:bg-gray-200 px-2.5 py-1.5">
+                  <Package2 size={20} className="text-gray-400" />
+               </div>
+              <SideDrawer2 isOpen={isOpen} setIsOpen={setIsOpen} />
+          </>
+          }
 
             {activeTab === "Schedule" && 
               <button onClick={handleWriteScheduleWithAI} className="bg-gradient-to-br from-green-400 to-orange-500 shrink-0 text-white text-[14px] font-semibold border border-gray-400 flex gap-1 items-center rounded-full px-3 cursor-pointer">

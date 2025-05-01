@@ -26,6 +26,11 @@ function Campaigns() {
   const [showUpdateNameModal, setShowUpdateNameModal] = useState(false);
   const [campaignToUpdate, setCampaignToUpdate] = useState(''); 
 
+  const [modelOpen, setmodelOpen] = useState(false);
+  const handleModal = () => {
+    setmodelOpen(!modelOpen);
+  };
+
   const handleMoreClick = (campaignId) => {
     setShowOptions((prev) => (prev === campaignId ? null : campaignId)); 
   };
