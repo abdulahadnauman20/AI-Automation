@@ -719,7 +719,7 @@ import { useState, useEffect } from "react";
 import { useCampaignQuery } from "../reactQuery/hooks/useCampaignQuery";
 import { ChevronDown, Plus, Calendar, X } from "lucide-react";
 
-function ScheduleForm({ campaignId }) {
+function ScheduleForm({ campaignId, newSchedulesData  }) {
   const [schedules, setSchedules] = useState([]);
   const [activeSchedule, setActiveSchedule] = useState(null);
   const [scheduleName, setScheduleName] = useState("");
@@ -744,8 +744,7 @@ function ScheduleForm({ campaignId }) {
   } = getCampaignScheduleQuery(campaignId);
 
   useEffect(() => {
-    console.log(campaignSchedule);
-    if (campaignSchedule?.schedule?.Schedule) {
+    if (Array.isArray(campaignSchedule?.schedule?.Schedule)) {
       const scheduleData = campaignSchedule.schedule.Schedule.map((schedule, index) => ({
         id: index + 1,
         name: schedule.Name,
@@ -757,12 +756,50 @@ function ScheduleForm({ campaignId }) {
           return acc;
         }, {}),
       }));
-
+  
       setSchedules(scheduleData);
       setActiveSchedule(scheduleData[0]?.id); // Set first schedule as active
       setScheduleName(scheduleData[0]?.name);
+    } else {
+      // if it's not an array, you might want to reset the states
+      setSchedules([]);
+      setActiveSchedule(null);
+      setScheduleName("");
     }
   }, [campaignSchedule]);
+  
+
+  useEffect(() => {
+    console.log("Schedules by AI: ", newSchedulesData);
+  
+    setSchedules([]); // Always reset to empty array, NOT null.
+  
+    if (Array.isArray(newSchedulesData) && newSchedulesData.length > 0) {
+      console.log("Received new schedules from parent:", newSchedulesData);
+  
+      const formattedSchedules = newSchedulesData.map((schedule, index) => ({
+        id: index + 1,
+        name: schedule.Name,
+        fromTime: schedule.TimingFrom,
+        toTime: schedule.TimingTo,
+        timezone: schedule.Timezone,
+        days: schedule.Days.reduce((acc, day) => {
+          acc[day] = true;
+          return acc;
+        }, {}),
+      }));
+  
+      setSchedules(formattedSchedules);
+      setActiveSchedule(formattedSchedules[0]?.id || null);
+      setScheduleName(formattedSchedules[0]?.name || "");
+    } else {
+      // In case there are no new schedules, reset active and name
+      setActiveSchedule(null);
+      setScheduleName("");
+    }
+  }, [newSchedulesData]);
+  
+  
   
   const handleDayToggle = (day) => {
     setSelectedDays((prev) => ({
@@ -848,7 +885,7 @@ function ScheduleForm({ campaignId }) {
         </div>
 
         <div className="border-t border-gray-200 pt-6">
-          {schedules.map((schedule) => (
+          {schedules?.map((schedule) => (
             <div
               key={schedule.id}
               className={`px-4 py-2 mb-2 rounded-md cursor-pointer border relative ${
@@ -875,12 +912,12 @@ function ScheduleForm({ campaignId }) {
 
           <button
             className={`w-full flex items-center justify-center px-4 py-2 border rounded-full cursor-pointer ${
-              schedules.length >= 3
+              schedules?.length >= 3
                 ? "text-gray-300 cursor-not-allowed border-gray-200"
                 : "text-gray-500 hover:text-teal-500 border-gray-200"
             }`}
             onClick={addSchedule}
-            disabled={schedules.length >= 3}
+            disabled={schedules?.length >= 3}
           >
             <Plus className="h-5 w-5 mr-2" />
             Add schedule
@@ -891,7 +928,7 @@ function ScheduleForm({ campaignId }) {
       {/* Main Form */}
       <div className="flex-1 space-y-6">
         {/* Display only the active schedule */}
-        {schedules.length > 0 && (
+        {schedules?.length > 0 && (
           <div className="bg-white p-6 shadow rounded-md">
             <h2 className="text-base font-medium mb-2">Schedule Name</h2>
             <input

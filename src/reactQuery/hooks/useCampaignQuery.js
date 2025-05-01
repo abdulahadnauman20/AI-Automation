@@ -149,6 +149,18 @@ export const useCampaignQuery = () => {
     });
   };
 
+  const generateAIScheduleQuery = useMutation({
+    mutationFn: ({ campaignId, data }) => generateAISchedule(campaignId, data),
+    onSuccess: (data) => {
+      console.log("AI Schedule generated successfully:", data);
+      // We won't directly update the state here. We'll return the data to the component for handling.
+    },
+    onError: (error) => {
+      toast.error(`Failed to generate AI schedule: ${error.message}`);
+      console.log(error);
+    },
+  });
+
 
 
   const getCampaignLeadsQuery = (campaignId) => useQuery({
@@ -190,6 +202,6 @@ export const useCampaignQuery = () => {
     // Schedule
     getCampaignScheduleQuery,
     updateScheduleMutationQuery,
-    generateAISchedule,
+    generateAIScheduleQuery,
   };
 };

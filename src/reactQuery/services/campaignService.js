@@ -27,8 +27,8 @@ export const getCampaignSchedule = (campaignId) =>
 export const updateCampaignSchedule = (campaignId, data) =>
   axiosInstance.put(`/campaign/UpdateCampaignSchedule/${campaignId}/schedule`, data).then(res => res.data);
 
-export const generateAISchedule = (campaignId) =>
-  axiosInstance.get(`/campaign/GenerateAISchedule/${campaignId}/schedule`).then(res => res.data);
+export const generateAISchedule = (campaignId, data) =>
+  axiosInstance.post(`/campaign/GenerateAISchedule/${campaignId}/schedule`, data).then(res => res.data);
 
 // -------------------- Campaign CRUD --------------------
 export const getAllCampaigns = () =>
