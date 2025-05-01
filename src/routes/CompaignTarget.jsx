@@ -125,7 +125,23 @@ const data = [
       setDelay(delay); // Also update subject displayed above editor
     }
   };
-  
+
+  const AddTemplateToStep = (template) => () => {
+    const updatedSteps = steps.map((step) => {
+      if (step.id === selectStep) {
+        return {
+          ...step,
+          subject: template.Subject,
+          body: template.Body,
+        };
+      }
+      return step;
+    });
+    setSteps(updatedSteps);
+    setSubject(template.Subject);
+    setContent(template.Body);
+    setIsOpen(false);
+  };
 
   const handleSelectSeqStep = (id) => {
     const selectedStep = steps.find(step => step.id === id);
@@ -201,10 +217,9 @@ const data = [
   
           if (response?.content?.length) {
             const updatedSteps = response.content.map((email, index, arr) => {
-              const isFollowUp = !email.Subject && index > 0;
               return {
                 id: index + 1,
-                value: isFollowUp ? `Follow-up to "${arr[index - 1]?.Name || 'Previous Email'}"` : email.Name,
+                value: email.Name,
                 subject: email.Subject,
                 body: email.Body,
                 delay: email.Delay
@@ -342,24 +357,24 @@ const data = [
                     </button>
                   </div>
 
-                  {isLoading && <p>Loading campaigns...</p>}
-                  {error && <p className="text-red-500">Failed to load campaigns</p>}
+                  {isLoading && <p>Loading templates...</p>}
+                  {error && <p className="text-red-500">Failed to load templates</p>}
 
                   {templates &&
-                    templates?.Templates.map((campaign) => (
-                      <div key={campaign.id} className="border hover:border-teal-300 bg-white p-3 rounded-xl mb-3">
+                    templates?.Templates.map((template) => (
+                      <div key={template.id} className="border hover:border-teal-300 bg-white p-3 rounded-xl mb-3">
                         <div className="flex items-center gap-1">
                           <Mail size={17} />
-                          <p className="py-0 font-medium">{campaign?.Name}</p>
+                          <p className="py-0 font-medium">{template?.Name}</p>
                         </div>
                         <p className="text-gray-400 text-[15px]">
-                          {campaign?.Body
-                            ? campaign.Body.split(" ").slice(0, 10).join(" ") + "..."
+                          {template?.Body
+                            ? template.Body.split(" ").slice(0, 10).join(" ") + "..."
                             : "No description provided."}
                         </p>
 
                         <hr className="text-gray-200 py-2" />
-                          <button onClick={() => setTemplateData(campaign)} className="px-3 py-1 cursor-pointer hover:text-white hover:bg-teal-600 rounded-full border border-gray-500">
+                          <button onClick={AddTemplateToStep(template)} className="px-3 py-1 cursor-pointer hover:text-white hover:bg-teal-600 rounded-full border border-gray-500">
                             Use template
                           </button>
                       </div>
@@ -788,7 +803,7 @@ const data = [
                         ${selectStep === step.id ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-white'}`}
                     >
                       <div className="flex justify-between items-center my-2">
-                        <p className="font-semibold">{templateData?.Name || step.value}</p>
+                        <p className="font-semibold">{step.value}</p>
                         <button
                           onClick={() => deleteSeqStep(step.id)}
                           className="text-red-500 ml-2 cursor-pointer"
@@ -834,7 +849,7 @@ const data = [
                     <div className="flex justify-between items-center mb-6">
                       <div className="text-gray-700 text-sm">
                         <span className="font-medium">Subject: </span>
-                        {templateData?.Subject || "No Subject"}
+                        {subject || "No Subject"}
                       </div>
                       <div className="flex gap-2">
                         <button className="px-3 py-2 border border-teal-500 text-teal-500 hover:bg-teal-50 text-sm rounded flex items-center gap-1">
@@ -851,7 +866,7 @@ const data = [
                     <div className="mb-6 relative">
                       <Editor
                         apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
-                        value={templateData?.Body}
+                        value={content}
                         onEditorChange={(newContent) => setContent(newContent)}
                         init={{
                           height: 400,

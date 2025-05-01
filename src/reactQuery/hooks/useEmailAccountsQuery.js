@@ -7,13 +7,20 @@ import {
 export const useCampaignQuery = () => {
   const queryClient = useQueryClient();
 
-  const getEmailAccountsQuery = () => useQuery({
-    queryKey: ["email-accounts"],
-    queryFn: () => getEmailAccounts(),
+  const {
+    data: emailAccountsObject, 
+    isLoading: isEmailAccountsLoading,
+    error: emailAccountsError,
+  } = useQuery({
+    queryKey: ["emailAccounts"],
+    queryFn: getEmailAccounts,
+    onSuccess: (data) => console.log("All email accounts fetched:", data),
   });
 
   return {
-
+    emailAccountsObject,
+    isEmailAccountsLoading,
+    emailAccountsError,
   };
 
 };

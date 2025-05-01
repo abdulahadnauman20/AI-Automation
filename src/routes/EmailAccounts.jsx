@@ -3,69 +3,8 @@ import { FaEllipsisH, FaFilter, FaChevronDown } from "react-icons/fa";
 import { FaBackward } from "react-icons/fa";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useCampaignQuery } from "../reactQuery/hooks/useEmailAccountsQuery";
 
-const contacts = [
-  {
-    id: 1,
-    name: "Support",
-    email: "support@manaflow.com",
-    emailsSent: "12 of 67",
-    warmupEmails: "56",
-    healthScore: "99%",
-    initials: "S",
-    bgColor: "bg-gray-300",
-  },
-  {
-    id: 2,
-    name: "Help",
-    email: "help@manaflow.com",
-    emailsSent: "0 of 32",
-    warmupEmails: "0",
-    healthScore: "99%",
-    initials: "H",
-    bgColor: "bg-red-300",
-  },
-  {
-    id: 3,
-    name: "Manager",
-    email: "manager@manaflow.com",
-    emailsSent: "11 of 89",
-    warmupEmails: "78",
-    healthScore: "98%",
-    initials: "M",
-    bgColor: "bg-yellow-300",
-  },
-  {
-    id: 4,
-    name: "HR",
-    email: "hr@manaflow.com",
-    emailsSent: "0 of 120",
-    warmupEmails: "34",
-    healthScore: "2%",
-    initials: "HR",
-    bgColor: "bg-green-300",
-  },
-  {
-    id: 5,
-    name: "CEO",
-    email: "ceo@manaflow.com",
-    emailsSent: "27 of 122",
-    warmupEmails: "120",
-    healthScore: "98%",
-    initials: "CE",
-    bgColor: "bg-purple-300",
-  },
-  {
-    id: 6,
-    name: "Branch Manager",
-    email: "nybranchmanager@manaflow.com",
-    emailsSent: "0 of 2",
-    warmupEmails: "0",
-    healthScore: "98%",
-    initials: "BM",
-    bgColor: "bg-yellow-500",
-  },
-];
 
 // OAuth Callback Component
 const OAuthCallback = () => {
@@ -80,11 +19,14 @@ const OAuthCallback = () => {
         const params = new URLSearchParams(location.search);
         const code = params.get('code');
         const error = params.get('error');
-        const provider = params.get('provider') || 'google'; // Default to google if not specified
+        const provider = params.get('provider') || 'microsoft'; // Default to microsoft if not specified
 
         // Get Google-specific parameters if provider is Google
+        // make all the letters of provider small
+        const lowerCaseProvider = provider.toLowerCase();
         let callbackUrl;
-        if (provider === 'google' || 'Google' ) {
+        console.log(lowerCaseProvider);
+        if (lowerCaseProvider === 'google') {
           const scope = params.get('scope');
           const authuser = params.get('authuser');
           const prompt = params.get('prompt');
@@ -165,6 +107,9 @@ const EmailAccounts = () => {
   const [authWindow, setAuthWindow] = useState(null);
   const [error, setError] = useState(null);
 
+  // Get email accounts data from the query
+  const { emailAccountsObject, isEmailAccountsLoading, emailAccountsError } = useCampaignQuery();
+
   const toggleSelect = (id) => {
     setSelected((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
@@ -175,7 +120,7 @@ const EmailAccounts = () => {
     if (selectAll) {
       setSelected([]);
     } else {
-      setSelected(contacts.map((contact) => contact.id));
+      setSelected(emailAccountsObject?.emailAccounts?.map((account) => account.id) || []);
     }
     setSelectAll(!selectAll);
   };
@@ -593,34 +538,41 @@ const EmailAccounts = () => {
               <div className="w-[100px] md:w-auto">Health Score</div>
             </div>
 
-            {contacts.map((contact) => (
-              <div
-                key={contact.id}
-                className={`flex jusitfy-between w-150 md:w-auto flex-shrink-0 md:grid grid-cols-5 gap-4 items-center p-4 rounded-lg transition-all ${selected.includes(contact.id) ? "bg-[#c3ffe8]" : "hover:bg-[#e4fff5]"
-                  } text-gray-500`}
-              >
-                <div className="flex items-center md:gap-4 gap-2 w-[200px] md:w-auto">
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(contact.id)}
-                    onChange={() => toggleSelect(contact.id)}
-                    className="w-4 h-4 md:w-5 md:h-5 text-green-500"
-                  />
-                  <div
-                    className={`md:w-10 md:h-10 h-8 w-8 shrink-0 flex items-center justify-center rounded-full text-white font-bold ${contact.bgColor}`}
-                  >
-                    {contact.initials}
+            {isEmailAccountsLoading ? (
+              <div className="text-center py-4">Loading email accounts...</div>
+            ) : emailAccountsError ? (
+              <div className="text-center py-4 text-red-500">Error loading email accounts</div>
+            ) : (
+              emailAccountsObject?.emailAccounts?.map((account) => (
+                <div
+                  key={account.id}
+                  className={`flex jusitfy-between w-150 md:w-auto flex-shrink-0 md:grid grid-cols-5 gap-4 items-center p-4 rounded-lg transition-all ${selected.includes(account.id) ? "bg-[#c3ffe8]" : "hover:bg-[#e4fff5]"
+                    } text-gray-500`}
+                >
+                  <div className="flex items-center md:gap-4 gap-2 w-[200px] md:w-auto">
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(account.id)}
+                      onChange={() => toggleSelect(account.id)}
+                      className="w-4 h-4 md:w-5 md:h-5 text-green-500"
+                    />
+                    <div
+                      className={`md:w-10 md:h-10 h-8 w-8 shrink-0 flex items-center justify-center rounded-full text-white font-bold ${account.bgColor || "bg-gray-300"
+                        }`}
+                    >
+                      {account.initials || (account.Email ? account.Email.charAt(0).toUpperCase() : '?')}
+                    </div>
+                    <span>{account.name || account.Email || 'Unnamed Account'}</span>
                   </div>
-                  <span>{contact.name}</span>
+                  <div className="w-[100px] md:w-auto">{account.emailsSent || "0 of 0"}</div>
+                  <div className="w-[100px] md:w-auto">{account.warmupEmails || "0"}</div>
+                  <div className="w-[100px] md:w-auto">{account.healthScore || "0%"}</div>
+                  <div className="text-gray-600 w-[30px] md:w-auto cursor-pointer flex justify-end ">
+                    <FaEllipsisH />
+                  </div>
                 </div>
-                <div className="w-[100px] md:w-auto">{contact.emailsSent}</div>
-                <div className="w-[100px] md:w-auto">{contact.warmupEmails}</div>
-                <div className="w-[100px] md:w-auto">{contact.healthScore}</div>
-                <div className="text-gray-600 w-[30px] md:w-auto cursor-pointer flex justify-end ">
-                  <FaEllipsisH />
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       )}
