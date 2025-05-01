@@ -1,75 +1,117 @@
-import { useState, useEffect } from "react"
-import {
-Search,
-MoreVertical,
-Plus,
-MapPin,
-Globe,
-ChevronDown,
-Play,
-Pause,
-CircleCheck,
-ChevronLeft,
-ChevronRight,
-Clock,
-Sparkles,
-Phone,
-Zap,
-Eye,
-Hand,
-CircleDollarSign,
-CircleCheckBig,
-Ellipsis,
-ArrowDownToLine,
-Share2,
-ListFilter,
-User,
-PhoneIncoming,
-FileMinus,
-MailOpen,
-X,
-} from "lucide-react"
-import { useCampaignQuery } from "../reactQuery/hooks/useCampaignQuery";
-import { useParams } from "react-router-dom"
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid, Funnel } from "recharts";
-import ScheduleForm from "../components/SheduleForm";
-import EmailTemplateBuilder from "../components/EmailTemplate";
-import { IoClose } from "react-icons/io5";
-import { FcGoogle } from "react-icons/fc";
-import { Editor } from '@tinymce/tinymce-react';
-import { toast } from "react-hot-toast";
-
+// const people = [
+//   {
+//     email: "xmitchell@hotmail.com",
+//     contact: "Lynn Tanner",
+//     provider: "Microsoft",
+//     status: "Verified",
+//     company: "Tuxedo Suits Inc.",
+//     website: "https://tuxedosuits.com",
+//     title: "Design manager",
+//   },
+//   {
+//     email: "tbaker@outlook.com",
+//     contact: "Capt. Trunk",
+//     provider: "Google",
+//     status: "Verified",
+//     company: "Tuxedo Suits Inc.",
+//     website: "https://tuxedosuits.com",
+//     title: "Design manager",
+//   },
+//   {
+//     email: "mgonzalez@aol.com",
+//     contact: "Thomas Anum",
+//     provider: "Google",
+//     status: "Verified",
+//     company: "Tuxedo Suits Inc.",
+//     website: "https://tuxedosuits.com",
+//     title: "Design manager",
+//   },
+//   {
+//     email: "xmitchell@hotmail.com",
+//     contact: "Lynn Tanner",
+//     provider: "Microsoft",
+//     status: "Verified",
+//     company: "Tuxedo Suits Inc.",
+//     website: "https://tuxedosuits.com",
+//     title: "Design manager",
+//   },
+//   {
+//     email: "tbaker@outlook.com",
+//     contact: "Capt. Trunk",
+//     provider: "Google",
+//     status: "Verified",
+//     company: "Tuxedo Suits Inc.",
+//     website: "https://tuxedosuits.com",
+//     title: "Design manager",
+//   },
+//   {
+//     email: "mgonzalez@aol.com",
+//     contact: "Thomas Anum",
+//     provider: "Google",
+//     status: "Verified",
+//     company: "Tuxedo Suits Inc.",
+//     website: "https://tuxedosuits.com",
+//     title: "Design manager",
+//   },
+//   {
+//     email: "yrodriguez@aol.com",
+//     contact: "B.A. Baracus",
+//     provider: "Microsoft",
+//     status: "Verified",
+//     company: "Tuxedo Suits Inc.",
+//     website: "https://tuxedosuits.com",
+//     title: "Design manager",
+//   },
+//   {
+  //     email: "vflores@gmail.com",
+//     contact: "Devon Miles",
+//     provider: "Google",
+//     status: "Verified",
+//     company: "Tuxedo Suits Inc.",
+//     website: "https://tuxedosuits.com",
+//     title: "Design manager",
+//   },
+//   {
+//     email: "yrodriguez@aol.com",
+//     contact: "B.A. Baracus",
+//     provider: "Microsoft",
+//     status: "Verified",
+//     company: "Tuxedo Suits Inc.",
+//     website: "https://tuxedosuits.com",
+//     title: "Design manager",
+//   },
+// ]
 
 // const opportunities = [
-//   {
-//     id: 1,
-//     opportunity: "BetaTech",
-//     contact: "Michael Regan",
-//     amount: "-",
-//     owner: "Beeto Leru",
-//     source: "Phone",
-//     expectedClosing: "12/2/2025",
-//     actualClosing: "12/4/2025",
+  //   {
+    //     id: 1,
+    //     opportunity: "BetaTech",
+    //     contact: "Michael Regan",
+    //     amount: "-",
+    //     owner: "Beeto Leru",
+    //     source: "Phone",
+    //     expectedClosing: "12/2/2025",
+    //     actualClosing: "12/4/2025",
+    //     lastInteraction: "12/2/2025 9:23 AM",
+    //     stage: "Discovery",
+    //   },
+    //   {
+      //     id: 2,
+      //     opportunity: "Greenfield",
+      //     contact: "Jordyn Botosh",
+      //     amount: "$12,839",
+      //     owner: "Beeto Leru",
+      //     source: "Email",
+      //     expectedClosing: "12/2/2025",
+      //     actualClosing: "12/4/2025",
 //     lastInteraction: "12/2/2025 9:23 AM",
 //     stage: "Discovery",
 //   },
 //   {
-//     id: 2,
-//     opportunity: "Greenfield",
-//     contact: "Jordyn Botosh",
-//     amount: "$12,839",
-//     owner: "Beeto Leru",
-//     source: "Email",
-//     expectedClosing: "12/2/2025",
-//     actualClosing: "12/4/2025",
-//     lastInteraction: "12/2/2025 9:23 AM",
-//     stage: "Discovery",
-//   },
-//   {
-//     id: 3,
-//     opportunity: "Acme Corp.",
-//     contact: "Emerson Saris",
-//     amount: "-",
+  //     id: 3,
+  //     opportunity: "Acme Corp.",
+  //     contact: "Emerson Saris",
+  //     amount: "-",
 //     owner: "Beeto Leru",
 //     source: "Phone",
 //     expectedClosing: "12/2/2025",
@@ -78,74 +120,85 @@ import { toast } from "react-hot-toast";
 //     stage: "Proposal",
 //   },
 //   {
-//     id: 4,
-//     opportunity: "Vertex Health",
-//     contact: "Emerson Franci",
-//     amount: "-",
-//     owner: "Beeto Leru",
-//     source: "Phone",
-//     expectedClosing: "12/2/2025",
-//     actualClosing: "12/4/2025",
-//     lastInteraction: "12/2/2025 9:23 AM",
-//     stage: "Evaluation",
-//   },
-//   {
-//     id: 5,
-//     opportunity: "EcoBuild",
-//     contact: "Aspen Vaccaro",
-//     amount: "$200",
-//     owner: "Beeto Leru",
-//     source: "Email",
-//     expectedClosing: "12/2/2025",
-//     actualClosing: "12/4/2025",
-//     lastInteraction: "12/2/2025 9:23 AM",
-//     stage: "Evaluation",
-//   },
-//   {
-//     id: 6,
-//     opportunity: "EcoBuild",
-//     contact: "Ruben Torff",
-//     amount: "$12,839",
-//     owner: "Beeto Leru",
-//     source: "Phone",
-//     expectedClosing: "12/2/2025",
-//     actualClosing: "12/4/2025",
-//     lastInteraction: "12/2/2025 9:23 AM",
-//     stage: "Evaluation",
-//   },
-//   {
-//     id: 7,
-//     opportunity: "OmniTech",
-//     contact: "Carter Rosser",
-//     amount: "$12,839",
-//     owner: "Beeto Leru",
-//     source: "Email",
-//     expectedClosing: "12/2/2025",
-//     actualClosing: "12/4/2025",
-//     lastInteraction: "12/2/2025 9:23 AM",
-//     stage: "Evaluation",
-//   },
-//   {
-//     id: 8,
-//     opportunity: "Zenoth Co.",
-//     contact: "Lynn Tanner",
-//     amount: "$12,839",
-//     owner: "Beeto Leru",
-//     source: "Email",
-//     expectedClosing: "12/2/2025",
-//     actualClosing: "12/4/2025",
-//     lastInteraction: "12/2/2025 9:23 AM",
+  //     id: 4,
+  //     opportunity: "Vertex Health",
+  //     contact: "Emerson Franci",
+  //     amount: "-",
+  //     owner: "Beeto Leru",
+  //     source: "Phone",
+  //     expectedClosing: "12/2/2025",
+  //     actualClosing: "12/4/2025",
+  //     lastInteraction: "12/2/2025 9:23 AM",
+  //     stage: "Evaluation",
+  //   },
+  //   {
+    //     id: 5,
+    //     opportunity: "EcoBuild",
+    //     contact: "Aspen Vaccaro",
+    //     amount: "$200",
+    //     owner: "Beeto Leru",
+    //     source: "Email",
+    //     expectedClosing: "12/2/2025",
+    //     actualClosing: "12/4/2025",
+    //     lastInteraction: "12/2/2025 9:23 AM",
+    //     stage: "Evaluation",
+    //   },
+    //   {
+      //     id: 6,
+      //     opportunity: "EcoBuild",
+      //     contact: "Ruben Torff",
+      //     amount: "$12,839",
+      //     owner: "Beeto Leru",
+      //     source: "Phone",
+      //     expectedClosing: "12/2/2025",
+      //     actualClosing: "12/4/2025",
+      //     lastInteraction: "12/2/2025 9:23 AM",
+      //     stage: "Evaluation",
+      //   },
+      //   {
+        //     id: 7,
+        //     opportunity: "OmniTech",
+        //     contact: "Carter Rosser",
+        //     amount: "$12,839",
+        //     owner: "Beeto Leru",
+        //     source: "Email",
+        //     expectedClosing: "12/2/2025",
+        //     actualClosing: "12/4/2025",
+        //     lastInteraction: "12/2/2025 9:23 AM",
+        //     stage: "Evaluation",
+        //   },
+        //   {
+          //     id: 8,
+          //     opportunity: "Zenoth Co.",
+          //     contact: "Lynn Tanner",
+          //     amount: "$12,839",
+          //     owner: "Beeto Leru",
+          //     source: "Email",
+          //     expectedClosing: "12/2/2025",
+          //     actualClosing: "12/4/2025",
+          //     lastInteraction: "12/2/2025 9:23 AM",
 //     stage: "Sales",
 //   },
 // ]
+
+import { useState, useEffect } from "react"
+import { Search, Plus,Pause, Clock,Zap, Eye,Hand,CircleDollarSign,CircleCheckBig,Ellipsis,ArrowDownToLine,Share2,ListFilter,User,PhoneIncoming,FileMinus,MailOpen, X,ChevronDown,} from "lucide-react"
+import { useCampaignQuery } from "../reactQuery/hooks/useCampaignQuery";
+import { useParams } from "react-router-dom"
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid, Funnel } from "recharts";
+import ScheduleForm from "../components/SheduleForm";
+import EmailTemplateBuilder from "../components/EmailTemplate";
+import { IoClose } from "react-icons/io5";
+import { FcGoogle } from "react-icons/fc";
+import { Editor } from '@tinymce/tinymce-react';
+
 
 export default function CompaignTarget() {
   const { campaignId } = useParams();
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isOpen2, setIsOpen2] = useState(false)
-  const { getCampaignLeadsQuery, getCampaignSequenceQuery, generateEmailWithAI, generateSequenceWithAI, updateCampaignSequenceMutation, generateAIScheduleQuery } = useCampaignQuery();
-  const [scheduleMadeByAI, setScheduleMadeByAI] = useState(null);
+  const { getCampaignLeadsQuery, getCampaignSequenceQuery, generateEmailWithAI, generateSequenceWithAI, updateCampaignSequenceMutation } = useCampaignQuery();
 
   const [selectStep, setSelectStep] = useState(null);
   const [steps, setSteps] = useState([]);
@@ -165,89 +218,13 @@ export default function CompaignTarget() {
   } = getCampaignSequenceQuery(campaignId);
 
 
-  // const people = [
-  //   {
-  //     email: "xmitchell@hotmail.com",
-  //     contact: "Lynn Tanner",
-  //     provider: "Microsoft",
-  //     status: "Verified",
-  //     company: "Tuxedo Suits Inc.",
-  //     website: "https://tuxedosuits.com",
-  //     title: "Design manager",
-  //   },
-  //   {
-  //     email: "tbaker@outlook.com",
-  //     contact: "Capt. Trunk",
-  //     provider: "Google",
-  //     status: "Verified",
-  //     company: "Tuxedo Suits Inc.",
-  //     website: "https://tuxedosuits.com",
-  //     title: "Design manager",
-  //   },
-  //   {
-  //     email: "mgonzalez@aol.com",
-  //     contact: "Thomas Anum",
-  //     provider: "Google",
-  //     status: "Verified",
-  //     company: "Tuxedo Suits Inc.",
-  //     website: "https://tuxedosuits.com",
-  //     title: "Design manager",
-  //   },
-  //   {
-  //     email: "xmitchell@hotmail.com",
-  //     contact: "Lynn Tanner",
-  //     provider: "Microsoft",
-  //     status: "Verified",
-  //     company: "Tuxedo Suits Inc.",
-  //     website: "https://tuxedosuits.com",
-  //     title: "Design manager",
-  //   },
-  //   {
-  //     email: "tbaker@outlook.com",
-  //     contact: "Capt. Trunk",
-  //     provider: "Google",
-  //     status: "Verified",
-  //     company: "Tuxedo Suits Inc.",
-  //     website: "https://tuxedosuits.com",
-  //     title: "Design manager",
-  //   },
-  //   {
-  //     email: "mgonzalez@aol.com",
-  //     contact: "Thomas Anum",
-  //     provider: "Google",
-  //     status: "Verified",
-  //     company: "Tuxedo Suits Inc.",
-  //     website: "https://tuxedosuits.com",
-  //     title: "Design manager",
-  //   },
-  //   {
-  //     email: "yrodriguez@aol.com",
-  //     contact: "B.A. Baracus",
-  //     provider: "Microsoft",
-  //     status: "Verified",
-  //     company: "Tuxedo Suits Inc.",
-  //     website: "https://tuxedosuits.com",
-  //     title: "Design manager",
-  //   },
-  //   {
-  //     email: "vflores@gmail.com",
-  //     contact: "Devon Miles",
-  //     provider: "Google",
-  //     status: "Verified",
-  //     company: "Tuxedo Suits Inc.",
-  //     website: "https://tuxedosuits.com",
-  //     title: "Design manager",
-  //   },
-  //   {
-  //     email: "yrodriguez@aol.com",
-  //     contact: "B.A. Baracus",
-  //     provider: "Microsoft",
-  //     status: "Verified",
-  //     company: "Tuxedo Suits Inc.",
-  //     website: "https://tuxedosuits.com",
-  //     title: "Design manager",
-  //   },
-  // ]
+
+const data = [
+    { name: "SEP", sent: 250, opens: 200, clicks: 150, opportunities: 100, conversions: 50 },
+    { name: "OCT", sent: 150, opens: 120, clicks: 90, opportunities: 60, conversions: 30 },
+    { name: "NOV", sent: 180, opens: 140, clicks: 100, opportunities: 80, conversions: 40 },
+    { name: "DEC", sent: 220, opens: 170, clicks: 130, opportunities: 90, conversions: 60 },
+];
 
   // Fetch and populate steps when campaign sequence is available
   useEffect(() => {
@@ -495,7 +472,7 @@ export default function CompaignTarget() {
           </nav>
           <div className="flex gap-4">
 
-            {activeTab === "Sequence" && 
+            {activeTab !== "People" && activeTab !== "Options" && 
               <button onClick={handleWriteFullSequenceWithAI} className="bg-gradient-to-br from-green-400 to-orange-500 shrink-0 text-white text-[14px] font-semibold border border-gray-400 flex gap-1 items-center rounded-full px-3 cursor-pointer">
                 <p>AI Sequence</p>
               </button>
@@ -508,10 +485,71 @@ export default function CompaignTarget() {
             }
 
 
-            <div className="border border-gray-300 flex gap-1 items-center rounded-full px-2.5 py-1.5">
+            <div className="border border-gray-300 flex gap-1 items-center rounded-full hover:bg-gray-200 px-2.5 py-1.5">
               <Pause size={20} className="text-gray-400" />
               <p className="text-gray-400 text-[14px]">Pause campaign</p>
             </div>
+
+            {activeTab === "Analytics" && 
+            <div className="relative dropdown ">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setdropdown2(!dropdown2);
+                  }}
+                  className="p-2.5 border border-gray-300 cursor-pointer hover:bg-gray-200 text-gray-600 rounded-full flex gap-1 items-center">
+                  <Share2 className="w-4 h-4 text-gray-400" />
+                  <span className='text-gray-400 text-[14px]'>Share</span>
+                </button>
+
+                {dropdown2 && (
+                  <div className="absolute border-none outline-none right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-10 border">
+                      <div className="">
+                        <ul>
+                          <li className="text-gray-400 px-3 py-2 text-[13px] font-[450] cursor-pointer hover:text-[#15a395] hover:bg-[#defffcbe]">Newest First</li>
+                          <hr className="text-gray-300" />
+                          <li className="text-gray-400 px-3 py-2 text-[13px] font-[450] cursor-pointer hover:text-[#15a395] hover:bg-[#defffcbe]">Oldest First</li>
+                          <hr className="text-gray-300" />
+                          <li className="text-gray-400 px-3 py-2 text-[13px] font-[450] cursor-pointer hover:text-[#15a395] hover:bg-[#defffcbe]">Name A-Z</li>
+                          <hr className="text-gray-300" />
+                          <li className="text-gray-400 px-3 py-2 text-[13px] font-[450] cursor-pointer hover:text-[#15a395] hover:bg-[#defffcbe]">Name Z-A</li>
+                        </ul>
+                      </div>
+                  </div>
+                )}
+            </div>
+            }
+
+            
+          {activeTab === "Analytics" && 
+            <div className="relative dropdown ">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setdropdown1(!dropdown1);
+                  }}
+                  className="p-1.5 border border-gray-300 cursor-pointer hover:bg-gray-200 text-gray-600 rounded-full flex gap-1 items-center">
+                  <span className='text-gray-400 text-[14px] p-1'>Last 4 weeks</span>
+                  <ChevronDown className="w-4 h-5" />
+                </button>
+
+                {dropdown1 && (
+                  <div className="absolute border-none outline-none right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-10 border">
+                      <div className="">
+                        <ul>
+                          <li className="text-gray-400 px-3 py-2 text-[13px] font-[450] cursor-pointer hover:text-[#15a395] hover:bg-[#defffcbe]">Newest First</li>
+                          <hr className="text-gray-300" />
+                          <li className="text-gray-400 px-3 py-2 text-[13px] font-[450] cursor-pointer hover:text-[#15a395] hover:bg-[#defffcbe]">Oldest First</li>
+                          <hr className="text-gray-300" />
+                          <li className="text-gray-400 px-3 py-2 text-[13px] font-[450] cursor-pointer hover:text-[#15a395] hover:bg-[#defffcbe]">Name A-Z</li>
+                          <hr className="text-gray-300" />
+                          <li className="text-gray-400 px-3 py-2 text-[13px] font-[450] cursor-pointer hover:text-[#15a395] hover:bg-[#defffcbe]">Name Z-A</li>
+                        </ul>
+                      </div>
+                  </div>
+                )}
+            </div>
+            }
 
             <div className="relative inline-block text-left">
               <button
@@ -711,11 +749,11 @@ export default function CompaignTarget() {
         )}
 
         {/* Accounts Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 w-full">
         {activeTab === "Analytics" && (
-            <>
+          <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 w-full">
             {box.map((item, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg px-4 py-6 flex items-center gap-3 bg-white">
+              <div key={index} className="border border-gray-200 rounded-lg px-4 py-6 flex items-center gap-3 bg-white">
                 <div className={`p-3 rounded-full ${item.bg}`}>{item.icon}</div>
                 <div>
                     <div className="text-2xl font-bold">{item.amount}</div>
@@ -723,9 +761,29 @@ export default function CompaignTarget() {
                 </div>
                 </div>
             ))}
+            </div>
+            <div className="p-0 md:p-6 rounded-lg">
+                <div className="h-[300px] md:h-[400px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={data} margin={{ top: 30, right: 20, left: 0, bottom: 5 }}>
+                            <CartesianGrid stroke="#E5E7EB" strokeDasharray="0" />
+                            <XAxis dataKey="name" stroke="#4A5568" tick={{ fontSize: 12 }} />
+                            <YAxis stroke="#4A5568" tick={{ fontSize: 12 }} />
+                            <Tooltip contentStyle={{ backgroundColor: "#fff", borderRadius: "5px", padding: "10px" }} />
+                            <Legend />
+                            <Bar dataKey="conversions" stackId="a" fill="#6c6cf0" barSize={40} />
+                            <Bar dataKey="opportunities" stackId="a" fill="#a16ff2" barSize={40} />
+                            <Bar dataKey="clicks" stackId="a" fill="#e271db" barSize={40} />
+                            <Bar dataKey="opens" stackId="a" fill="#f19888" barSize={40} />
+                            <Bar dataKey="sent" stackId="a" fill="#ffc195" barSize={40} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
             </>
         )}
 
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 w-full">
           {activeTab === "People" && (
             <div className="col-span-full w-full overflow-x-hidden">
               <table className="w-full table-fixed">

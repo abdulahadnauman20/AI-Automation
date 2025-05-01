@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, ChevronDown, User, HelpCircle, Settings, LogOut, Plus, X, Briefcase, Menu } from 'lucide-react';
+import { Bell, ChevronDown, User, HelpCircle, Settings, LogOut, Plus, X, Briefcase, Menu, Sparkles } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { QueryClient } from '@tanstack/react-query';
@@ -130,7 +130,8 @@ const Navbar = () => {
           <Link to="/" className={`pb-2 ${location.pathname === "/" ? "border-b-2 border-green-500" : ""}`}>
             <li>Home</li>
           </Link>
-          <Link to="/crm" className={`pb-2 ${location.pathname === "/crm" ? "border-b-2 border-green-500" : ""}`}>
+          <Link to="/crm" className={`pb-2 flex items-center ${location.pathname === "/crm" ? "border-b-2 border-green-500" : ""}`}>
+          <Sparkles className="w-4 h-4 mr-1 text-yellow-500" />
             <li>AI CRM</li>
           </Link>
           <Link to="/campaigns" className={`pb-2 ${location.pathname === "/campaigns" ? "border-b-2 border-green-500" : ""}`}>
@@ -243,12 +244,6 @@ const Navbar = () => {
 
                 {isProfileOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg p-1 z-10 border-none">
-                    {/* <span className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      <User className="w-4 h-4 mr-2" />
-                      <Link to='/settings'>
-                        Profile
-                      </Link>
-                    </a> */}
                     <span className="flex justify-between items-center px-4 py-2 text-sm text-gray-500 hover:bg-gray-100">
                       <Link to='/settings'>
                         Settings
@@ -307,7 +302,6 @@ const Navbar = () => {
                         className="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none"
                       /> */}
                     {/* </div> */}
-
                       <div className="p-2">
                         <ul>
                         {allWorkspace.OwnedWorkspaces.map((val) => (

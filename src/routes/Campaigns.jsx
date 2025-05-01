@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, MoreHorizontal, Search, Filter, PlusCircle, ChevronDown, CheckCircle, AlertCircle, Circle, ArrowUpDown, X, Zap, Plus } from 'lucide-react';
+import { Play, Pause, MoreHorizontal, Search, Filter, PlusCircle, ChevronDown, CheckCircle, AlertCircle, Circle, ArrowUpDown, X, Zap, Plus, SquarePen, ShieldX, CircleCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCampaignQuery } from "../reactQuery/hooks/useCampaignQuery";
 
@@ -18,12 +18,12 @@ function Campaigns() {
   const [campaigns, setCampaigns] = useState([]);
 
   const statusOptions = [
-    { value: 'All statuses', icon: <Filter size={16} className="text-gray-400" /> },
-    { value: 'Active', icon: <Play size={16} className="text-blue-500" /> },
-    { value: 'Draft', icon: <Circle size={16} className="text-gray-400" /> },
-    { value: 'Paused', icon: <Pause size={16} className="text-yellow-500" /> },
-    { value: 'Error', icon: <AlertCircle size={16} className="text-red-500" /> },
-    { value: 'Completed', icon: <CheckCircle size={16} className="text-green-500" /> }
+    { name: "All Statuses", icon: "⚡" },
+    { name: "Active", icon: <Play size={20} className="text-blue-400" /> },
+    { name: "Draft", icon: <SquarePen size={20} className="text-gray-600" /> },
+    { name: "Paused", icon: <Pause size={20} className="text-orange-400" /> },
+    { name: "Error", icon: <ShieldX size={20} className="text-red-600" /> },
+    { name: "Completed", icon: <CircleCheck size={20} className="text-green-400" /> },
   ];
 
   const sortOptions = [
@@ -174,18 +174,17 @@ function Campaigns() {
               {/* Status dropdown */}
               {showStatusDropdown && (
                 <div 
-                  className="origin-top-right absolute right-0 left-1 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+                  className="origin-top-right absolute right-0 left-1 mt-2 w-56 rounded-md shadow-lg bg-white border-gray-300 ring-opacity-5 focus:outline-none z-10"
                   onClick={handleDropdownClick}
                 >
                   <div className="py-1">
                     {statusOptions.map((option) => (
                       <button
-                        key={option.value}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                        onClick={() => handleStatusChange(option.value)}
-                      >
-                        <span className="mr-2">{option.icon}</span>
-                        {option.value}
+                        key={option.name}
+                        className="w-full text-left px-4 py-2 text-sm hover:text-[#15a395] hover:bg-[#defffcf7] flex gap-2 items-center"
+                        onClick={() => handleStatusChange(option.name)}>
+                        {option.icon} {option.name} 
+                        <hr className="text-gray-100" />
                       </button>
                     ))}
                   </div>
@@ -203,7 +202,6 @@ function Campaigns() {
                   setShowStatusDropdown(false);
                 }}
               >
-                <ArrowUpDown size={16} className="mr-2 text-gray-400" />
                 {sortOrder}
                 <ChevronDown size={16} className="ml-2 text-gray-400" />
               </button>
