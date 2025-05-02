@@ -2,19 +2,31 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Calendar1, CircleCheckBig } from "lucide-react";
 import SideDrawer from "../components/SideDrawer";
 import Modal from "../components/Modal";
+import { useGoogleCalendarQuery } from "../reactQuery/hooks/useCalenderQuery";
+
+// const { connectCalendarMutation, oAuthCallbackQuery, getAllEventsQuery, createEventMutation, getSingleEventQuery, updateEventMutation, deleteEventMutation, syncEventsMutation } = useGoogleCalendarQuery();
+
 
 function Calendar() {
   const [modelOpen, setmodelOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedView, setSelectedView] = useState("month");
-  const [currentDate] = useState(new Date(2025, 0, 30)); // January 30, 2025
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const handleModal = () => {
     setmodelOpen(!modelOpen);
   };
 
-  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const handlePreviousMonth = () => {
+    setCurrentDate((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth() - 1, 1));
+  };
+  
+  const handleNextMonth = () => {
+    setCurrentDate((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1));
+  };
+  
 
+  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const generateCalendarDays = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -22,28 +34,50 @@ function Calendar() {
     const lastDay = new Date(year, month + 1, 0);
     const startingDayIndex = firstDay.getDay();
     const daysInMonth = lastDay.getDate();
+  
     const previousMonth = new Date(year, month, 0);
     const daysInPreviousMonth = previousMonth.getDate();
+  
+    // Get current week range (Sunday to Saturday)
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+  
     const days = [];
-
+  
+    // Previous month's tail
     for (let i = startingDayIndex - 1; i >= 0; i--) {
       days.push({ date: daysInPreviousMonth - i, isCurrentMonth: false, events: [] });
     }
-
+  
+    // Current month
     for (let i = 1; i <= daysInMonth; i++) {
+      const thisDate = new Date(year, month, i);
+      const isInWeek =
+        selectedView === "week" &&
+        thisDate >= startOfWeek &&
+        thisDate <= endOfWeek;
+  
+      const eventList = [
+        i === 2 && { type: "meeting", title: "Meeting with Carl Pei" },
+        i === 2 && { type: "task", title: "Client Demo Task" },
+        i === 14 && { type: "meeting", title: "Meeting with Carl Pei" },
+        i === 14 && { type: "task", title: "Client Demo Task" },
+      ].filter(Boolean);
+  
       days.push({
         date: i,
         isCurrentMonth: true,
-        events: [
-          i === 2 && { type: "meeting", title: "Meeting with Carl Pei" },
-          i === 2 && { type: "task", title: "Client Demo Task" },
-          i === 14 && { type: "meeting", title: "Meeting with Carl Pei" },
-          i === 14 && { type: "task", title: "Client Demo Task" },
-        ].filter(Boolean),
+        events: selectedView === "month" || isInWeek ? eventList : [],
       });
     }
+  
     return days;
   };
+  
+  
 
   return (
     <div className="max-w-9xl mx-auto p-4 ">
@@ -52,9 +86,10 @@ function Calendar() {
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="text-lg sm:text-2xl flex items-center gap-2 font-semibold">
-                <Calendar1 size={20} /> 30 Jan 2025
-              </h1>
+            <h1 className="text-lg sm:text-2xl flex items-center gap-2 font-semibold">
+              <Calendar1 size={20} /> {currentDate.toLocaleString("default", { month: "long" })} {currentDate.getFullYear()}
+            </h1>
+
               <p className="text-sm sm:text-[16px] text-gray-400">
                 Manage your reminders, events, and meetings
               </p>
@@ -65,31 +100,32 @@ function Calendar() {
                   className={`px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm rounded-full cursor-pointer transition-all duration-300 ${
                     selectedView === "month" ? "bg-gray-500 text-white" : "bg-gray-200 text-gray-400"
                   }`}
-                  onClick={() => setSelectedView("month")}
-                >
+                  onClick={() => setSelectedView("month")}>
                   Month
                 </button>
                 <button
                   className={`px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm rounded-full cursor-pointer transition-all duration-300 ${
                     selectedView === "week" ? "bg-gray-500 text-white" : "bg-gray-200 text-gray-400"
                   }`}
-                  onClick={() => setSelectedView("week")}
-                >
+                  onClick={() => setSelectedView("week")}>
                   Week
                 </button>
               </div>
               <div className="flex gap-2">
-                <button className="border border-gray-400 p-2 rounded-full bg-gray-100">
+                <button
+                  onClick={handlePreviousMonth}
+                  className="border cursor-pointer border-gray-400 p-2 rounded-full bg-gray-100">
                   <ChevronLeft size={18} className="text-gray-400" />
                 </button>
-                <button className="border border-gray-400 p-2 rounded-full bg-gray-100">
+                <button
+                  onClick={handleNextMonth}
+                  className="border cursor-pointer border-gray-400 p-2 rounded-full bg-gray-100">
                   <ChevronRight size={18} className="text-gray-400" />
                 </button>
               </div>
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex cursor-pointer gap-2 rounded-full py-2 px-4 sm:px-5 items-center text-white bg-[rgb(21,163,149)] hover:bg-teal-600 text-sm sm:text-base"
-              >
+                className="flex cursor-pointer gap-2 rounded-full py-2 px-4 sm:px-5 items-center text-white bg-[rgb(21,163,149)] hover:bg-teal-600 text-sm sm:text-base">
                 <Plus size={18} />
                 New
               </button>
@@ -98,10 +134,8 @@ function Calendar() {
           </div>
         </div>
 
-        {/* Calendar Grid */}
         <div className="py-3 overflow-x-auto">
-          {/* Days of the week (Hidden on small screens) */}
-          <div className="hidden sm:grid grid-cols-7">
+          <div className={`grid ${selectedView === "week" ? "grid-cols-7" : "grid-cols-3 sm:grid-cols-7"}`}>
             {daysOfWeek.map((day) => (
               <div key={day} className="px-3 text-sm sm:text-[17px] text-gray-500">
                 {day}
