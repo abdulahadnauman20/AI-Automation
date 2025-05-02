@@ -501,7 +501,7 @@ const EmailAccounts = () => {
       {showAccountsPage ? (
         <AccountsSelectionPage />
       ) : (
-        <div className="bg-white overflow-auto min-h-screen pl-[5px] md:px-[140px] pt-[10px] md:pt-[35px] text-gray-400 flex flex-col md:justify-center align-center text-sm">
+        <div className="bg-white overflow-auto min-h-screen pl-[5px] md:px-[140px] pt-[10px] md:pt-[35px] text-gray-400 flex flex-col  align-center text-sm">
           <div className="flex items-center justify-between mb-4 flex-col md:flex-row gap-2 md:mx-5">
             <input
               type="text"
@@ -523,56 +523,76 @@ const EmailAccounts = () => {
           </div>
 
           <div className="overflow-auto">
-            <div className="flex md:grid grid-cols-5 gap-2 md:gap-4 my-6 md:my-12 text-gray-400 font-medium pl-[12px] py-4 w-150 md:w-auto">
-              <div className="flex items-center gap-2 w-[200px] md:w-auto">
-                <input
-                  type="checkbox"
-                  checked={selectAll}
-                  onChange={handleSelectAll}
-                  className="w-4 h-4 md:w-5 md:h-5 text-green-500"
-                />
-                Email Address
-              </div>
-              <div className="w-[100px] md:w-auto">Email Sent</div>
-              <div className="w-[100px] md:w-auto">Warmup Emails</div>
-              <div className="w-[100px] md:w-auto">Health Score</div>
-            </div>
-
-            {isEmailAccountsLoading ? (
-              <div className="text-center py-4">Loading email accounts...</div>
-            ) : emailAccountsError ? (
-              <div className="text-center py-4 text-red-500">Error loading email accounts</div>
-            ) : (
-              emailAccountsObject?.emailAccounts?.map((account) => (
-                <div
-                  key={account.id}
-                  className={`flex jusitfy-between w-150 md:w-auto flex-shrink-0 md:grid grid-cols-5 gap-4 items-center p-4 rounded-lg transition-all ${selected.includes(account.id) ? "bg-[#c3ffe8]" : "hover:bg-[#e4fff5]"
-                    } text-gray-500`}
-                >
-                  <div className="flex items-center md:gap-4 gap-2 w-[200px] md:w-auto">
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(account.id)}
-                      onChange={() => toggleSelect(account.id)}
-                      className="w-4 h-4 md:w-5 md:h-5 text-green-500"
-                    />
-                    <div
-                      className={`md:w-10 md:h-10 h-8 w-8 shrink-0 flex items-center justify-center rounded-full text-white font-bold ${account.bgColor || "bg-gray-300"
-                        }`}
-                    >
-                      {account.initials || (account.Email ? account.Email.charAt(0).toUpperCase() : '?')}
+            <table className="w-full">
+              <thead>
+                <tr className="text-gray-400 font-medium py-4">
+                  <th className="text-left py-4 pl-4">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={handleSelectAll}
+                        className="w-3 h-3 text-green-500"
+                      />
+                      Email Address
                     </div>
-                    <span>{account.name || account.Email || 'Unnamed Account'}</span>
-                  </div>
-                  <div className="w-[100px] md:w-auto">{account.emailsSent || "0 of 0"}</div>
-                  <div className="w-[100px] md:w-auto">{account.warmupEmails || "0"}</div>
-                  <div className="w-[100px] md:w-auto">{account.healthScore || "0%"}</div>
-                  <div className="text-gray-600 w-[30px] md:w-auto cursor-pointer flex justify-end ">
-                    <FaEllipsisH />
-                  </div>
-                </div>
-              ))
-            )}
+                  </th>
+                  <th className="text-center py-4">Email Sent</th>
+                  <th className="text-center py-4">Warmup Emails</th>
+                  <th className="text-center py-4">Health Score</th>
+                  <th className="w-[50px]"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {isEmailAccountsLoading ? (
+                  <tr>
+                    <td colSpan="5" className="text-center py-4">Loading email accounts...</td>
+                  </tr>
+                ) : emailAccountsError ? (
+                  <tr>
+                    <td colSpan="5" className="text-center py-4 text-red-500">Error loading email accounts</td>
+                  </tr>
+                ) : (
+                  emailAccountsObject?.emailAccounts?.map((account) => (
+                    <tr
+                      key={account.id}
+                      className={`transition-all cursor-pointer ${selected.includes(account.id) ? "bg-[#c3ffe8]" : "hover:bg-[#e4fff5]"
+                        } text-gray-500`}
+                      onClick={() => toggleSelect(account.id)}
+                    >
+                      <td className="py-4 pl-4">
+                        <div className="flex items-center gap-4">
+                          <input
+                            type="checkbox"
+                            checked={selected.includes(account.id)}
+                            onChange={(e) => {
+                              e.stopPropagation(); // Prevent row click when clicking checkbox
+                              toggleSelect(account.id);
+                            }}
+                            className="w-3 h-3 text-green-500"
+                          />
+                          <div
+                            className={`w-10 h-10 shrink-0 flex items-center justify-center rounded-full text-white font-bold ${account.bgColor || "bg-gray-300"
+                              }`}
+                          >
+                            {account.initials || (account.Email ? account.Email.charAt(0).toUpperCase() : '?')}
+                          </div>
+                          <span className="truncate">{account.name || account.Email || 'Unnamed Account'}</span>
+                        </div>
+                      </td>
+                      <td className="text-center py-4">{account.emailsSent || "0 of 0"}</td>
+                      <td className="text-center py-4">{account.warmupEmails || "0"}</td>
+                      <td className="text-center py-4">{account.healthScore || "0%"}</td>
+                      <td className="text-gray-600 cursor-pointer py-4" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-end pr-4">
+                          <FaEllipsisH />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

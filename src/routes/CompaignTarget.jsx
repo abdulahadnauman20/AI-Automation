@@ -133,6 +133,7 @@ const data = [
           ...step,
           subject: template.Subject,
           body: template.Body,
+          value: template.Name,
         };
       }
       return step;
@@ -154,7 +155,7 @@ const data = [
   
   const handleWriteEmailWithAI = () => {
     const emailIndex = selectStep - 1;
-  
+    console.log(emailIndex);
     const emailObject = {
       Emails: campaignSequence.sequence.Emails.map((email) => ({
         Name: email.Name,
