@@ -2,13 +2,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import {
   connectGoogleCalendar,
-  callCalender,
   getEvents,
   createEvents,
   getAEvent,
   updateAEvent,
   deleteAEvent,
-  syncGoogleEvents,
 } from "../services/calenderService";
 
 export const useGoogleCalendarQuery = () => {
@@ -24,14 +22,6 @@ export const useGoogleCalendarQuery = () => {
     onError: (err) => {
       toast.error(err.response?.data?.message || "Failed to connect Google Calendar");
     },
-  });
-
-  const oAuthCallbackQuery = useQuery({
-    queryKey: ["calendar-callback"],
-    queryFn: callCalender,
-    enabled: false,
-    onSuccess: (data) => toast.success(data.message),
-    onError: (err) => toast.error(err.response?.data?.message || "OAuth Callback Failed"),
   });
 
   // -------------------- Events --------------------
@@ -76,19 +66,9 @@ export const useGoogleCalendarQuery = () => {
     onError: (err) => toast.error(err.response?.data?.message || "Delete failed"),
   });
 
-  const syncEventsMutation = useMutation({
-    mutationFn: syncGoogleEvents,
-    onSuccess: () => {
-      toast.success("Synced Google Events");
-      queryClient.invalidateQueries(["calendar-events"]);
-    },
-    onError: (err) => toast.error(err.response?.data?.message || "Sync failed"),
-  });
-
   return {
     // OAuth
     connectCalendarMutation,
-    oAuthCallbackQuery,
 
     // Events
     getAllEventsQuery,
@@ -96,6 +76,5 @@ export const useGoogleCalendarQuery = () => {
     getSingleEventQuery,
     updateEventMutation,
     deleteEventMutation,
-    syncEventsMutation,
   };
 };

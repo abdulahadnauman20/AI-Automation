@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Calendar, CircleX, Clock3, FileText, NotepadText } from "lucide-react";
+import { Calendar, CircleX, Clock3, FileText, NotepadText, Trash2 } from "lucide-react";
 import { RiEditCircleLine } from "react-icons/ri";
 import { IoVideocam } from "react-icons/io5";
 
@@ -81,6 +81,10 @@ function SideDrawer({ isOpen, setIsOpen, data}) {
     setIsOpen(false);
   }
 
+  const handleDelete = () => {
+    
+  }
+
 
   return (
     <div className="relative">
@@ -98,7 +102,7 @@ function SideDrawer({ isOpen, setIsOpen, data}) {
             <CircleX size={22} />
           </button>
         </div>
-
+        <button onClick={handleDelete} className="text-gray-400 ms-[245px] cursor-pointer"><Trash2 /></button>
         <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
           {/* Task Title */}
           <div>
@@ -211,12 +215,12 @@ function SideDrawer({ isOpen, setIsOpen, data}) {
             <button
               type="button"
               onClick={handleSubmit}
-              className="text-white flex gap-2 items-center cursor-pointer bg-[rgb(21,163,149)] font-medium rounded-full text-sm px-5 py-2.5"
-            >
+              className="text-white flex gap-2 items-center cursor-pointer bg-[rgb(21,163,149)] font-medium rounded-full text-sm px-5 py-2.5">
               <FileText size={18} /> Save Task
             </button>
           </div>
         </form>
+       
       </div>
     </div>
   );

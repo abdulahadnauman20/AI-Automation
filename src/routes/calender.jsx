@@ -4,10 +4,21 @@ import SideDrawer from "../components/SideDrawer";
 import Modal from "../components/Modal";
 import { useGoogleCalendarQuery } from "../reactQuery/hooks/useCalenderQuery";
 
-// const { connectCalendarMutation, oAuthCallbackQuery, getAllEventsQuery, createEventMutation, getSingleEventQuery, updateEventMutation, deleteEventMutation, syncEventsMutation } = useGoogleCalendarQuery();
 
 
 function Calendar() {
+  // const[getData, setGetData] = useState(null);
+  // const {  
+  //   // OAuth
+  //   connectCalendarMutation,
+  //   // Events
+  //   getAllEventsQuery,
+  //   createEventMutation,
+  //   getSingleEventQuery,
+  //   updateEventMutation,
+  //   deleteEventMutation, 
+  // } = useGoogleCalendarQuery();
+
   const [modelOpen, setmodelOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedView, setSelectedView] = useState("month");
