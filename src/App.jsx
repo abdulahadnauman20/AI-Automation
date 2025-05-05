@@ -40,7 +40,7 @@ function App() {
           <Route path='/crm' element={<Crm />} />
           <Route path='/campaigns' element={<Campaigns />} />
           <Route path='/campaigns/target/:campaignId' element={<CompaignTarget />} />
-          <Route path="/calender" element={<Calendar />} />
+          <Route path="/calendar" element={<Calendar />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/pipelines" element={<Pipelines />} />
           <Route path="/website-visitor" element={<WebsiteVisitor />} />

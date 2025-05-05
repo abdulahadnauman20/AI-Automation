@@ -117,6 +117,40 @@ const Settings = () => {
         })
     };
 
+    const handleConnectCalendar = async () => {
+        try {
+          const tokenObj = JSON.parse(localStorage.getItem('Token'));
+          const token = tokenObj?.token;
+    
+          if (!token) {
+            alert('No auth token found.');
+            return;
+          }
+    
+          const response = await fetch('https://quick-pipe-backend.vercel.app/calendar/connect', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+    
+          if (!response.ok) {
+            throw new Error('Failed to connect to calendar');
+          }
+    
+          const data = await response.json();
+    
+          if (data.url) {
+            window.location.href = data.url;
+          } else {
+            alert('URL not found in response');
+          }
+        } catch (error) {
+          console.error('Error connecting to calendar:', error);
+          alert('An error occurred. Please try again.');
+        }
+      };
+
 
     const [activeTab, setActiveTab] = useState('profile');
     const [activeTab2, setActiveTab2] = useState('team');
@@ -576,7 +610,7 @@ const Settings = () => {
                                         </svg>
                                         Manage
                                     </button>
-                                    <button className="flex items-center justify-center text-xs text-gray-500 bg-white group-hover:bg-[#15A395] group-hover:text-white px-3 py-1.5 rounded-full border border-gray-200 group-hover:border-[#15A395] transition-colors duration-200">
+                                    <button onClick={handleConnectCalendar} className="flex items-center cursor-pointer justify-center text-xs text-gray-500 bg-white group-hover:bg-[#15A395] group-hover:text-white px-3 py-1.5 rounded-full border border-gray-200 group-hover:border-[#15A395] transition-colors duration-200">
                                         Connect
                                     </button>
                                 </div>

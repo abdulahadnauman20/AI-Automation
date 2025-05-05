@@ -10,7 +10,7 @@ const menuItems = [
   { name: "Analytics", icon: ChartBar, slug: "analytics" },
   { name: "Website Visitors", icon: Eye, slug: "website-visitor" },
   { name: "Pipeline", icon: LineChart, slug: "pipelines" },
-  { name: "Calendar", icon: Calendar, slug: "calender" },
+  { name: "Calendar", icon: Calendar, slug: "calendar" },
 ];
 
 const bottomItems = [

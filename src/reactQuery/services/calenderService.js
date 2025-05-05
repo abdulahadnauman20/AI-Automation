@@ -4,9 +4,12 @@ export const connectGoogleCalendar = () => axiosInstance.get("/calendar/connect"
 
 export const isAuthenticated = () => axiosInstance.get("/integration/CalendarAuthCheck").then(res => res.data);
   
-export const getEvents = () => axiosInstance.get("/calendar/events").then(res => res.data);
+export const getEventsByRange = (startDate, endDate) => {
+    console.log("getEventsByRange called with:", { startDate, endDate });
+    return axiosInstance.get(`tasks/range?startDate=${startDate}&endDate=${endDate}`).then(res => res.data);
+};
 
-export const createEvents = () => axiosInstance.post("/calendar/events").then(res => res.data);
+export const createEvents = (data) => axiosInstance.post("/calendar/events", data).then(res => res.data);
 
 export const getAEvent = (id) => axiosInstance.get(`/calendar/events/${id}`).then(res => res.data);
 
