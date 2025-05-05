@@ -24,6 +24,7 @@ import Otp from './routes/Otp';
 import { Toaster } from 'react-hot-toast';
 import InvittionRoutes from './routes/InvittionRoutes';
 import { OAuthCallback } from './routes/EmailAccounts';
+import AILeadSearch from "./routes/AILeadSearch"
 
 function App() {
   const router = createBrowserRouter(
@@ -51,6 +52,7 @@ function App() {
           <Route path="/support" element={<Support />} />
           <Route path='/invitationAccept/:wkid/:usid' element={<InvittionRoutes />} />
           <Route path='/oauth/callback' element={<OAuthCallback />} />
+          <Route path="/ai-lead-search" element={<AILeadSearch />} />
         </Route>
       </>
     )
