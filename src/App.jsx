@@ -25,6 +25,8 @@ import { Toaster } from 'react-hot-toast';
 import InvittionRoutes from './routes/InvittionRoutes';
 import { OAuthCallback } from './routes/EmailAccounts';
 import AILeadSearch from "./routes/AILeadSearch"
+import EmailDomain from './routes/EmailDomain';
+import EmailDomainOrder from './routes/EmailDomainOrder';
 
 function App() {
   const router = createBrowserRouter(
@@ -47,6 +49,8 @@ function App() {
           <Route path="/website-visitor" element={<WebsiteVisitor />} />
           <Route path="/multi-box" element={<MultiBox />} />
           <Route path="/email-accounts" element={<EmailAccounts />} />
+          <Route path="/email-domain" element={<EmailDomain />} />
+          <Route path="/email-domain-order" element={<EmailDomainOrder />} />
           <Route path="/ai-lead-scouts" element={<AILeadScouts />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/support" element={<Support />} />

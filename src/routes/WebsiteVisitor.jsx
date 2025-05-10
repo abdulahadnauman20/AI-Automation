@@ -1,6 +1,7 @@
 import { useState } from "react";
 import profilePic from "../assets/Boy.png";
-import { ChevronDown, Filter, PlusCircle } from "lucide-react";
+import { ChevronDown, CircleX, Filter, MousePointer2, PlusCircle, User } from "lucide-react";
+import Filters from "../components/Filters";
 
 const contacts = Array.from({ length: 8 }, (_, i) => ({
   id: i,
@@ -9,6 +10,7 @@ const contacts = Array.from({ length: 8 }, (_, i) => ({
   address: "Los Angeles Pier, LA",
   time: "Jan 23, 7:23 AM",
 }));
+
 
 const ContactCard = ({ contact, isSelected, onSelect }) => {
   return (
@@ -37,6 +39,8 @@ const ContactCard = ({ contact, isSelected, onSelect }) => {
 export default function ContactList() {
   const [selectedAll, setSelectedAll] = useState(false);
   const [selectedContacts, setSelectedContacts] = useState({});
+  const [isModal, setIsModal] = useState(false);
+  const [isModal2, setIsModal2] = useState(false);
 
   const toggleSelectAll = () => {
     const newSelected = !selectedAll;
@@ -65,18 +69,92 @@ export default function ContactList() {
           className="p-2 border border-gray-300 rounded-full w-full md:w-64"
         />
         <div className="flex items-center space-x-2 md:space-x-4 text-xs flex-wrap gap-2">
-          <button className="flex items-center px-3 md:px-6 py-1.5 md:py-3 border border-gray-300 rounded-full">
-            <Filter size={16} className="mr-2" /> Filter
+          <Filters />
+          <button
+            type="button"
+            onClick={() => setIsModal2(true)}
+            className="inline-flex items-center px-4 py-2 cursor-pointer border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-[rgb(224,140,23)] to-[rgb(84,156,110)]">
+            <User size={18} />
+            Get Contacts
           </button>
-          <button className="flex items-center px-3 md:px-6 py-1.5 md:py-3 border border-gray-300 rounded-full">
-            Oldest first <ChevronDown size={16} className="ml-2" />
-          </button>
-          <button className="flex items-center px-3 md:px-6 py-1.5 md:py-3 bg-gradient-to-r from-orange-400 to-green-500 text-white rounded-full">
-            <PlusCircle size={16} className="mr-2" /> Get Contacts
-          </button>
-          <button className="px-3 md:px-6 py-1.5 md:py-3 rounded-full text-white" style={{ backgroundColor: "#15A395" }}>
+          
+          {isModal2 && (
+              <div onClick={() => setIsModal2(false)} className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30">
+                <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl mx-4 animate-fade-in-up transition-all duration-300">
+                  <div className="flex items-center bg-teal-50 justify-between p-5 border-b border-gray-200">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">23 Contacts found</h3>
+                      <p className="text-sm text-gray-500">AI has found 23 contact from website  visitors Select the contacts you want to add to your campaign or CRM.</p>
+                    </div>
+                    <button onClick={() => setIsModal2(false)} className="text-gray-400 cursor-pointer hover:text-gray-600 transition">
+                      <CircleX className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="max-h-[60vh] overflow-y-auto p-2 space-y-2">
+                    {contacts.map((contact) => (
+                      <ContactCard
+                        key={contact.id}
+                        contact={contact}
+                        isSelected={selectedContacts[contact.id]}
+                        onSelect={() => toggleSelect(contact.id)}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex justify-end gap-2 p-4">
+                    <button onClick={() => setIsModal(false)} className="py-2 px-5 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-full hover:bg-gray-100 cursor-pointer">Add to campaign</button>
+                    <button className="py-2 px-5 text-sm font-medium text-white bg-teal-600 rounded-full cursor-pointer">Add to CRM</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          <button onClick={() => setIsModal(true)} className="px-3 flex items-center gap-1 cursor-pointer text-[13px] md:px-6 py-1.5 md:py-3 rounded-full text-white" style={{ backgroundColor: "#15A395" }}>
             Add to campaign
+            <MousePointer2 size={17} />
           </button>
+          
+          {isModal && (
+            <div onClick={() => setIsModal(false)} className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30">
+              <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 animate-fade-in-up transition-all duration-300">
+                <div className="flex items-center justify-between p-5 border-b border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900">Add to Campaign</h3>
+                  <button onClick={() => setIsModal(false)} className="text-gray-400 cursor-pointer hover:text-gray-600 transition">
+                    <CircleX className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="p-5 space-y-3">
+                  <h4 className="text-base font-medium">Select Campaign</h4>
+                  <p className="text-sm text-gray-500">Choose the campaign you want to send the notification from.</p>
+                  <div className="relative">
+                    <select className="w-full p-2.5 mt-2 text-sm border border-gray-300 rounded-md  outline-none">
+                      <option value="">All Campaigns</option>
+                      <option value="option1">Campaign 1</option>
+                      <option value="option2">Campaign 2</option>
+                      <option value="option3">Campaign 3</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" />
+                    <span className="text-gray-400 text-[14px]">Check for duplicate across all campaigns</span>
+                  </div>
+
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" className="sr-only peer" />
+                    <div className="relative w-11 h-6 bg-gray-200 rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:h-5 after:w-5 after:rounded-full after:transition-all peer-checked:bg-teal-600"></div>
+                    <span className="ml-3 text-sm font-medium text-gray-900">Skip already in campaign</span>
+                  </label>
+                </div>
+
+                <div className="flex justify-end gap-2 p-4">
+                  <button onClick={() => setIsModal(false)} className="py-2.5 px-5 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-full hover:bg-gray-100 hover:text-blue-700 cursor-pointer">Cancel</button>
+                  <button className="py-2.5 px-5 text-sm font-medium text-white bg-teal-600 rounded-full cursor-pointer">Add to campaign</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       <div className="flex items-center space-x-2 mb-4">

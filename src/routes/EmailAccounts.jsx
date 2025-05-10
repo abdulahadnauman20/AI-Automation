@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { FaEllipsisH, FaFilter, FaChevronDown } from "react-icons/fa";
 import { FaBackward } from "react-icons/fa";
 import axios from "axios";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCampaignQuery } from "../reactQuery/hooks/useEmailAccountsQuery";
+import { ChevronDown, CircleCheckBig } from "lucide-react";
 
 
 // OAuth Callback Component
@@ -11,6 +12,7 @@ const OAuthCallback = () => {
   const [status, setStatus] = useState('Processing...');
   const location = useLocation();
   const navigate = useNavigate();
+
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -106,6 +108,39 @@ const EmailAccounts = () => {
   const [showAccountsPage, setShowAccountsPage] = useState(false);
   const [authWindow, setAuthWindow] = useState(null);
   const [error, setError] = useState(null);
+
+  const [showSortDropdown, setShowSortDropdown] = useState(false)
+  const [sortOrder, setSortOrder] = useState('Oldest first');
+  const [campaigns, setCampaigns] = useState([]);
+  const sortOptions = [
+    { value: 'Newest first', label: 'Newest first' },
+    { value: 'Oldest first', label: 'Oldest first' },
+    { value: 'Name A - Z', label: 'Name A - Z' },
+    { value: 'Name Z - A', label: 'Name Z - A' }
+  ];
+
+
+  const handleSortChange = (sort) => {
+    setSortOrder(sort);
+    setShowSortDropdown(false);
+    const sortedCampaigns = [...campaigns];
+    
+    if (sort === 'Newest first') {
+      sortedCampaigns.sort((a, b) => b.id - a.id);
+    } else if (sort === 'Oldest first') {
+      sortedCampaigns.sort((a, b) => a.id - b.id);
+    } else if (sort === 'Name A - Z') {
+      sortedCampaigns.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sort === 'Name Z - A') {
+      sortedCampaigns.sort((a, b) => b.name.localeCompare(a.name));
+    }
+    setCampaigns(sortedCampaigns);
+  };
+
+  
+  const handleDropdownClick = (e) => {
+    e.stopPropagation();
+  };
 
   // Get email accounts data from the query
   const { emailAccountsObject, isEmailAccountsLoading, emailAccountsError } = useCampaignQuery();
@@ -359,39 +394,31 @@ const EmailAccounts = () => {
             <img src="/src/assets/customer-support.jpeg" alt="Email setup" className="w-70 h-40 object-contain" />
           </div>
           <h3 className="text-lg font-semibold text-center mb-4">Ready-to-send accounts</h3>
-          <button className="bg-[#15A395] text-white py-2 px-4 rounded-full w-full mb-6">
-            Continue
-          </button>
+          <Link to="/email-domain">
+            <button className="bg-[#15A395] cursor-pointer text-white py-2 px-4 rounded-full w-full mb-6">
+              Continue
+            </button>
+          </Link>
 
           <div className="space-y-4 mt-2">
-            <div className="flex items-center">
-              <div className="w-4 h-4 mr-2 rounded-full border border-gray-300 flex items-center justify-center">
-                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              </div>
+            <div className="flex items-center gap-1">
+              <CircleCheckBig size={17} className="text-gray-400" />
               <span className="text-sm text-gray-600">Ready-to-use accounts & domains</span>
             </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 mr-2 rounded-full border border-gray-300 flex items-center justify-center">
-                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              </div>
+            <div className="flex items-center gap-1">
+              <CircleCheckBig size={17} className="text-gray-400" />
               <span className="text-sm text-gray-600">Launch your outreach immediately</span>
             </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 mr-2 rounded-full border border-gray-300 flex items-center justify-center">
-                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              </div>
+            <div className="flex items-center gap-1">
+              <CircleCheckBig size={17} className="text-gray-400" />
               <span className="text-sm text-gray-600">Expand your campaigns seamlessly</span>
             </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 mr-2 rounded-full border border-gray-300 flex items-center justify-center">
-                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              </div>
+            <div className="flex items-center gap-1">
+              <CircleCheckBig size={17} className="text-gray-400" />
               <span className="text-sm text-gray-600">Enhanced email deliverability</span>
             </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 mr-2 rounded-full border border-gray-300 flex items-center justify-center">
-                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              </div>
+            <div className="flex items-center gap-1">
+              <CircleCheckBig size={17} className="text-gray-400" />
               <span className="text-sm text-gray-600">Premium US-based IP accounts</span>
             </div>
           </div>
@@ -407,42 +434,32 @@ const EmailAccounts = () => {
           <div className="mb-6">
             <button
               onClick={handleGoogleAuth}
-              className="flex items-center justify-center bg-gray-100 text-gray-800 py-2 px-4 rounded-full w-full mb-2 hover:bg-gray-200 transition-colors"
+              className="flex items-center justify-center cursor-pointer bg-gray-100 text-gray-800 py-2 px-4 rounded-full w-full mb-2 hover:bg-gray-200 transition-colors"
             >
               <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4 mr-2" />
               Gmail/ Google Suite
             </button>
           </div>
 
-          <div className="space-y-4 mt-2">
+          <div className="space-y-4 mt-2 gap-1">
             <div className="flex items-center">
-              <div className="w-4 h-4 mr-2 rounded-full border border-gray-300 flex items-center justify-center">
-                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              </div>
+              <CircleCheckBig size={17} className="text-gray-400" />
               <span className="text-sm text-gray-600">Accounts set up for you</span>
             </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 mr-2 rounded-full border border-gray-300 flex items-center justify-center">
-                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              </div>
+            <div className="flex items-center gap-1">
+              <CircleCheckBig size={17} className="text-gray-400" />
               <span className="text-sm text-gray-600">Pick your domain & account names</span>
             </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 mr-2 rounded-full border border-gray-300 flex items-center justify-center">
-                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              </div>
+            <div className="flex items-center gap-1">
+              <CircleCheckBig size={17} className="text-gray-400" />
               <span className="text-sm text-gray-600">Seamless auto-reconnect</span>
             </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 mr-2 rounded-full border border-gray-300 flex items-center justify-center">
-                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              </div>
+            <div className="flex items-center gap-1">
+              <CircleCheckBig size={17} className="text-gray-400" />
               <span className="text-sm text-gray-600">Cut costs & boost efficiency</span>
             </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 mr-2 rounded-full border border-gray-300 flex items-center justify-center">
-                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              </div>
+            <div className="flex items-center gap-1">
+              <CircleCheckBig size={17} className="text-gray-400" />
               <span className="text-sm text-gray-600">Premium US-based IP accounts</span>
             </div>
           </div>
@@ -462,7 +479,7 @@ const EmailAccounts = () => {
             </button> */}
             <button
               onClick={handleMicrosoftAuth}
-              className="flex items-center justify-center bg-gray-100 text-gray-800 py-2 px-4 rounded-full w-full mb-2 hover:bg-gray-200 transition-colors"
+              className="flex items-center justify-center cursor-pointer bg-gray-100 text-gray-800 py-2 px-4 rounded-full w-full mb-2 hover:bg-gray-200 transition-colors"
             >
               <img src="https://c.s-microsoft.com/favicon.ico" alt="Microsoft" className="w-4 h-4 mr-2" />
               Microsoft Office 365 Suite
@@ -478,16 +495,12 @@ const EmailAccounts = () => {
           </div>
 
           <div className="space-y-4 mt-2">
-            <div className="flex items-center">
-              <div className="w-4 h-4 mr-2 rounded-full border border-gray-300 flex items-center justify-center">
-                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              </div>
+            <div className="flex items-center gap-1">
+              <CircleCheckBig size={17} className="text-gray-400" />
               <span className="text-sm text-gray-600">Connect any IMAP or SMTP email provider</span>
             </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 mr-2 rounded-full border border-gray-300 flex items-center justify-center">
-                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              </div>
+            <div className="flex items-center gap-1">
+              <CircleCheckBig size={17} className="text-gray-400" />
               <span className="text-sm text-gray-600">Sync up replies in the Multibox</span>
             </div>
           </div>
@@ -512,10 +525,43 @@ const EmailAccounts = () => {
               <button className="flex items-center px-3 md:px-4 py-2 border border-gray-300 rounded-full text-sm">
                 All Statuses
               </button>
-              <button className="flex items-center px-3 py-2 border border-gray-300 rounded-full">
-                Oldest First
-              </button>
-              <button className="px-3 py-2 bg-[#15A395] text-white rounded-full"
+              <div className="relative">
+            <button
+            type="button"
+            className="inline-flex justify-center cursor-pointer w-full rounded-full border border-gray-300 px-4 py-2 bg-white text-sm font-medium gap-1 text-gray-400 hover:bg-gray-50 focus:outline-none"
+            id="sort-menu"
+            onClick={(e) => {
+                e.stopPropagation();
+                setShowSortDropdown(!showSortDropdown);
+                setShowStatusDropdown(false);
+            }}
+            >
+            {sortOrder}
+            <ChevronDown size={16} className="ml-2 text-gray-400" />
+            </button>
+            
+            {showSortDropdown && (
+            <div 
+                className="origin-top-right absolute right-0 left-1 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+                onClick={handleDropdownClick}
+            >
+                <div className="py-1">
+                {sortOptions.map((option) => (
+                    <button
+                    key={option.value}
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center ${
+                        sortOrder === option.value ? 'text-teal-600 font-medium' : 'text-gray-700'
+                    }`}
+                    onClick={() => handleSortChange(option.value)}
+                    >
+                    {option.label}
+                    </button>
+                ))}
+                </div>
+            </div>
+            )}
+        </div>
+              <button className="px-3 py-2 cursor-pointer bg-[#15A395] text-white rounded-full"
                 onClick={() => setShowAccountsPage(true)}>
                 + Add new
               </button>
