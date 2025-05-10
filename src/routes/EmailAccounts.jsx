@@ -3,7 +3,7 @@ import { FaEllipsisH, FaFilter, FaChevronDown } from "react-icons/fa";
 import { FaBackward } from "react-icons/fa";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useCampaignQuery } from "../reactQuery/hooks/useEmailAccountsQuery";
+import { useEmailAccountQuery } from "../reactQuery/hooks/useEmailAccountsQuery";
 import { ChevronDown, CircleCheckBig } from "lucide-react";
 
 
@@ -143,7 +143,7 @@ const EmailAccounts = () => {
   };
 
   // Get email accounts data from the query
-  const { emailAccountsObject, isEmailAccountsLoading, emailAccountsError } = useCampaignQuery();
+  const { emailAccountsObject, isEmailAccountsLoading, emailAccountsError } = useEmailAccountQuery();
 
   const toggleSelect = (id) => {
     setSelected((prev) =>
