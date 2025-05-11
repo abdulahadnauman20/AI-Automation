@@ -139,7 +139,13 @@ export default function AILeadSearch() {
     alert(`Campaign "${campaignName}" created successfully!`);
   };
 
-  const filteredLeads = skipOwned ? allLeads?.filter((lead) => !lead.owned) : leads;
+  const filteredLeads = allLeads?.results;
+
+  useEffect(() => {
+    console.log("Filtered:", filteredLeads);
+  }, [filteredLeads])
+
+  // const filteredLeads = skipOwned ? allLeads?.filter((lead) => !lead.owned) : leads;
 
   return (
     <div className="flex min-h-screen w-full h-full flex-col md:flex-row gap-5 md:gap-0 pl-[10px] md:pl-[25px] bg-white relative">
@@ -316,4 +322,40 @@ export default function AILeadSearch() {
       </div>
     </div>
   );
+}
+
+function LeadRow({ checked, onChange, name, avatar, avatarColor, company, title, email, phone, lastInteraction, owned }) {
+  return (
+    <tr className={`border-b hover:bg-gray-50 ${owned ? 'bg-gray-50' : ''}`}>
+      <td className="p-4">
+        <CustomCheckbox 
+          checked={checked} 
+          onChange={onChange}
+          disabled={owned}
+        />
+      </td>
+      <td className="p-4">
+        <div className="flex items-center gap-2">
+          <div className={`w-8 h-8 rounded-full ${avatarColor} flex items-center justify-center`}>{avatar}</div>
+          <span className={`text-sm ${owned ? 'text-gray-400' : ''}`}>{name}</span>
+          {owned && <span className="text-xs text-gray-400">(owned)</span>}
+        </div>
+      </td>
+      <td className="p-4">
+        <span className={`text-sm ${owned ? 'text-gray-400' : ''}`}>{company}</span>
+      </td>
+      <td className="p-4">
+        <span className={`text-sm ${owned ? 'text-gray-400' : ''}`}>{title}</span>
+      </td>
+      <td className="p-4">
+        <span className={`text-sm ${owned ? 'text-gray-400' : 'text-blue-500'}`}>{email}</span>
+      </td>
+      <td className="p-4">
+        <span className={`text-sm ${owned ? 'text-gray-400' : ''}`}>{phone}</span>
+      </td>
+      <td className="p-4">
+        <span className={`text-sm ${owned ? 'text-gray-400' : ''}`}>{lastInteraction}</span>
+      </td>
+    </tr>
+  )
 }
