@@ -1,4 +1,8 @@
-import { ChevronDown, ChevronLeft, ChevronRight, MoreVertical, Phone, Search } from "lucide-react"
+import { Search } from "lucide-react"
+import { FaBriefcase, FaMapMarkerAlt, FaIndustry, FaUsers, FaDollarSign, FaGlobe, FaCogs, FaMoneyCheckAlt, FaUser, FaBuilding } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom"; // useNavigate added
+import { useAILeadScoutQuery } from "../reactQuery/hooks/useAILeadScoutQuery";
 
 function CustomCheckbox({ id, checked = false, onChange = () => {}, disabled = false }) {
   return (
@@ -57,38 +61,43 @@ function CustomButton({ children, variant = "default", className = "", ...props 
 }
 
 
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { useAILeadScoutQuery } from "../reactQuery/hooks/useAILeadScoutQuery";
-import { FaBriefcase, FaMapMarkerAlt, FaIndustry, FaUsers, FaDollarSign, FaGlobe, FaCogs, FaMoneyCheckAlt, FaUser, FaBuilding } from "react-icons/fa";
-// import { ChevronDown, ChevronLeft, ChevronRight, MoreVertical, Phone, Search } from "lucide-react"
 
 export default function AILeadSearch() {
   const [selectAll, setSelectAll] = useState(false);
   const [skipOwned, setSkipOwned] = useState(true);
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [campaignName, setCampaignName] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); // Added state for search input
 
   const location = useLocation();
+  const navigate = useNavigate(); // useNavigate hook for changing the URL
+
+  // Extract the initial search query from the URL
   const queryParams = new URLSearchParams(location.search);
-  const searchQuery = queryParams.get("searchQuery") || "No search query provided";
+  const initialSearchQuery = queryParams.get("searchQuery") || "";
+
+  
+  useEffect(() => {
+    setSearchTerm(initialSearchQuery);
+  }, [initialSearchQuery]);
+
   const page = 1;
 
+  // Fetch leads with the current search query
   const { allLeads, isLeadsLoading, leadsError, refetch } = useAILeadScoutQuery({
-    query: searchQuery,
+    query: searchTerm,
     page: page,
   });
 
   useEffect(() => {
-    // Trigger the refetch function as soon as the page loads with the search query
-    if (searchQuery && searchQuery !== "No search query provided") {
-      refetch();
-    }
-  }, [searchQuery]); 
-
-  useEffect(() => {
     console.log("Data: ", allLeads);
-  }, [allLeads])
+  }, [allLeads]);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    navigate(`?searchQuery=${searchTerm}`, { replace: true });
+    refetch();
+  };
 
   const toggleSelectAll = () => {
     const newSelectAll = !selectAll;
@@ -144,8 +153,6 @@ export default function AILeadSearch() {
   useEffect(() => {
     console.log("Filtered:", filteredLeads);
   }, [filteredLeads])
-
-  // const filteredLeads = skipOwned ? allLeads?.filter((lead) => !lead.owned) : leads;
 
   return (
     <div className="flex min-h-screen w-full h-full flex-col md:flex-row gap-5 md:gap-0 pl-[10px] md:pl-[25px] bg-white relative">
@@ -238,11 +245,15 @@ export default function AILeadSearch() {
             <div className="text-sm text-gray-500">{filteredLeads?.length} results found</div>
             <div className="flex-1 relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="E.g Engineers in New York in software ..."
-                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <form onSubmit={handleSearchSubmit}>
+                <input
+                  type="text"
+                  value={searchTerm} // Controlled input
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="E.g Engineers in New York in software ..."
+                  className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </form>
             </div>
             <button className="bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white flex items-center gap-2 rounded-full px-4 py-2 border-none">
               <span>✨</span> AI Search
@@ -294,35 +305,11 @@ export default function AILeadSearch() {
             </table>
           </div>
         </div>
-
-        {/* Pagination */}
-        <div className="p-4 flex items-center justify-center">
-          <div className="flex items-center gap-2">
-            <CustomButton variant="outline" className="flex items-center gap-1">
-              <ChevronLeft className="w-4 h-4" /> Previous
-            </CustomButton>
-            <CustomButton variant="outline" className="w-8 h-8 p-0 bg-gray-100">
-              1
-            </CustomButton>
-            <CustomButton variant="outline" className="w-8 h-8 p-0">
-              2
-            </CustomButton>
-            <CustomButton variant="outline" className="w-8 h-8 p-0">
-              3
-            </CustomButton>
-            <span className="text-sm">...</span>
-            <CustomButton variant="outline" className="w-8 h-8 p-0">
-              45
-            </CustomButton>
-            <CustomButton variant="outline" className="flex items-center gap-1">
-              Next <ChevronRight className="w-4 h-4" />
-            </CustomButton>
-          </div>
-        </div>
       </div>
     </div>
   );
 }
+
 
 function LeadRow({ checked, onChange, name, avatar, avatarColor, company, title, email, phone, lastInteraction, owned }) {
   return (
