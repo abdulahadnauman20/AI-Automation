@@ -4,7 +4,7 @@ import { FaBackward } from "react-icons/fa";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEmailAccountQuery } from "../reactQuery/hooks/useEmailAccountsQuery";
-import { ChevronDown, CircleCheckBig } from "lucide-react";
+import { ChevronDown, ChevronLeft, CircleCheck, CircleCheckBig, Pause, Play, ShieldX, SquarePen, Zap } from "lucide-react";
 
 
 // OAuth Callback Component
@@ -108,6 +108,16 @@ const EmailAccounts = () => {
   const [showAccountsPage, setShowAccountsPage] = useState(false);
   const [authWindow, setAuthWindow] = useState(null);
   const [error, setError] = useState(null);
+  const[isOpen, setIsOpen] = useState(false);
+
+  const listItems = [
+  { name: "All Statuses", icon: "⚡" },
+  { name: "Active", icon: <Play size={20} className="text-blue-400" /> },
+  { name: "Draft", icon: <SquarePen size={20} className="text-gray-600" /> },
+  { name: "Paused", icon: <Pause size={20} className="text-orange-400" /> },
+  { name: "Error", icon: <ShieldX size={20} className="text-red-600" /> },
+  { name: "Completed", icon: <CircleCheck size={20} className="text-green-400" /> },
+]
 
   const [showSortDropdown, setShowSortDropdown] = useState(false)
   const [sortOrder, setSortOrder] = useState('Oldest first');
@@ -379,15 +389,12 @@ const EmailAccounts = () => {
       <div className="flex items-center mb-4">
         <button
           onClick={() => setShowAccountsPage(false)}
-          className="flex items-center text-gray-600 hover:text-gray-800"
-        >
-          <span className="mr-2">
-            <FaBackward />
-          </span> Back
+          className="flex items-center font-bold cursor-pointer text-gray-600 hover:text-gray-800">
+            <ChevronLeft /> Back
         </button>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-3 mt-8">
+      <div className="grid md:grid-cols-3 mx-auto gap-3 mt-8 max-w-5xl">
         {/* First Card */}
         <div className="border border-gray-200 rounded-2xl p-4 flex flex-col w-[275px] md:w-auto">
           <div className="flex justify-center mb-4">
@@ -522,9 +529,25 @@ const EmailAccounts = () => {
               className="p-2 border border-gray-300 rounded-full md:w-1/3 w-full"
             />
             <div className="flex md:gap-4 gap-1 items-center ">
-              <button className="flex items-center px-3 md:px-4 py-2 border border-gray-300 rounded-full text-sm">
-                All Statuses
-              </button>
+              <div className="relative inline-block text-left">
+             <button
+                  onClick={() => setIsOpen(!isOpen)}  
+                  className="px-4 cursor-pointer relative py-2 border border-gray-300 text-gray-400 rounded-full flex gap-1 items-center"
+                >
+                 <Zap size={18} className="text-gray-400" /> All Statuses <ChevronDown className="text-gray-400" />
+                </button>
+                {isOpen && (
+                  <div className="absolute z-10 mt-2 bg-white shadow-md w-44 rounded-lg">
+                    <ul className="py-2 text-sm text-gray-700">
+                      {listItems.map((val, index) => (
+                        <li key={index} className="px-4 py-2 flex gap-2 items-center hover:bg-gray-100">
+                          {val.icon} {val.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                </div>
               <div className="relative">
             <button
             type="button"
@@ -542,22 +565,22 @@ const EmailAccounts = () => {
             
             {showSortDropdown && (
             <div 
-                className="origin-top-right absolute right-0 left-1 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+                className="origin-top-right absolute right-0 left-1 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 border-none focus:outline-none z-10"
                 onClick={handleDropdownClick}
             >
-                <div className="py-1">
-                {sortOptions.map((option) => (
-                    <button
-                    key={option.value}
-                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center ${
-                        sortOrder === option.value ? 'text-teal-600 font-medium' : 'text-gray-700'
-                    }`}
-                    onClick={() => handleSortChange(option.value)}
-                    >
-                    {option.label}
-                    </button>
-                ))}
-                </div>
+                  <div className="py-1">
+                  {sortOptions.map((option) => (
+                      <button
+                      key={option.value}
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center ${
+                          sortOrder === option.value ? 'text-teal-600 font-medium' : 'text-gray-700'
+                      }`}
+                      onClick={() => handleSortChange(option.value)}
+                      >
+                      {option.label}
+                      </button>
+                  ))}
+                  </div>
             </div>
             )}
         </div>
