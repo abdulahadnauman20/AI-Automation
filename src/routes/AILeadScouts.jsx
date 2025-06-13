@@ -29,10 +29,7 @@
 //       </div>
 
 //       {/* Main Content */}
-//       <div
-//         className="flex justify-center items-center w-full bg-black relative bg-cover bg-center rounded-2xl md:mx-4 md:p-10 "
-//         style={{ backgroundImage: `url(${backgroundImage})` }}
-//       >
+//       <div className="flex justify-center items-center w-full bg-black relative bg-cover bg-center rounded-2xl md:mx-4 md:p-10" style={{ backgroundImage: `url(${backgroundImage})` }}>
 //         <div className="bg-opacity-60 rounded-2xl shadow-lg w-full max-w-[400px] md:w-[750px] text-center p-4 md:p-10">
 //           <h2 className="text-white text-xl md:text-3xl mb-[15px] md:mb-[75px] pb-[15px] md:pb-[30px] mt-[0px]">
 //             Discover high-value leads with ease
@@ -76,19 +73,52 @@ import {
 } from "react-icons/fa";
 import backgroundImage from "../assets/AILead_Scouts.jpeg";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 export default function LeadSearch() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
 
-  const handleSearch = (query = "") => {
+  const handleSearch = async (query = "") => {
+    if (!query.trim()) {
+      toast.error("Please enter a search query");
+      return;
+    }
+
     setIsLoading(true);
     setSearchQuery(query);
 
-    setTimeout(() => {
-      navigate(`/ai-lead-search?searchQuery=${encodeURIComponent(query)}`);
-    }, 1500);
+    try {
+      // Format the query for better API results
+      const formattedQuery = formatSearchQuery(query);
+      // Navigate to search page with the formatted query
+      navigate(`/ai-lead-search?searchQuery=${encodeURIComponent(formattedQuery)}`);
+    } catch (error) {
+      console.error("Search error:", error);
+      toast.error("Failed to perform search");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Helper function to format search queries
+  const formatSearchQuery = (query) => {
+    // Convert to lowercase for consistent matching
+    const lowerQuery = query.toLowerCase();
+    
+    // Map common quick search terms to more specific queries
+    const queryMap = {
+      "sales person": "Sales Representative",
+      "sales representative": "Sales Representative",
+      "marketing director from sweden": "Marketing Director in Sweden",
+      "chief executive officer from switzerland": "Chief Executive Officer in Switzerland",
+      "it manager": "IT Manager",
+      "small business owner in los angeles": "Small Business Owner in Los Angeles"
+    };
+
+    // Return mapped query if it exists, otherwise return original
+    return queryMap[lowerQuery] || query;
   };
 
   return (
@@ -140,11 +170,11 @@ export default function LeadSearch() {
           {/* Suggested Search Buttons */}
           <div className="flex flex-wrap justify-center gap-2 mb-6 w-full max-w-[350px] md:w-[650px] mx-auto">
             {[
-              "Sales persons",
-              "Marketing Directors from Sweden",
-              "Chief Executive Officers from Switzerland",
-              "IT managers",
-              "Small business owners in Los Angeles"
+              "Sales Representative",
+              "Marketing Director in Sweden",
+              "Chief Executive Officer in Switzerland",
+              "IT Manager",
+              "Small Business Owner in Los Angeles"
             ].map((item, index) => (
               <button
                 key={index}
@@ -152,7 +182,7 @@ export default function LeadSearch() {
                 className="px-4 py-3 text-sm bg-gray-500/30 text-white rounded-full shadow my-[10px] mx-[6px] hover:bg-gray-500/50 transition-colors duration-200"
                 disabled={isLoading}
               >
-                {item}
+                {isLoading ? "Searching..." : item}
               </button>
             ))}
           </div>
@@ -174,7 +204,7 @@ export default function LeadSearch() {
               <button
                 onClick={() => handleSearch(searchQuery)}
                 disabled={isLoading}
-                className="bg-gradient-to-r from-amber-500 to-emerald-600 px-4 py-2 text-white font-semibold text-sm md:text-md rounded-full flex items-center w-full hover:from-amber-600 hover:to-emerald-700 transition-colors duration-200"
+                className="bg-gradient-to-r from-amber-500 to-emerald-600 px-4 py-2 text-white font-semibold text-sm md:text-md rounded-full flex items-center w-full hover:from-amber-600 hover:to-emerald-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FaHandSparkles size={16} className="mr-1 md:block hidden" />
                 <span>{isLoading ? "Searching..." : "AI Search"}</span>

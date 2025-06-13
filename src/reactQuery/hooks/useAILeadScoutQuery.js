@@ -25,33 +25,20 @@
 
 // };
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-hot-toast";
+import { useQuery } from "@tanstack/react-query";
 import { searchLeads } from "../services/aiLeadScoutService";
 
-export const useAILeadScoutQuery = (data) => {
-  const queryClient = useQueryClient();
-
-  const {
-    data: allLeads,
-    isLoading: isLeadsLoading,
-    error: leadsError,
-    refetch
-  } = useQuery({
-    queryKey: ["allLeads", data.query, data.page], // Add search query and page to the query key
-    queryFn: () => searchLeads(data), // Make sure it's a function, not the result of a function call
-    onSuccess: (data) => {
-      console.log("All leads fetched:", data);
+export const useAILeadScoutQuery = (query, page, per_page) => {
+  return useQuery({
+    queryKey: ["leads", query, page, per_page],
+    queryFn: async () => {
+      console.log('useAILeadScoutQuery called with:', { query, page, per_page });
+      const result = await searchLeads({ query, page, per_page });
+      console.log('Query result:', result);
+      return result;
     },
-    onError: (error) => {
-      console.error("Error fetching leads:", error);
-    },
+    enabled: !!query,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 1,
   });
-
-  return {
-    allLeads,
-    isLeadsLoading,
-    leadsError,
-    refetch
-  };
 };

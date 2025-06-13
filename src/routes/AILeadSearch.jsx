@@ -1,8 +1,9 @@
 import { Search } from "lucide-react"
 import { FaBriefcase, FaMapMarkerAlt, FaIndustry, FaUsers, FaDollarSign, FaGlobe, FaCogs, FaMoneyCheckAlt, FaUser, FaBuilding } from "react-icons/fa";
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom"; // useNavigate added
+import { useEffect, useState, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAILeadScoutQuery } from "../reactQuery/hooks/useAILeadScoutQuery";
+import { toast } from "react-hot-toast";
 
 function CustomCheckbox({ id, checked = false, onChange = () => {}, disabled = false }) {
   return (
@@ -60,56 +61,92 @@ function CustomButton({ children, variant = "default", className = "", ...props 
   )
 }
 
-
-
 export default function AILeadSearch() {
   const [selectAll, setSelectAll] = useState(false);
   const [skipOwned, setSkipOwned] = useState(true);
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [campaignName, setCampaignName] = useState("");
-  const [searchTerm, setSearchTerm] = useState(""); // Added state for search input
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [leads, setLeads] = useState([]);
+  const [perPage, setPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const location = useLocation();
-  const navigate = useNavigate(); // useNavigate hook for changing the URL
+  const navigate = useNavigate();
+  const debounceTimeout = useRef();
 
   // Extract the initial search query from the URL
   const queryParams = new URLSearchParams(location.search);
   const initialSearchQuery = queryParams.get("searchQuery") || "";
-
   
   useEffect(() => {
     setSearchTerm(initialSearchQuery);
   }, [initialSearchQuery]);
 
-  const page = 1;
+  // Debounce searchTerm
+  useEffect(() => {
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    debounceTimeout.current = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset to first page on new search
+      navigate(`?searchQuery=${searchTerm}`, { replace: true });
+    }, 500);
+    return () => clearTimeout(debounceTimeout.current);
+  }, [searchTerm, navigate]);
 
-  // Fetch leads with the current search query
-  const { allLeads, isLeadsLoading, leadsError, refetch } = useAILeadScoutQuery({
-    query: searchTerm,
-    page: page,
-  });
+  // Fetch leads with the debounced search query
+  const { data, isLoading, error, refetch } = useAILeadScoutQuery(
+    debouncedSearchTerm,
+    currentPage,
+    perPage
+  );
 
   useEffect(() => {
-    console.log("Data: ", allLeads);
-  }, [allLeads]);
+    if (data?.results) {
+      console.log('Setting leads from data:', data.results);
+      setLeads(data.results.map(lead => ({
+        ...lead,
+        checked: false
+      })));
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      console.error('Error fetching leads:', error);
+      toast.error(error.message || "Failed to fetch leads");
+    }
+  }, [error]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    navigate(`?searchQuery=${searchTerm}`, { replace: true });
+    // No need to manually refetch, as debouncedSearchTerm will trigger it
+  };
+
+  const handlePerPageChange = (e) => {
+    const newPerPage = parseInt(e.target.value);
+    setPerPage(newPerPage);
+    setCurrentPage(1); // Reset to first page when changing per page
+    refetch();
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
     refetch();
   };
 
   const toggleSelectAll = () => {
     const newSelectAll = !selectAll;
     setSelectAll(newSelectAll);
-    setLeads(allLeads?.map((lead) => ({
+    setLeads(leads.map((lead) => ({
       ...lead,
       checked: newSelectAll && (!skipOwned || !lead.owned),
     })));
   };
 
   const toggleLeadSelection = (id) => {
-    setLeads(allLeads?.map((lead) =>
+    setLeads(leads.map((lead) =>
       lead.id === id ? { ...lead, checked: !lead.checked } : lead
     ));
     setSelectAll(false);
@@ -119,7 +156,7 @@ export default function AILeadSearch() {
     const newSkipOwned = !skipOwned;
     setSkipOwned(newSkipOwned);
     if (selectAll) {
-      setLeads(allLeads?.map((lead) => ({
+      setLeads(leads.map((lead) => ({
         ...lead,
         checked: !newSkipOwned || !lead.owned,
       })));
@@ -129,7 +166,7 @@ export default function AILeadSearch() {
   const handleAddToCampaign = () => {
     const selectedLeads = leads.filter((lead) => lead.checked);
     if (selectedLeads.length === 0) {
-      alert("Please select at least one lead");
+      toast.error("Please select at least one lead");
       return;
     }
     setShowCampaignForm(true);
@@ -137,71 +174,30 @@ export default function AILeadSearch() {
 
   const handleCampaignSubmit = (e) => {
     e.preventDefault();
+    if (!campaignName.trim()) {
+      toast.error("Please enter a campaign name");
+      return;
+    }
+    
     console.log("Creating campaign:", campaignName);
     console.log("With leads:", leads.filter((lead) => lead.checked));
 
     setCampaignName("");
     setShowCampaignForm(false);
-    setLeads(allLeads.map((lead) => ({ ...lead, checked: false })));
+    setLeads(leads.map((lead) => ({ ...lead, checked: false })));
     setSelectAll(false);
 
-    alert(`Campaign "${campaignName}" created successfully!`);
+    toast.success(`Campaign "${campaignName}" created successfully!`);
   };
 
-  const filteredLeads = allLeads?.results;
-
-  useEffect(() => {
-    console.log("Filtered:", filteredLeads);
-  }, [filteredLeads])
-
   return (
-    <div className="flex min-h-screen w-full h-full flex-col md:flex-row gap-5 md:gap-0 pl-[10px] md:pl-[25px] bg-white relative">
-      {/* Campaign Form Modal */}
-      {showCampaignForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Create New Campaign</h2>
-            <form onSubmit={handleCampaignSubmit}>
-              <div className="mb-4">
-                <label htmlFor="campaignName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Campaign Name
-                </label>
-                <input
-                  type="text"
-                  id="campaignName"
-                  value={campaignName}
-                  onChange={(e) => setCampaignName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter campaign name"
-                  required
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowCampaignForm(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                >
-                  Create Campaign
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
+    <div className="flex min-h-screen w-full h-full flex-col md:flex-row gap-5 md:gap-0 pl-[10px] md:pl-[25px]">
       {/* Sidebar */}
       <div className="w-full h-full md:w-[400px] bg-white border border-gray-200 rounded-2xl flex flex-col">
         <div className="p-4 border-b border-gray-200 w-full">
           <h2 className="text-l md:text-xl font-bold mb-[40px]">Search Manually</h2>
           <div className="flex items-center justify-between">
-            <FaMapMarkerAlt className="text-gray-400" />
+            <FaMapMarkerAlt />
             <span className="text-md md:text-lg text-gray-500">Skip already owned</span>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
@@ -214,7 +210,7 @@ export default function AILeadSearch() {
             </label>
           </div>
         </div>
-        <nav className="p-2 space-y-4 overflow-y-auto">
+        <nav className="p-2 space-y-4">
           {[
             { icon: FaBriefcase, label: "Job titles" },
             { icon: FaMapMarkerAlt, label: "Location" },
@@ -236,80 +232,238 @@ export default function AILeadSearch() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col pr-[10px] md:pr-[25px]">
-        {/* Header */}
-        {/* Search Section */}
-        <div className="p-6 border-b">
-          <h2 className="text-lg font-medium mb-4">Search Manually</h2>
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-gray-500">{filteredLeads?.length} results found</div>
-            <div className="flex-1 relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <form onSubmit={handleSearchSubmit}>
+      <div className="flex-1 p-4">
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h2 className="text-xl font-bold mb-4">Search Results</h2>
+          
+          {/* Search Input */}
+          <form onSubmit={handleSearchSubmit} className="mb-6">
+            <div className="flex items-center gap-2">
                 <input
                   type="text"
-                  value={searchTerm} // Controlled input
+                value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="E.g Engineers in New York in software ..."
-                  className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </form>
+                placeholder="Search for leads..."
+                className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={isLoading}
+              >
+                {isLoading ? "Searching..." : "Search"}
+              </button>
             </div>
-            <button className="bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white flex items-center gap-2 rounded-full px-4 py-2 border-none">
-              <span>✨</span> AI Search
-            </button>
-            <button
-              onClick={handleAddToCampaign}
-              className="bg-teal-500 hover:bg-teal-600 text-white flex items-center gap-2 rounded-md px-4 py-2"
-            >
-              <span>✓</span> Add to campaign
-            </button>
+              </form>
+
+          {/* Results */}
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Searching for leads...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8 text-red-500">
+              {error.message || "Failed to fetch leads"}
+            </div>
+          ) : leads.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No leads found. Try a different search query.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Results Header with Per Page Selector */}
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectAll}
+                    onChange={toggleSelectAll}
+                    className="h-4 w-4 text-blue-500"
+                  />
+                  <span>Select All</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-600">Show:</span>
+                  <select
+                    value={perPage}
+                    onChange={handlePerPageChange}
+                    className="px-2 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                  </select>
+                  <span className="text-gray-600">contacts per page</span>
           </div>
         </div>
 
-        <div className="flex flex-1 overflow-hidden">
-          {/* Table */}
-          <div className="flex-1 overflow-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="w-10 p-4">
-                    <CustomCheckbox checked={selectAll} onChange={toggleSelectAll} />
-                  </th>
-                  <th className="text-left p-4 text-sm font-medium text-gray-500">Lead</th>
-                  <th className="text-left p-4 text-sm font-medium text-gray-500">Company</th>
-                  <th className="text-left p-4 text-sm font-medium text-gray-500">Title</th>
-                  <th className="text-left p-4 text-sm font-medium text-gray-500">Email</th>
-                  <th className="text-left p-4 text-sm font-medium text-gray-500">Phone</th>
-                  <th className="text-left p-4 text-sm font-medium text-gray-500">Last Interaction</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredLeads?.map((lead) => (
-                  <LeadRow
-                    key={lead.id}
-                    checked={lead.checked}
-                    onChange={() => toggleLeadSelection(lead.id)}
-                    name={lead.name}
-                    avatar={lead.avatar}
-                    avatarColor={lead.avatarColor}
-                    company={lead.company}
-                    title={lead.title}
-                    email={lead.email}
-                    phone={lead.phone}
-                    lastInteraction={lead.lastInteraction}
-                    owned={lead.owned}
-                  />
-                ))}
-              </tbody>
-            </table>
+              {/* Leads List */}
+              {leads.map((lead) => (
+                <div
+                  key={lead.id}
+                  className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-start gap-4">
+                    <input
+                      type="checkbox"
+                      checked={lead.checked}
+                      onChange={() => toggleLeadSelection(lead.id)}
+                      className="h-4 w-4 text-blue-500 mt-2"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="font-semibold text-lg">{lead.name}</h3>
+                          <p className="text-gray-600 font-medium">{lead.title}</p>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-500">
+                          <FaMapMarkerAlt className="text-gray-400" />
+                          <span>
+                            {lead.location && lead.location.trim() !== '' 
+                              ? lead.location 
+                              : lead.organization?.location || 'N/A'}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-2">
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <FaBuilding className="text-gray-400" />
+                          <span>{lead.company || 'Company not specified'}</span>
+                        </div>
+                        
+                        {lead.organization && (
+                          <div className="mt-2 text-sm text-gray-500 space-y-1">
+                            {lead.organization.employee_count && (
+                              <div className="flex items-center gap-2">
+                                <FaUsers className="text-gray-400" />
+                                <span>Company Size: {lead.organization.employee_count}</span>
+                              </div>
+                            )}
+                            {lead.organization.website && (
+                              <div className="flex items-center gap-2">
+                                <FaGlobe className="text-gray-400" />
+                                <a 
+                                  href={lead.organization.website}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500 hover:text-blue-600"
+                                >
+                                  {lead.organization.website}
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-3 flex flex-wrap gap-3">
+                        {lead.email && (
+                          <a
+                            href={`mailto:${lead.email}`}
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors"
+                          >
+                            <span>✉</span> Email
+                          </a>
+                        )}
+                        {lead.phone && (
+                          <a
+                            href={`tel:${lead.phone}`}
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-green-50 text-green-600 rounded-full hover:bg-green-100 transition-colors"
+                          >
+                            <span>📞</span> Call
+                          </a>
+                        )}
+                        {lead.linkedin_url && (
+                          <a
+                            href={lead.linkedin_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors"
+                          >
+                            <span>🔗</span> LinkedIn
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Pagination */}
+              {data?.pagination && (
+                <div className="flex justify-between items-center mt-6">
+                  <div className="text-gray-600">
+                    Showing {((currentPage - 1) * perPage) + 1} to {Math.min(currentPage * perPage, data.pagination.total)} of {data.pagination.total} results
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="px-3 py-1 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage * perPage >= data.pagination.total}
+                      className="px-3 py-1 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Add to Campaign Button */}
+              <button
+                onClick={handleAddToCampaign}
+                className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                Add Selected to Campaign
+              </button>
           </div>
+          )}
         </div>
       </div>
+
+      {/* Campaign Modal */}
+      {showCampaignForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4">Create New Campaign</h3>
+            <form onSubmit={handleCampaignSubmit}>
+              <input
+                type="text"
+                value={campaignName}
+                onChange={(e) => setCampaignName(e.target.value)}
+                placeholder="Campaign Name"
+                className="w-full px-4 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCampaignForm(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                >
+                  Create Campaign
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
 
 function LeadRow({ checked, onChange, name, avatar, avatarColor, company, title, email, phone, lastInteraction, owned }) {
   return (
