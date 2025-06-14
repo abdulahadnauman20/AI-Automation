@@ -4,10 +4,13 @@ import { Copy, Lock, Mail, Phone, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useWorkspaceQuery } from '../reactQuery/hooks/useWorkspaceQuery';
 import { BiLoaderCircle } from 'react-icons/bi';
+import { GrDocumentWord } from "react-icons/gr";
 
 const Settings = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalOpen2, setIsModalOpen2] = useState(false);
+    const [file, setFile] = useState(null);
+
 
     const { updatePasswordMutation, updateProfileMutation, userInfo, TFAMutation } = useAuthQuery();
 
@@ -63,7 +66,7 @@ const Settings = () => {
             toast.error("Invalid phone number format!");
             return;
         }
-        console.log(profileDetail);
+        // console.log(profileDetail);
         updateProfileMutation.mutate(profileDetail);
     }
 
@@ -71,8 +74,6 @@ const Settings = () => {
     // *****************************
 
     const { currentWorkspace, updateWorkspaceMutation, teamWorkspaceMember, addMemeberMutation } =  useWorkspaceQuery()
-    // console.log(currentWorkspace?.Workspace);
-    console.log(teamWorkspaceMember?.Members);
     
     const [workspaceData, setWorkspaceData] = useState({
         WorkspaceName: '',
@@ -88,7 +89,7 @@ const Settings = () => {
     }, [currentWorkspace])
 
     const handleUpdateWorkspace = () => {
-        console.log({WorkspaceName: workspaceData.WorkspaceName});
+        // console.log({WorkspaceName: workspaceData.WorkspaceName});
         updateWorkspaceMutation.mutate({WorkspaceName: workspaceData.WorkspaceName})
     }
 
@@ -154,10 +155,6 @@ const Settings = () => {
 
     const [activeTab, setActiveTab] = useState('profile');
     const [activeTab2, setActiveTab2] = useState('team');
-    // const [members] = useState([
-    //     { id: 1, name: 'Beetoo Leru', role: 'Owner', avatar: '👤', color: 'bg-yellow-100' },
-    //     { id: 2, name: 'Kaiya Donin', role: 'Editor', avatar: '👤', color: 'bg-purple-100' },
-    // ]);
 
     const handleProfileChange = (e) => {
         const { name, value } = e.target;
@@ -194,22 +191,27 @@ const Settings = () => {
         <div className="p-2 md:p-6 bg-gray-50 min-h-screen justify-center ">
             {/* Navigation Tabs */}
             <div className="w-full max-w-3xl">
-                <div className="mb-8 border-b border-gray-300">
+                <div className="mb-8 ">
                     <nav className="flex space-x-8">
                         <button
-                            className={`py-4 text-sm px-1 border-b-2 font-medium ${activeTab === 'profile' ? 'border-green-500 text-green-500' : 'text-gray-500 border-white'}`}
+                            className={`py-4 text-sm px-1 border-b-2 cursor-pointer font-medium ${activeTab === 'profile' ? 'border-green-500 text-green-500' : 'text-gray-500 border-white'}`}
                             onClick={() => setActiveTab('profile')}>
                             Profile
                         </button>
                         <button
-                            className={`py-4 text-sm px-1 border-b-2 font-medium ${activeTab === 'workspace' ? 'border-green-500 text-green-500' : 'text-gray-500 border-white'}`}
+                            className={`py-4 text-sm px-1 border-b-2 cursor-pointer font-medium ${activeTab === 'workspace' ? 'border-green-500 text-green-500' : 'text-gray-500 border-white'}`}
                             onClick={() => setActiveTab('workspace')}>
                             Workspace & members
                         </button>
                         <button
-                            className={`py-4 text-sm px-1 border-b-2 font-medium ${activeTab === 'integrations' ? 'border-green-500 text-green-500' : 'text-gray-500 border-white'}`}
+                            className={`py-4 text-sm px-1 border-b-2 cursor-pointer font-medium ${activeTab === 'integrations' ? 'border-green-500 text-green-500' : 'text-gray-500 border-white'}`}
                             onClick={() => setActiveTab('integrations')}>
                             Integrations
+                        </button>
+                         <button
+                            className={`py-4 text-sm px-1 border-b-2 cursor-pointer font-medium ${activeTab === 'businessDetails' ? 'border-green-500 text-green-500' : 'text-gray-500 border-white'}`}
+                            onClick={() => setActiveTab('businessDetails')}>
+                            Bussiness Details
                         </button>
                     </nav>
                 </div>
@@ -688,7 +690,57 @@ const Settings = () => {
                             </div>
                         </div>
                     </div>
-                ) : null}
+                ) : activeTab === 'businessDetails' ? (
+                   <div className="bg-white p-6 max-w-lg mx-auto rounded shadow space-y-4">
+                        {/* Link Input */}
+                        <div className="flex flex-col space-y-1">
+                            <label htmlFor="link" className="text-gray-700 font-medium">
+                            Link:
+                            </label>
+                            <input
+                            type="text"
+                            id="link"
+                            className="border border-gray-300 rounded w-full outline-none px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500"
+                            placeholder="Enter your link here"
+                            />
+                        </div>
+
+                        {/* File Upload */}
+                        <div className="flex flex-col space-y-2">
+                            <label htmlFor="file" className="text-gray-700 font-medium">
+                            Upload Document:
+                            </label>
+                            <label
+                            htmlFor="file"
+                            className="cursor-pointer border border-gray-300 rounded w-[200px] h-[120px] flex items-center justify-center overflow-hidden">
+                            <img
+                                className=" h-full"
+                                src={
+                                file
+                                    ? 'https://cdn.iconscout.com/icon/free/png-256/free-doc-file-icon-download-in-svg-png-gif-formats--format-extension-pack-files-folders-icons-1634559.png?f=webp'
+                                    : 
+                                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfvFUfHKW2AXtIyHz6VkczX02FejAJS-18MA&s"
+                                }
+                                alt="Preview"
+                            />
+                            </label>
+                            <input
+                            type="file"
+                            id="file"
+                            accept=".doc,.docx"
+                            style={{ display: "none" }}
+                            onChange={(e) => setFile(e.target.files[0])}
+                            />
+                            <span className="text-xs text-gray-500">Only .doc or .docx files are allowed.</span>
+                        </div>
+
+                        <button
+                            className="bg-teal-500 cursor-pointer hover:bg-teal-600 text-white py-2 px-4 rounded-full flex gap-2 items-center justify-center transition duration-200">
+                            Submit
+                        </button>
+                        </div>
+
+                ) :null}
             </div>
         </div>
     );
