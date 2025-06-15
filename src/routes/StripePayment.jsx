@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
-const stripePromise = loadStripe("pk_test_51RUlirFYxVVbdtFSBryjfLzYPCE2K0w758wXvx2gSmThmB8XR9wkliFHVluvYLCZTZltdMrx8uXRixHQuxfOwDvV005PUzCvDf");
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const CheckoutForm = () => {
   const { state } = useLocation();
@@ -18,7 +18,7 @@ const CheckoutForm = () => {
   useEffect(() => {
   const domainNames = domains.map(d => d.name); // Ensure only strings
 
-  fetch("http://localhost:4000/EmailAccount/CreatePaymentIntent", {
+  fetch(`${import.meta.env.VITE_API_URL}EmailAccount/CreatePaymentIntent`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ Amount: totalPrice, Domains: domainNames }),
@@ -78,7 +78,7 @@ const CheckoutForm = () => {
         <button
           type="submit"
           disabled={!stripe}
-          className="w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600"
+          className="w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600 cursor-pointer"
         >
           Pay Now
         </button>
