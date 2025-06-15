@@ -3,3 +3,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+/* Override fixed width and height for the phone input */
+.react-tel-input .form-control {
+  width: 100% !important;   /* full width */
+  height: auto !important;  /* auto height */
+  min-height: 40px;         /* or your preferred min-height */
+}

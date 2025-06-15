@@ -296,14 +296,22 @@ export default function EmailDomain() {
       <DomainConfirmModal
         isOpen={showConfirmModal}
         categorizedDomains={categorizedDomains}
-        onClose={() => setShowConfirmModal(false)}   // Close the modal
+        onClose={() => setShowConfirmModal(false)}
         onNext={() =>
           navigate("/payment", {
             state: {
-              domains: selectedDomains,
-              totalPrice: totalPrice,
+              totalPrice,
+              paymentIntentDomains: {
+                PremiumDomains: categorizedDomains.premiumAvailable?.map(d => ({
+                  Name: d.domain,
+                  Price: d.price,
+                  EapFee: d.eapFee || 0,
+                })),
+                NonPremiumDomains: categorizedDomains.nonPremiumAvailable.map(d => d.domain),
+              },
             },
-          })}
+          })
+        }
         loading={loading} // Pass loading state
         onRetry={handleRetry} // Pass retry handler
         error={error}
