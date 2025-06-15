@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { Check, CircleX, X, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEmailAccountQuery } from "../reactQuery/hooks/useEmailAccountsQuery";
+import { useNavigate } from "react-router-dom";
 
 export default function EmailDomain() {
   const { getDomainSuggestionsMutation, getDomainPricingMutation } = useEmailAccountQuery();
+  const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState("new");
   const [domainExtensions, setDomainExtensions] = useState({
@@ -18,10 +20,19 @@ export default function EmailDomain() {
   const [selectedExtensions, setSelectedExtensions] = useState(["com", "org"]);
   const [domainSuggestions, setDomainSuggestions] = useState([]);
   const [selectedDomains, setSelectedDomains] = useState([]);
-  const [suggestionLimit, setSuggestionLimit] = useState(5);
+  const [suggestionLimit, setSuggestionLimit] = useState(10);
 
-  const priceQueue = useRef([]);
-  const isFetching = useRef(false);
+  const [loading, setLoading] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [categorizedDomains, setCategorizedDomains] = useState({
+    premiumAvailable: [],
+    nonPremiumAvailable: [],
+    unavailablePremium: [],
+    unavailableNonPremium: [],
+  });
+
+  const [error, setError] = useState(false); // For tracking API errors
+  const [totalPrice, setTotalPrice] = useState(0); // For the total price from the API response
 
   // ⏳ Debounced suggestion fetch
   useEffect(() => {
@@ -55,48 +66,6 @@ export default function EmailDomain() {
     setSelectedExtensions(Object.keys(updated).filter((k) => updated[k]));
   };
 
-  const enqueuePriceFetch = (domainName) => {
-    priceQueue.current.push(domainName);
-  };
-
-  // 🧠 Run queue one-by-one with delay
-  useEffect(() => {
-    const processQueue = async () => {
-      if (isFetching.current || priceQueue.current.length === 0) return;
-
-      isFetching.current = true;
-      const domain = priceQueue.current.shift();
-
-      try {
-        const res = await getDomainPricingMutation.mutateAsync({ domains: [domain] });
-        const priceInfo = res.prices[0];
-
-        setSelectedDomains((prev) =>
-          prev.map((d) =>
-            d.name === domain
-              ? { ...d, price: priceInfo.price, fetched: true, error: false }
-              : d
-          )
-        );
-      } catch (err) {
-        console.error("Price fetch error for", domain);
-        setSelectedDomains((prev) =>
-          prev.map((d) =>
-            d.name === domain ? { ...d, fetched: true, error: true } : d
-          )
-        );
-      }
-
-      setTimeout(() => {
-        isFetching.current = false;
-        processQueue(); // Continue next after 10s
-      }, 10000);
-    };
-
-    const interval = setInterval(processQueue, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   const handleDomainSelection = (domain) => {
     const alreadySelected = selectedDomains.find((d) => d.name === domain);
 
@@ -105,24 +74,105 @@ export default function EmailDomain() {
     } else {
       const newDomain = { name: domain, price: null, fetched: false, error: false };
       setSelectedDomains((prev) => [...prev, newDomain]);
-      enqueuePriceFetch(domain);
     }
   };
 
-  const handleRetry = (domainName) => {
-    setSelectedDomains((prev) =>
-      prev.map((d) =>
-        d.name === domainName ? { ...d, fetched: false, error: false, price: null } : d
-      )
-    );
-    enqueuePriceFetch(domainName);
-  };
+  const handleConfirm = () => {
+    setShowConfirmModal(true);  // Show the modal immediately
+    setCategorizedDomains({});  // Reset categorized domains
+    setLoading(true); // Show loading state in the modal
+    setError(false);
 
-  const getSubtotal = () => {
-    return selectedDomains
-      .filter((d) => d.price && !d.error)
-      .reduce((sum, d) => sum + d.price, 0)
-      .toFixed(2);
+    const domainNames = selectedDomains.map((d) => d.name);
+
+    console.log(domainNames);
+
+    getDomainPricingMutation.mutateAsync({
+      Domains: domainNames,
+    })
+    .then((res) => {
+      console.log(res);
+      const { Available, Unavailable } = res.prices;
+
+      // Categorize domains based on availability and premium status
+      const categorized = {
+        premiumAvailable: Available.PremiumDomains,
+        nonPremiumAvailable: Available.NonPremiumDomains,
+        unavailablePremium: Unavailable.PremiumDomains,
+        unavailableNonPremium: Unavailable.NonPremiumDomains,
+      };
+
+      setCategorizedDomains(categorized);
+      setTotalPrice(res.totalPrice);
+      setLoading(false); // Stop the loader when data is available
+    })
+    .catch((err) => {
+      console.error("Error confirming domains", err);
+      setError(true)
+      setLoading(false); // Stop the loader in case of an error
+    });
+  };
+  
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRY_COUNT = 3;
+
+  // const handleRetry = () => {
+  //   if (retryCount >= MAX_RETRY_COUNT) {
+  //     alert("Maximum retry attempts reached. Please try again later.");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   setCategorizedDomains({});
+
+  //   getDomainPricingMutation
+  //     .mutateAsync({ domains: selectedDomains.map(d => d.name) })
+  //     .then((res) => {
+  //       const { Available, Unavailable } = res.prices;
+  //       const categorized = {
+  //         premiumAvailable: Available.PremiumDomains,
+  //         nonPremiumAvailable: Available.NonPremiumDomains,
+  //         unavailablePremium: Unavailable.PremiumDomains,
+  //         unavailableNonPremium: Unavailable.NonPremiumDomains,
+  //       };
+
+  //       setCategorizedDomains(categorized);
+  //       setLoading(false);
+  //     })
+  //     .catch((err) => {
+  //       setRetryCount((prev) => prev + 1);
+  //       console.error("Error confirming domains", err);
+  //       setLoading(false);
+  //     });
+  // };
+
+  const handleRetry = () => {
+    if (!error) return;
+    setLoading(true);
+    setError(false);
+    setCategorizedDomains({});
+
+    getDomainPricingMutation
+      .mutateAsync({ Domains: selectedDomains.map((d) => d.name) })
+      .then((res) => {
+        const { Available, Unavailable } = res.prices;
+
+        const categorized = {
+          premiumAvailable: Available.PremiumDomains,
+          nonPremiumAvailable: Available.NonPremiumDomains,
+          unavailablePremium: Unavailable.PremiumDomains,
+          unavailableNonPremium: Unavailable.NonPremiumDomains,
+        };
+
+        setCategorizedDomains(categorized);
+        setTotalPrice(res.totalPrice); // Set the total price from the API response
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error confirming domains", err);
+        setError(true);
+        setLoading(false);
+      });
   };
 
   return (
@@ -211,17 +261,6 @@ export default function EmailDomain() {
                   <div key={idx} className="flex gap-4">
                     <div className="flex justify-between items-center border-2 border-teal-500 p-4 w-full rounded-2xl">
                       <span className="text-sm">{domain.name}</span>
-                      <div className="flex items-center gap-2">
-                        {domain.fetched && domain.error ? (
-                          <button onClick={() => handleRetry(domain.name)}>
-                            <RotateCcw size={16} className="text-red-500" />
-                          </button>
-                        ) : domain.fetched && domain.price !== null ? (
-                          <span className="text-sm text-gray-600">${domain.price.toFixed(2)}</span>
-                        ) : (
-                          <span className="text-xs text-gray-500">Fetching...</span>
-                        )}
-                      </div>
                     </div>
                     <button
                       className="cursor-pointer"
@@ -236,14 +275,12 @@ export default function EmailDomain() {
               </div>
 
               <div className="flex justify-between items-center mt-4">
-                <p className="text-gray-400 text-[14px] font-semibold">
-                  Subtotal (Annual Domain Price): <span className="text-black"> ${getSubtotal()}</span>
-                </p>
-                <Link to="/email-domain-order">
-                  <button className="bg-[#15A395] text-white py-1 px-4 rounded-full cursor-pointer">
-                    Next
-                  </button>
-                </Link>
+                <button
+                  className="bg-[#15A395] text-white py-2 px-4 rounded-full mt-2 cursor-pointer"
+                  onClick={() => handleConfirm()}
+                >
+                  Confirm
+                </button>
               </div>
             </>
           )}
@@ -253,6 +290,134 @@ export default function EmailDomain() {
       {activeTab === "existing" && (
         <div className="py-8 text-center text-gray-500">Your existing domains will appear here.</div>
       )}
+
+    
+    {showConfirmModal && (
+      <DomainConfirmModal
+        isOpen={showConfirmModal}
+        categorizedDomains={categorizedDomains}
+        onClose={() => setShowConfirmModal(false)}   // Close the modal
+        onNext={() =>
+          navigate("/payment", {
+            state: {
+              domains: selectedDomains,
+              totalPrice: totalPrice,
+            },
+          })}
+        loading={loading} // Pass loading state
+        onRetry={handleRetry} // Pass retry handler
+        error={error}
+        totalPrice={totalPrice}
+      />
+    )}
+
+
     </div>
   );
 }
+
+const DomainConfirmModal = ({ isOpen, categorizedDomains, onClose, onNext, loading, onRetry, error, totalPrice }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 flex justify-center items-center bg-black/50 bg-opacity-50 z-50">
+      <div className="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full">
+        <h2 className="text-2xl font-semibold mb-6">Confirm Your Domains</h2>
+
+        {loading ? (
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <p className="text-gray-700">Loading pricing information...</p>
+            <div className="animate-spin rounded-full border-4 border-teal-500 border-t-transparent w-10 h-10"></div>
+          </div>
+        ) : (
+          <>
+            {/* Conditional rendering of categories */}
+            {categorizedDomains?.premiumAvailable?.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-xl font-medium text-teal-600 mb-2">Premium Available</h3>
+                {categorizedDomains.premiumAvailable.map((domain, idx) => (
+                  <div key={idx} className="flex justify-between py-2 border-b border-gray-200">
+                    <span className="text-gray-800">{domain.domain}</span>
+                    <span className="text-teal-500">${domain.price}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {categorizedDomains?.nonPremiumAvailable?.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-xl font-medium text-teal-600 mb-2">Non-Premium Available</h3>
+                {categorizedDomains.nonPremiumAvailable.map((domain, idx) => (
+                  <div key={idx} className="flex justify-between py-2 border-gray-200">
+                    <span className="text-gray-800">{domain.domain}</span>
+                    <span className="text-teal-500">${domain.registerPrice}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {categorizedDomains?.unavailablePremium?.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-xl font-medium text-teal-600 mb-2">Unavailable Premium</h3>
+                {categorizedDomains.unavailablePremium.map((domain, idx) => (
+                  <div key={idx} className="flex justify-between py-2 border-b border-gray-200">
+                    <span className="text-gray-800">{domain}</span>
+                    <span className="text-red-500">Unavailable</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {categorizedDomains?.unavailableNonPremium?.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-xl font-medium text-teal-600 mb-2">Unavailable Non-Premium</h3>
+                {categorizedDomains.unavailableNonPremium.map((domain, idx) => (
+                  <div key={idx} className="flex justify-between py-2 border-b border-gray-200">
+                    <span className="text-gray-800">{domain}</span>
+                    <span className="text-red-500">Unavailable</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Display Total Price */}
+            <div className="flex justify-between items-center mt-4 border-t pt-4">
+              <p className="text-lg font-semibold">Total Price:</p>
+              <span className="text-teal-500 text-lg">$ {totalPrice}</span>
+            </div>
+          </>
+        )}
+
+        {/* Retry Button only visible if there was an error */}
+        {!loading && error && (
+          <div className="flex justify-between mt-6">
+            <button
+              onClick={onRetry}
+              className="bg-yellow-400 text-white py-2 px-4 rounded-lg hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {/* Action buttons */}
+        {!loading && !error && (
+          <div className="flex justify-between mt-6">
+            <button
+              onClick={onClose}
+              className="bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            >
+              Back
+            </button>
+            <button
+              onClick={onNext}
+              className="bg-teal-500 text-white py-2 px-4 rounded-lg hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};

@@ -27,6 +27,7 @@ import { OAuthCallback } from './routes/EmailAccounts';
 import AILeadSearch from "./routes/AILeadSearch"
 import EmailDomain from './routes/EmailDomain';
 import EmailDomainOrder from './routes/EmailDomainOrder';
+import StripePaymentWrapper from './routes/StripePayment';
 
 function App() {
   const router = createBrowserRouter(
@@ -57,6 +58,7 @@ function App() {
           <Route path='/invitationAccept/:wkid/:usid' element={<InvittionRoutes />} />
           <Route path='/oauth/callback' element={<OAuthCallback />} />
           <Route path="/ai-lead-search" element={<AILeadSearch />} />
+          <Route path="/payment" element={<StripePaymentWrapper />} />
         </Route>
       </>
     )
