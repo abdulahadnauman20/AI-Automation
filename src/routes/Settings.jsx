@@ -3,8 +3,9 @@ import { useAuthQuery } from '../reactQuery/hooks/useAuthQuery';
 import { Copy, Lock, Mail, Phone, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useWorkspaceQuery } from '../reactQuery/hooks/useWorkspaceQuery';
-import { BiLoaderCircle } from 'react-icons/bi';
-import { GrDocumentWord } from "react-icons/gr";
+// import { BiLoaderCircle } from 'react-icons/bi';
+// import { GrDocumentWord } from "react-icons/gr";
+import { FileText, XCircle } from "lucide-react";
 
 const Settings = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,6 +34,25 @@ const Settings = () => {
         console.log("Password updated successfully!", passwords);
         setIsModalOpen(false);
     };
+
+    const handleFileChange = (e) => {
+    const selected = e.target.files[0];
+    if (
+      selected &&
+      (selected.type === "application/pdf" ||
+        selected.name.endsWith(".doc") ||
+        selected.name.endsWith(".docx"))
+    ) {
+      setFile(selected);
+    } else {
+      alert("Only .doc, .docx, or .pdf files are allowed.");
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setFile(null);
+    document.getElementById("file").value = null;
+  };
 
     
     // console.log(userInfo?.User);
@@ -691,54 +711,120 @@ const Settings = () => {
                         </div>
                     </div>
                 ) : activeTab === 'businessDetails' ? (
-                   <div className="bg-white p-6 max-w-lg mx-auto rounded shadow space-y-4">
-                        {/* Link Input */}
-                        <div className="flex flex-col space-y-1">
-                            <label htmlFor="link" className="text-gray-700 font-medium">
-                            Link:
-                            </label>
-                            <input
-                            type="text"
-                            id="link"
-                            className="border border-gray-300 rounded w-full outline-none px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500"
-                            placeholder="Enter your link here"
-                            />
-                        </div>
+                //    <div className="bg-white p-6 max-w-lg mx-auto rounded shadow space-y-4">
+                //         {/* Link Input */}
+                //         <div className="flex flex-col space-y-1">
+                //             <label htmlFor="link" className="text-gray-700 font-medium">
+                //             Link:
+                //             </label>
+                //             <input
+                //             type="text"
+                //             id="link"
+                //             className="border border-gray-300 rounded w-full outline-none px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500"
+                //             placeholder="Enter your link here"
+                //             />
+                //         </div>
 
-                        {/* File Upload */}
-                        <div className="flex flex-col space-y-2">
-                            <label htmlFor="file" className="text-gray-700 font-medium">
-                            Upload Document:
-                            </label>
-                            <label
-                            htmlFor="file"
-                            className="cursor-pointer border border-gray-300 rounded w-[200px] h-[120px] flex items-center justify-center overflow-hidden">
-                            <img
-                                className=" h-full"
-                                src={
-                                file
-                                    ? 'https://cdn.iconscout.com/icon/free/png-256/free-doc-file-icon-download-in-svg-png-gif-formats--format-extension-pack-files-folders-icons-1634559.png?f=webp'
-                                    : 
-                                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfvFUfHKW2AXtIyHz6VkczX02FejAJS-18MA&s"
-                                }
-                                alt="Preview"
-                            />
-                            </label>
-                            <input
-                            type="file"
-                            id="file"
-                            accept=".doc,.docx"
-                            style={{ display: "none" }}
-                            onChange={(e) => setFile(e.target.files[0])}
-                            />
-                            <span className="text-xs text-gray-500">Only .doc or .docx files are allowed.</span>
-                        </div>
+                //         {/* File Upload */}
+                //         <div className="flex flex-col space-y-2">
+                //             <label htmlFor="file" className="text-gray-700 font-medium">
+                //             Upload Document:
+                //             </label>
+                //             <label
+                //             htmlFor="file"
+                //             className="cursor-pointer border border-gray-300 rounded h-[120px] flex items-center justify-center overflow-hidden">
+                //             <img
+                //                 className=" h-full"
+                //                 src={
+                //                 file
+                //                     ? 'https://cdn.iconscout.com/icon/free/png-256/free-doc-file-icon-download-in-svg-png-gif-formats--format-extension-pack-files-folders-icons-1634559.png?f=webp'
+                //                     : 
+                //                     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfvFUfHKW2AXtIyHz6VkczX02FejAJS-18MA&s"
+                //                 }
+                //                 alt="Preview"
+                //             />
+                //             </label>
+                //             <input
+                //             type="file"
+                //             id="file"
+                //             accept=".doc,.docx"
+                //             style={{ display: "none" }}
+                //             onChange={(e) => setFile(e.target.files[0])}
+                //             />
+                //             <span className="text-xs text-gray-500">Only .doc or .pdf files are allowed.</span>
+                //         </div>
 
-                        <button
-                            className="bg-teal-500 cursor-pointer hover:bg-teal-600 text-white py-2 px-4 rounded-full flex gap-2 items-center justify-center transition duration-200">
-                            Submit
-                        </button>
-                        </div>
+                //         <button className="bg-teal-500 w-full cursor-pointer hover:bg-teal-600 text-white py-2 px-4 rounded-md flex gap-2 items-center justify-center transition duration-200">
+                //             Submit
+                //         </button>
+                //         </div>
+
+                <div className="bg-white p-6 max-w-lg mx-auto rounded shadow space-y-4">
+      {/* Link Input */}
+      <div className="flex flex-col space-y-1">
+        <label htmlFor="link" className="text-gray-700 font-medium">
+          Link:
+        </label>
+        <input
+          type="text"
+          id="link"
+          className="border border-gray-300 rounded w-full outline-none px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500"
+          placeholder="Enter your link here"
+        />
+      </div>
+
+      {/* File Upload */}
+      <div className="flex flex-col space-y-2">
+        <label htmlFor="file" className="text-gray-700 font-medium">
+          Upload Document:
+        </label>
+
+        <div
+          className="border border-gray-300 rounded h-[120px] flex items-center justify-center relative cursor-pointer hover:bg-gray-50 transition"
+          onClick={() => document.getElementById("file").click()}
+        >
+          {file ? (
+            <>
+              <div className="flex flex-col items-center">
+                <FileText className="w-8 h-8 text-teal-600" />
+                <span className="text-sm mt-2 px-2 text-center break-all max-w-[90%]">
+                  {file.name}
+                </span>
+              </div>
+              <XCircle
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveFile();
+                }}
+                className="w-5 h-5 text-red-500 absolute top-2 right-2 cursor-pointer hover:text-red-600"
+                title="Remove file"
+              />
+            </>
+          ) : (
+            <div className="flex flex-col items-center text-gray-400">
+              <FileText className="w-8 h-8" />
+              <span className="text-xs mt-2">Click to upload</span>
+            </div>
+          )}
+        </div>
+
+        <input
+          type="file"
+          id="file"
+          accept=".doc,.docx,.pdf"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
+        <span className="text-xs text-gray-500">Only .doc, .docx, or .pdf files are allowed.</span>
+      </div>
+
+      <button
+        className="bg-teal-500 w-full cursor-pointer hover:bg-teal-600 text-white py-2 px-4 rounded-md flex gap-2 items-center justify-center transition duration-200"
+        disabled={!file}
+      >
+        Submit
+      </button>
+    </div>
 
                 ) :null}
             </div>
