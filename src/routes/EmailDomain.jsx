@@ -22,6 +22,45 @@ export default function EmailDomain() {
   const [selectedDomains, setSelectedDomains] = useState([]);
   const [suggestionLimit, setSuggestionLimit] = useState(10);
 
+  const [existingDomains, setExistingDomains] = useState([]);
+  const [existingLoading, setExistingLoading] = useState(false);
+  const [existingError, setExistingError] = useState(false);
+
+  useEffect(() => {
+    if (activeTab !== "existing") return;
+
+    const fetchExistingDomains = async () => {
+      setExistingLoading(true);
+      setExistingError(false);
+      const token = localStorage.getItem("Token")?.replace(/^"|"$/g, "");
+
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}EmailAccount/GetDomains`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          setExistingDomains(data.domains || []);
+        } else {
+          setExistingError(true);
+        }
+      } catch (err) {
+        console.error("Error fetching existing domains:", err);
+        setExistingError(true);
+      } finally {
+        setExistingLoading(false);
+      }
+    };
+
+    fetchExistingDomains();
+  }, [activeTab]);
+
+
+
   const [loading, setLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [categorizedDomains, setCategorizedDomains] = useState({
@@ -287,9 +326,39 @@ export default function EmailDomain() {
         </div>
       )}
 
-      {activeTab === "existing" && (
+      {/* {activeTab === "existing" && (
         <div className="py-8 text-center text-gray-500">Your existing domains will appear here.</div>
-      )}
+      )} */}
+
+      {activeTab === "existing" && (
+  <div className="py-8">
+    {existingLoading ? (
+      <p className="text-center text-gray-500">Loading your domains...</p>
+    ) : existingError ? (
+      <p className="text-center text-red-500">Failed to load domains. Please try again.</p>
+    ) : existingDomains.length === 0 ? (
+      <p className="text-center text-gray-500">You haven’t purchased any domains yet.</p>
+    ) : (
+      <div className="space-y-4">
+        {existingDomains.map((d, idx) => (
+          <div
+            key={d.id || idx}
+            className="border border-gray-300 p-4 rounded-lg shadow-sm"
+          >
+            <p><strong>Domain:</strong> {d.DomainName}</p>
+            <p><strong>Type:</strong> {d.Type}</p>
+            <p><strong>Price:</strong> ${d.Price}</p>
+            <p><strong>Renewal Price:</strong> ${d.RenewalPrice}</p>
+            <p><strong>Transfer Price:</strong> ${d.TransferPrice}</p>
+            {d.EapFee && <p><strong>EAP Fee:</strong> ${d.EapFee}</p>}
+            <p><strong>Renewal Date:</strong> {new Date(d.RenewalDate).toLocaleDateString()}</p>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
+
 
     
     {showConfirmModal && (
@@ -302,12 +371,8 @@ export default function EmailDomain() {
             state: {
               totalPrice,
               paymentIntentDomains: {
-                PremiumDomains: categorizedDomains.premiumAvailable?.map(d => ({
-                  Name: d.domain,
-                  Price: d.price,
-                  EapFee: d.eapFee || 0,
-                })),
-                NonPremiumDomains: categorizedDomains.nonPremiumAvailable.map(d => d.domain),
+                PremiumDomains: categorizedDomains.premiumAvailable, // has domain, price, eapFee
+                NonPremiumDomains: categorizedDomains.nonPremiumAvailable, // has domain, registerPrice, etc.
               },
             },
           })

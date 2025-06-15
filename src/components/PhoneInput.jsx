@@ -11,6 +11,7 @@ const PhoneInput = ({ value, onChange, defaultCountry = 'us' }) => {
       containerClass="w-full"
       enableSearch
       placeholder='Number'
+      
     />
   );
 };

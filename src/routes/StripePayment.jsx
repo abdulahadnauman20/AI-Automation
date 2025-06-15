@@ -20,6 +20,7 @@ const CheckoutForm = () => {
 
   const [purchaseResult, setPurchaseResult] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [orderId, setOrderId] = useState(null);
 
 
   const stripe = useStripe();
@@ -48,16 +49,23 @@ const CheckoutForm = () => {
 
   useEffect(() => {
     if (!paymentIntentDomains) return;
+    const token = localStorage.getItem("Token")?.replace(/^"|"$/g, "");
+    console.log(token);
+
+    const domainNames = [
+    ...(paymentIntentDomains.PremiumDomains || []).map(d => d.domain),
+    ...(paymentIntentDomains.NonPremiumDomains || []).map(d => d.domain),
+  ];
 
     fetch(`${import.meta.env.VITE_API_URL}EmailAccount/CreatePaymentIntent`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+     },
       body: JSON.stringify({
         Amount: totalPrice,
-        Domains: [
-          ...paymentIntentDomains.PremiumDomains.map(d => d.Name),
-          ...paymentIntentDomains.NonPremiumDomains,
-        ],
+        Domains: domainNames,
       }),
     })
       .then(res => res.json())
@@ -84,12 +92,75 @@ const CheckoutForm = () => {
       payment_method: { card, billing_details: { name: `${user.FirstName} ${user.LastName}` } },
     });
 
+    console.log(card);
+
     if (result.error) {
       setStatus({ message: result.error.message, type: "error" });
-      setTimeout(() => navigate("/email-domain"), 2500);
+      setTimeout(() => navigate("/email-domain"), 5000);
     } else if (result.paymentIntent.status === "succeeded") {
       setStatus({ message: "Payment successful! Please fill in your details.", type: "success" });
       setShowUserForm(true);
+
+      const orderDomains = [
+  ...(paymentIntentDomains?.PremiumDomains || []).map((d) => ({
+    Name: d.domain,
+    Price: d.price,         // Use price for premium domains
+    Type: "Premium",
+    EapFee: d.eapFee || 0,  // Optional
+  })),
+  ...(paymentIntentDomains?.NonPremiumDomains || []).map((d) => ({
+    Name: d.domain,
+    Price: d.registerPrice, // Use registerPrice for non-premium domains
+    Type: "Not Premium",
+  })),
+];
+
+// Step 2: Get token from localStorage
+const token = localStorage.getItem("Token")?.replace(/^"|"$/g, "");
+
+// Step 3: Send AddOrder API request
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}EmailAccount/AddOrder`, {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+            Domains: orderDomains,
+            TotalAmount: totalPrice,
+            PaymentIntentId: intentId,
+            }),
+        });
+
+        const data = await res.json();
+        console.log("AddOrder response:", data);
+        const orderId = data?.Order?.id;
+        setOrderId(orderId);
+
+        // ✅ Call UpdateOrderStatus with StripeStatus only
+        await fetch(`${import.meta.env.VITE_API_URL}EmailAccount/UpdateOrderStatus`, {
+            method: "PUT",
+            headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+            OrderId: orderId,
+            StripeStatus: "Succeeded",
+            PurchaseStatus: "Pending",
+            }),
+        });
+
+        if (!data.success) {
+            setStatus({ message: "Failed to create order", type: "error" });
+            return;
+        }
+      } catch (err) {
+        console.error("Error creating order:", err);
+        setStatus({ message: "Error creating order", type: "error" });
+        return;
+      }
     }
   };
 
@@ -112,8 +183,18 @@ const CheckoutForm = () => {
       formattedPhone = `+${phoneCountryCode}.${phoneNumber}`;
     }
 
+    const formattedDomains = {
+  PremiumDomains: (paymentIntentDomains?.PremiumDomains || []).map((d) => ({
+    Name: d.domain,
+    Price: d.price,
+    EapFee: d.eapFee || 0,
+  })),
+  NonPremiumDomains: (paymentIntentDomains?.NonPremiumDomains || []).map((d) => d.domain),
+};
+
+
     const payload = {
-      Domains: paymentIntentDomains,
+      Domains: formattedDomains,
       PaymentIntentId: intentId,
       UserDetails: {
         ...user,
@@ -124,9 +205,13 @@ const CheckoutForm = () => {
     console.log(payload)
 
     try {
+      const token = localStorage.getItem("Token")?.replace(/^"|"$/g, "");
       const res = await fetch(`${import.meta.env.VITE_API_URL}EmailAccount/PurchaseDomains`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, 
+        },
         body: JSON.stringify(payload),
       });
 
@@ -134,7 +219,69 @@ const CheckoutForm = () => {
       setPurchaseResult(data);
       setShowUserForm(false);
       setShowConfirmation(true);
-      
+
+      await fetch(`${import.meta.env.VITE_API_URL}EmailAccount/UpdateOrderStatus`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          OrderId: orderId, // From state
+          StripeStatus: "Succeeded",     // already happened
+          PurchaseStatus: "Succeeded",   // user details accepted
+        }),
+      });
+
+      //there is an array in purchaseResult state named Purchased, which has strings of all domains purchased
+      const allDomains = [
+  ...(paymentIntentDomains?.PremiumDomains || []).map(d => ({
+    domain: d.domain,
+    type: "Premium",
+    price: d.price,
+    renewalPrice: d.renewalPrice,
+    transferPrice: d.transferPrice,
+    eapFee: d.eapFee || 0,
+  })),
+  ...(paymentIntentDomains?.NonPremiumDomains || []).map(d => ({
+    domain: d.domain,
+    type: "Not Premium",
+    price: d.registerPrice,
+    renewalPrice: d.renewPrice,
+    transferPrice: d.transferPrice,
+    // no eapFee
+  }))
+];
+
+for (const domainName of data.Purchased || []) {
+  const fullDomain = allDomains.find(d => d.domain === domainName);
+  if (!fullDomain) continue;
+
+  const payload = {
+    OrderId: orderId,
+    DomainName: domainName,
+    Price: fullDomain.price,
+    RenewalPrice: fullDomain.renewalPrice,
+    TransferPrice: fullDomain.transferPrice,
+    Type: fullDomain.type,
+    ...(fullDomain.type === "Premium" && { EapFee: fullDomain.eapFee }), // include only if premium
+  };
+
+  try {
+    await fetch(`${import.meta.env.VITE_API_URL}EmailAccount/AddDomain`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (err) {
+    console.error(`Failed to send AddDomain for ${domainName}:`, err);
+  }
+}
+
+
     } catch (err) {
       console.error("Error submitting purchase:", err);
     }
@@ -146,11 +293,11 @@ const CheckoutForm = () => {
       {!purchaseResult && (<div><ul className="mb-4 text-gray-700">
         {paymentIntentDomains?.PremiumDomains?.map((d, idx) => (
           <li key={idx}>
-            {d.Name} 
+            {d.domain} 
           </li>
         ))}
         {paymentIntentDomains?.NonPremiumDomains?.map((d, idx) => (
-          <li key={idx}>{d}</li>
+          <li key={idx}>{d.domain}</li>
         ))}
       </ul>
 
@@ -201,6 +348,7 @@ const CheckoutForm = () => {
       onChange={handleUserChange}
       placeholder={key.split(/(?=[A-Z])/).join(' ')} // Adds space between camelCase words
       className="w-full px-4 py-2 border border-gray-300 rounded"
+      required
     />
   )
 ))}
