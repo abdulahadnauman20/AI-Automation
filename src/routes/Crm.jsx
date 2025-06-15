@@ -1,399 +1,34 @@
-import { useState } from "react"
-import {Search,Plus,MapPin,Globe,ChevronDown,Play,Pause,CircleCheck,ChevronLeft,ChevronRight,Clock,Sparkles,Zap,Ellipsis,PhoneOutgoing,SquarePen,ShieldX, Disc,
-} from "lucide-react"
+import { useState, useEffect } from "react"
+import {Search, Plus, MapPin, Globe, ChevronDown, ChevronUp, Ellipsis, CircleCheck, Clock, DollarSign, Users, FileText, Handshake, CheckCircle, XCircle, PhoneCall, Video, CalendarDays} from "lucide-react"
+import axiosInstance from "../services/axiosInstance";
+import { toast } from "react-hot-toast";
 import { FcGoogle } from "react-icons/fc";
-
-const calls = [
-  {
-    id: 1,
-    name: "Alexis Sanchez",
-    avatar: "https://s3-alpha-sig.figma.com/img/ad23/2f1a/673fe1645ff06837351bc6292fd60f72?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=VVDq6rfQ2pWWTaAOpfg8tli0UbUgcDVHfFCIY7aJsQ93u9eSOdHxJMbBfGkZGbcw1gkl5Pdqfvp4VlKR-NUq4MesVpJtlCZY~kEf09IG6ryLnYULwWPfmy3VUrg0UanQQzpvb31sq3Lpdv0Bzjaccq56B1Nbdg5TB5XQWmCM6taNTrqCTQwNh7e9k~xQaBsh80nmLp6jzaUW61hj7i8POSXayfkWVpDOUuazUmb~GbMfscuO27o1ReIRRpn0m2ztRpbNtSAvi-tpzZx6V3bVqhoHAnfubJ-vGHPvDaX2MSokCbwAJZ8WW2ulnpW73XTuo8tZjdasWOBsmkt6Rz9~YQ__",
-    phone: "+1263 263513",
-    date: "6 mins ago",
-    duration: "54:230000000",
-    bgColor: "bg-orange-100",
-  },
-  {
-    id: 2,
-    name: "Emily Carter",
-    avatar: "https://s3-alpha-sig.figma.com/img/c5f3/e84e/4fb2f97bf20e33c2b8cdf9197e1f2409?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=k0Pgv~SnS1HG-3jj4WyeozE4GXVYpBnxgHWQRBz1m0ufyD04WpA5PjOhZEux8AqIh73kZ4UQZBt2Lw1V2Nsd83WZUm8mEkade8p~Rnr6KSMysZmO8Mv0kJuQnM6TTIGG05Czd5dHPUeD4KwVn11w8JMgkzlk82Q5iPUZqMWZLMWY3Up4yRJ0Vlpo7E7y4XnkCkRwKGXnECxwHzAphCum1yY~MQvDkrCfwBksGlQqA6laZNPuLaGhiFMc5HdP1Go2Aom~x29r7iZUygikzeF9p82mGCMPCRdup1ws98jaFXcn~yuq0t0LEwN4S5Eb5bvEo1GkemvRely0bH-piVkEZQ__",
-    phone: "+1263 263513",
-    date: "4 hours ago",
-    duration: "54:230000000",
-    bgColor: "bg-yellow-100",
-  },
-  {
-    id: 3,
-    name: "James Harrison",
-    avatar: "https://s3-alpha-sig.figma.com/img/afac/9044/1bd1b90f58b13b3dfe5637587e1b9661?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=hZaJTeiHMtAhzF0mzQMmpkDUh-7avxHcOP-zvd16gSFWASUQ8-PQGei8q321bz9DPoGyEKIBtPVl-x9FKbWoC1EaUp384DYHTDdJlQRBt9TOZs8zRr6poYGmVNk15L-wa4BBFydAbk1uHo081eN3-dyi1hIcH4YmwL1h4IzMi8lnMo4Z5KINfXUvE4gzA-y2-jYAD4Tzip2uL9hTod-gsDFMXHLbQx4Ftl0Uufs5cG6pnBNuNOVRowcWjDDSftVVqB2J8NhV6WvgVGwAF-4mQ3QFGiWH653f4dxWNIAea9G3hniSYcT800qrv5kj2ouDBrgm~IkzzAe~VW0zPmeGfw__",
-    initials: "JH",
-    phone: "+1263 263513",
-    date: "Yesterday",
-    duration: "54:230000000",
-    bgColor: "bg-blue-100",
-  },
-  {
-    id: 4,
-    name: "Olivia Bennett",
-    avatar: "https://s3-alpha-sig.figma.com/img/b52b/ff87/4bd5e2c4056e2551724da86e02902466?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=eOAGmt7-rcQLSTD1Uvx8ckUBaduhmCRhRaSuSvHvNYSkMmPN1vt0DtBcIl7AE0yx3rk3561v75b6XrnAFnMdEkcWEIkLR5N4-ao6ZuABD4h31TcSdklnw5c9c4PLGkt50YQ1asl7b6po34yCwLyJ3M3W8CBKIGZZVZdAFOuTq6uZ4BTJSSa~EU~Od-AZBKSnnoms2e3FpyRTLc4Y1Zh4HpYpUDpeBmLVaXXVbrzAAyRdOTVPPsOBB5Re8-Pqcx-~iNviVTPyqRfa2sh2dpXydMfDhZr1lOgsG8F19EXUX5b0RFM3Uo91iy0mq9txnXQhGdFoqw6Lvdj-JiYsoDWclw__",
-    phone: "+1263 263513",
-    date: "June 2025",
-    duration: "54:230000000",
-    bgColor: "bg-green-100",
-  },
-]
-
-const meetings = [
-  {
-    id: 1,
-    lead: "Alexis Sanchez",
-    avatar: "https://s3-alpha-sig.figma.com/img/b303/3293/64981872de114f9afc9909268c41d532?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=URL1KYG3YLKQ89ddu0Jv1TknY~LtQQm4vrS4MT6UO~0MTMshLNI5NQTrJuCL79W2hFegObJrrbhnkD~lX2cR2m9yaP6a8iW8PZ8q0KGOR2GF64isOkuSozI54zgUP9hDU8rEFWU5erXwuwhwgXJ1NtuzBXP2J9fQwocbL4R-qYjLrMYGS2KrM3FNZ31U1~L18YLYwkQfOphOZv6SBvFEH9jPbjNj66YCmMrUDC0GOOJfag65yc4u546JnCc3XQx7Uq2UpJ-ViBOv1VjQ3CgGyqrl5E2Hp11Z6fSSsiSBfQYnRB4LtnafLLCvdJ5Nm9Qvc7e0EMpPsdm8izUgR6xmWQ__",
-    date: "27 Feb 2025",
-    time: "06 minutes ago",
-    createdBy: "Quickpipe AI",
-    isAI: true,
-    bgColor: "bg-purple-100",
-  },
-  {
-    id: 2,
-    lead: "Ruben Schleifer",
-    avatar: "https://s3-alpha-sig.figma.com/img/ae49/d0da/6115d464049091b9698d07b84562a8f0?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=kgeen2FpNLgv3BcZknG3W-~zL8O1m8BTAiJB-gBBbbxfLAsOSLkql3~rFms~l8dEi3CjzVyxnm7IWEm-d2At-UXDDjteybAmYUWfjYJbZYPhDBJqlYsZTV3WON1u2rpX6KiOKCRjaBs8YXTBNOFTuPYjcHwL~W0TTicsR2bR75VKQx1lqqFO1wA1aU3iITRqRlVhG91~R7DrVC8~xvy0s06xYuizao6WlS8zy-PPixaK4GDYw8oTY66dXQwncShOvPxKwQb2aMZ8mSRVik1bHrNNnpKGGbq1mpvbf5HPNqXb8i-5wu6rx8PIyyRSeH-fGdHaSq391TcTAH75ipISiA__",
-    date: "27 Feb 2025",
-    time: "06 minutes ago",
-    createdBy: "Beeto Leru",
-    isAI: false,
-    bgColor: "bg-green-100",
-  },
-  {
-    id: 3,
-    lead: "Kaylynn Geidt",
-    avatar: "https://s3-alpha-sig.figma.com/img/c5f3/e84e/4fb2f97bf20e33c2b8cdf9197e1f2409?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=k0Pgv~SnS1HG-3jj4WyeozE4GXVYpBnxgHWQRBz1m0ufyD04WpA5PjOhZEux8AqIh73kZ4UQZBt2Lw1V2Nsd83WZUm8mEkade8p~Rnr6KSMysZmO8Mv0kJuQnM6TTIGG05Czd5dHPUeD4KwVn11w8JMgkzlk82Q5iPUZqMWZLMWY3Up4yRJ0Vlpo7E7y4XnkCkRwKGXnECxwHzAphCum1yY~MQvDkrCfwBksGlQqA6laZNPuLaGhiFMc5HdP1Go2Aom~x29r7iZUygikzeF9p82mGCMPCRdup1ws98jaFXcn~yuq0t0LEwN4S5Eb5bvEo1GkemvRely0bH-piVkEZQ__",
-    date: "27 Feb 2025",
-    time: "06 minutes ago",
-    createdBy: "Quickpipe AI",
-    isAI: true,
-    bgColor: "bg-yellow-100",
-  },
-  {
-    id: 4,
-    lead: "Rayna Vetrovs",
-    avatar: "https://s3-alpha-sig.figma.com/img/b333/a10d/f8c23fab456b1b430a98b7405fb49665?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=NbQfy3MRcNWFqJmOnGMb0A52Zqh6ve7Svq6yIPwjBi-5w8CumHKoaO~rYMr3BW3b6AeM3yfaD7W~A0vw93q8TmUVWAiWEt34iCaawNPTrwaKERehUzFUoNyrGFDesBOPjMrkOS3sKs61g5s4q1SfMJq-rsUxXp10TkChwnMYfg9JofNbrGFETstK7h5B7kqvwQkvaRKkOSrusC185AXbvUJ~tlGAaGIVO7Ko1lyKDAe8WA3x9yoah7lThXw6qMXJTh~DIH2dK9MLGLxRlODO5~u7Ljy63B8jIabenWnmE8vYh4XzWoHd0JaetfCqlfz2TjR2lskQV~7JUQza8jsH1w__",
-    date: "27 Feb 2025",
-    time: "06 minutes ago",
-    createdBy: "Quickpipe AI",
-    isAI: true,
-    bgColor: "bg-pink-100",
-  },
-]
-
-const opportunities = [
-  {
-    id: 1,
-    opportunity: "BetaTech",
-    contact: "Michael Regan",
-    amount: "-",
-    owner: "Beeto Leru",
-    source: "Phone",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Discovery",
-  },
-  {
-    id: 2,
-    opportunity: "Greenfield",
-    contact: "Jordyn Botosh",
-    amount: "$12,839",
-    owner: "Beeto Leru",
-    source: "Email",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Discovery",
-  },
-  {
-    id: 3,
-    opportunity: "Acme Corp.",
-    contact: "Emerson Saris",
-    amount: "-",
-    owner: "Beeto Leru",
-    source: "Phone",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Proposal",
-  },
-  {
-    id: 4,
-    opportunity: "Vertex Health",
-    contact: "Emerson Franci",
-    amount: "-",
-    owner: "Beeto Leru",
-    source: "Phone",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Evaluation",
-  },
-  {
-    id: 5,
-    opportunity: "EcoBuild",
-    contact: "Aspen Vaccaro",
-    amount: "$200",
-    owner: "Beeto Leru",
-    source: "Email",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Evaluation",
-  },
-  {
-    id: 6,
-    opportunity: "EcoBuild",
-    contact: "Ruben Torff",
-    amount: "$12,839",
-    owner: "Beeto Leru",
-    source: "Phone",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Evaluation",
-  },
-  {
-    id: 7,
-    opportunity: "OmniTech",
-    contact: "Carter Rosser",
-    amount: "$12,839",
-    owner: "Beeto Leru",
-    source: "Email",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Evaluation",
-  },
-  {
-    id: 8,
-    opportunity: "Zenoth Co.",
-    contact: "Lynn Tanner",
-    amount: "$12,839",
-    owner: "Beeto Leru",
-    source: "Email",
-    expectedClosing: "12/2/2025",
-    actualClosing: "12/4/2025",
-    lastInteraction: "12/2/2025 9:23 AM",
-    stage: "Sales",
-  },
-]
+import { Menu } from '@headlessui/react';
 
 export default function Crm() {
-  const accounts = [
-    {
-      id: 1,
-      name: "Microsoft Inc.",
-      logo: "https://s3-alpha-sig.figma.com/img/88be/db6f/bd548b0155aebe1afeb8b51e2375808a?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=qHU-nuSC~~S2~zKp-lsc7efOtqjPuiuq-p1j8P1YRN2MtsltQEcaj4uQVM2iy9w6K4MvfNsru6P~xT9Q1UNecBkwAqz2yvP8VsxZxuqFeGiTEn8tlS20hcELBIOVmeAB6Hg31i0-Tm4XtLBbFx61FcSj2vuXlCNmgznUyCEF1f-F1Oq6ap1zqMtCm-h5qqY32W2sfarNh16sJPFpd-uxrfsWVsVqwA5~bWOiuKB5K6ZgatoDqDdOqrNMvww1r1dVcvGEl-dA64oG6hcUHCCDAv0-ZDLKsVpgHJN3tpM1pjSaCSl0Nd40LpmPVxziZPCrDbnazK9VQHUFLs58qDgNUw__",
-      logoBackground: "bg-[#f25022]",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 2,
-      name: "M & M Boutique",
-      logo: "https://s3-alpha-sig.figma.com/img/d3a5/92fa/910daf59226b7dc72d3256ae806bb9a0?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=H31~qoUjyEWlRaGZlONcbmslv-1gm-xi6ucbcEw~~euBZuTR~UmJCrDRH2PaV7F3W3ha~UjdcXnOq~fmLWYkduWq0qQ0SfeWNJzGdAkYKlhfaDgTvDIu1u4qPusaemHPo4wiCzil8spnkB3ZTwNoWEGI-ljG8JthW9zu32zU139bPeLTPQZ34WP~RKn-jBDiPhT-VcdNGs3sKIKAPtHbXkfDf298vCEPLFdVgsHDjNdHnKd0JLwML-sgjysVM-OD4-d-GyKPd228gyqFNJx5bFrnZa9GbSXI7tJUzK~MbVHQdG4xDPw~xsBl1iKxGoXw2v7fVWWXXsCv44v2ZqPkzw__",
-      logoBackground: "bg-teal-500",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["BM", "CE", "HR"],
-    },
-    {
-      id: 3,
-      name: "X (FormelyTwitter)",
-      logo: "https://s3-alpha-sig.figma.com/img/3af9/0560/3d2392ebd00db1775b555cf4dbcd29fe?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=FArFoTGANntS9Pa5S62qv8wKtlUWfeZg9K2aIfrxfMg3XLbSGzG2b4VF1V~Y13aaTuQrFI8s7bi3Vu8TFxF5o~hRd9xtnLmR2xswDhqKmuyth0gkmS9O0bvpC5qezFwL0UX1CySpVn1wn29CcTrnN8t3jfs~q~NSTtLL6Hz0iLE-3sm2IKAWoO43YIEw8UKg88yllbA01XRNs14p1YUMUjT-gJQCgsbZOVEp41sJunr3EO8eagmay4xiEWwcaae7vPfcbwLoJLI3Pt2DIruTqH7G~Q8VUkNOVhq0-NbvdPQGydEsg-5Ei52cn-EreX8eijq7cWsJ2K~T7RU39idcbw__",
-      logoBackground: "bg-black",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["HR", "CE", "BM"],
-    },
-    {
-      id: 4,
-      name: "PWC",
-      logo: "https://s3-alpha-sig.figma.com/img/7f7b/2b28/1d9939016d1ce03eceab3ff1479444b5?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=WdmG4FqTaxvZg7-KZYkLuWC44k2aXbQuA1Md3P~zf~lGjzChRvij5tRMqgyv4KJxdWj9KuKGu9DgBzb5elK9KuTBSh4adyY2nBLih08TMnekoYNgtYLXD2PS0YoiXatjyC-phFOP6aCpL8Dvgy3gR1emdSyeGEnqY-Ai6PFftFjkcAlkIkhvrJPaeDHOELxasSRVuoo-Ggcxxz52v3WyqaxgHkZfK4iEIR1A5Ew~MDEQgQcod255HN5RdPvWvBCK2AtTYBE7Ytp4Ent5FBEOU5c4emo4nW2QGaGcqCSF66t73H2N0NxTocvD7by-6vEKBGVx4FRqRgTONisoRTnwvg__",
-      logoBackground: "bg-orange-500",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 5,
-      name: "Deloitte",
-      logo: "https://s3-alpha-sig.figma.com/img/26a9/3a53/926d61cbf18c17def36384b764b4b0cf?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=fhOyIx2E6lslg1MrCiCcZsWlTqMcSjMJ3~-EnkaHHjbV700vvReadjDjGAUWcXFRSwPJUfXeSqpRIfZgFiq41jpgv1qg9CX19JE1q5bhp2C-m38Ns6BvV~5lbUIQE2MkoZT4HbkGbn-TcOqJaM8WpcDSA83E1wdOg-ikjU6Zk2KyNhZ2wPOLeDSdKnDFK9ap-bM7PGCrXP0QmRnFRbbWNoY0Y0Q6Ua8D0wiDXR4D4007rbA2Ud~-CaX2Tun3ntqWcMCDCZrIRrLQqcD8Dp~NlJkTlYt9hUA9wG9eZ5g5AZuGZmEhy12RZtxMw~LhWyAyP76QPXnSKm52b~S3c4PasA__",
-      logoBackground: "bg-black",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 6,
-      name: "Life Planner Inc.",
-      logo: "https://s3-alpha-sig.figma.com/img/f065/d635/7b4c9d42acc4e1793d19e8f503259f3f?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=U75ZXRJyKN0yRHGyM4f~zF9HkagsU46radwUCqIbGoEuc1QB5CCrEzmQ50HEzkLw08aapFcs5jJ7GPrELvgI9a~D8nnOiABtRGntFcaoxWpB~ntDnk~DRjzB0kE6paqbX7sS03kIvqF-0cyTfpAe5381Qw4LyYMtvEHZScng2S6r-DbDfokzTNeT9SpFiJmMycZO54B~QBU3W3GyftJT7OTz9dLE5S9JcAgymLTfyflFz-ASBv~tstTrUusw39TqCvILgjcrnHQ5cQDTBV7VlCBYq7AfSLEDaZKS4HILkIbFzxv2sN7m5sNhgWQ4ztM6R9zv7IXPB8Eo2LkT1JPobQ__",
-      logoBackground: "bg-pink-500",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 7,
-      name: "Hop's Bakery",
-      logo: "https://s3-alpha-sig.figma.com/img/d3a5/92fa/910daf59226b7dc72d3256ae806bb9a0?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=H31~qoUjyEWlRaGZlONcbmslv-1gm-xi6ucbcEw~~euBZuTR~UmJCrDRH2PaV7F3W3ha~UjdcXnOq~fmLWYkduWq0qQ0SfeWNJzGdAkYKlhfaDgTvDIu1u4qPusaemHPo4wiCzil8spnkB3ZTwNoWEGI-ljG8JthW9zu32zU139bPeLTPQZ34WP~RKn-jBDiPhT-VcdNGs3sKIKAPtHbXkfDf298vCEPLFdVgsHDjNdHnKd0JLwML-sgjysVM-OD4-d-GyKPd228gyqFNJx5bFrnZa9GbSXI7tJUzK~MbVHQdG4xDPw~xsBl1iKxGoXw2v7fVWWXXsCv44v2ZqPkzw__",
-      logoBackground: "bg-teal-500",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 8,
-      name: "Manaflow",
-      logo: "https://s3-alpha-sig.figma.com/img/d7f8/22b6/a7b41a5661bb413219ff939af1b3080b?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=XmFx226EEYmqLvjD4PUJuhEEXvgl9KjTcv26MlqpsuLgthWKm53MHvqK8dRoajKwwGTJ8tNoTzn-6DgYf4OMKQhdEXF5oN4vYN7z3L3tQlE2LJYRHOIOHFAyoN-t~BPouW6UeNWcJgShXtZyyi4MYKlPSeJF8wPcEUwNYINIwGfBTFYNcjEMLaeayu0BR-yiTpO1Hjl18T8xYhK7CPXNWJqBK1GPyKN0HWxTQn55-GSau9NxYjvc1hoaax9gg3rxR6Vi3OF01-QSXdt0rEBDjXzks9gB7bKa7AN86Q2u4Iah8GXakVcnteV4vqFnCJWhgjxono1ck~OUSSKDglYqbg__",
-      logoBackground: "bg-yellow-500",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 9,
-      name: "Volvo Inc.",
-      logo: "https://s3-alpha-sig.figma.com/img/8c51/4065/2b9ef4d97e29fed246db94dce3a10bae?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=aoR3-ZepYLStw5s2sK5ImbmolWCkLul-r3WNi6qHWsUlGSv4u9IetxLmKEBAVJ0L4duUtUAEo5X~Ml7fT4dS9lAmm1MsgsIs-uBYLnxupyclXlMdsoomDgufX~U3qDQV1VilGTYbdeqSS32mgZ7M~On9y96GvyVHJ6~KfXN3B2j0Y03oYjzh-7IjNRaylEbKEWLkpZhLKVD31cLRYh8h8JEQdFGtNRi3qYQUfNYTYWFc0EkEWxB8d9S6YPMdrQTzOZcE3ourZwseqToJDlmLewbWXOlYb49MFQd49kiXUBKjFtg9RzumnIvdjxJ6uw2Ca8SjR8W3ZrRBZRK6Fassyw__",
-      logoBackground: "bg-gray-200",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 10,
-      name: "Epidemic Sounds",
-      logo: "https://s3-alpha-sig.figma.com/img/32e8/f97f/3e08f0d9af04efd8aca9339225a039fe?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=AYW2OQkevtzFybikPVCb6Pyd~GwPk~8On3A-qZtd5Pv~zx-whUg~7k1RU2ltyMS4cwh27sv~E-k1Pl-A2UaPWbtw4w1~qQFXLtNDHl3jyGP0C0d9ADA6PYqYSpb9z~FLFws~~WJ8IsNfAvOHb8eZe5MZLGpUKVFBiR294yFRWE6NCGhek34Jh2BYfpRIOdk420KbsVY6BUMvFVQzFoHJi6bGiIN8eDrsYxIft-XdaUFonv03E-L2d5lK7x3nZy8hbjSf~7vBfrdZD3L6ancFbKJIc85~aK0WX85ozOgbakRa4P2J-oH69z9yZZYK4q2JELUvYroEC5txM-0tA3uKgg__",
-      logoBackground: "bg-black",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-    {
-      id: 11,
-      name: "Future Designers",
-      logo: "https://s3-alpha-sig.figma.com/img/d3a5/92fa/910daf59226b7dc72d3256ae806bb9a0?Expires=1741564800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=H31~qoUjyEWlRaGZlONcbmslv-1gm-xi6ucbcEw~~euBZuTR~UmJCrDRH2PaV7F3W3ha~UjdcXnOq~fmLWYkduWq0qQ0SfeWNJzGdAkYKlhfaDgTvDIu1u4qPusaemHPo4wiCzil8spnkB3ZTwNoWEGI-ljG8JthW9zu32zU139bPeLTPQZ34WP~RKn-jBDiPhT-VcdNGs3sKIKAPtHbXkfDf298vCEPLFdVgsHDjNdHnKd0JLwML-sgjysVM-OD4-d-GyKPd228gyqFNJx5bFrnZa9GbSXI7tJUzK~MbVHQdG4xDPw~xsBl1iKxGoXw2v7fVWWXXsCv44v2ZqPkzw__",
-      logoBackground: "bg-black",
-      location: "United Kingdom",
-      website: "www.microsoft.com/us",
-      contacts: 24,
-      contactAvatars: ["CE", "BM", "HR"],
-    },
-  ]
-  
-  const people = [
-    {
-      email: "xmitchell@hotmail.com",
-      contact: "Lynn Tanner",
-      provider: "Microsoft",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "tbaker@outlook.com",
-      contact: "Capt. Trunk",
-      provider: "Google",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "mgonzalez@aol.com",
-      contact: "Thomas Anum",
-      provider: "Google",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "xmitchell@hotmail.com",
-      contact: "Lynn Tanner",
-      provider: "Microsoft",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "tbaker@outlook.com",
-      contact: "Capt. Trunk",
-      provider: "Google",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "mgonzalez@aol.com",
-      contact: "Thomas Anum",
-      provider: "Google",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "yrodriguez@aol.com",
-      contact: "B.A. Baracus",
-      provider: "Microsoft",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "vflores@gmail.com",
-      contact: "Devon Miles",
-      provider: "Google",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-    {
-      email: "yrodriguez@aol.com",
-      contact: "B.A. Baracus",
-      provider: "Microsoft",
-      status: "Verified",
-      company: "Tuxedo Suits Inc.",
-      website: "https://tuxedosuits.com",
-      title: "Design manager",
-    },
-  ]
-
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [accounts, setAccounts] = useState([]);
+  const [people, setPeople] = useState([]);
+  const [opportunities, setOpportunities] = useState({
+    Discovery: [],
+    Evaluation: [],
+    Proposal: [],
+    Negotiation: [],
+    Commit: [],
+    Closed: []
+  });
+  const [expandedCompanies, setExpandedCompanies] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("Accounts");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const[showSortDropdown, setShowSortDropdown] = useState(false);
-  const listItems = [
-    { name: "All Statuses", icon: "⚡" },
-    { name: "Active", icon: <Play size={20} className="text-blue-400" /> },
-    { name: "Draft", icon: <SquarePen size={20} className="text-gray-600" /> },
-    { name: "Paused", icon: <Pause size={20} className="text-orange-400" /> },
-    { name: "Error", icon: <ShieldX size={20} className="text-red-600" /> },
-    { name: "Completed", icon: <CircleCheck size={20} className="text-green-400" /> },
-  ]
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [sortOrder, setSortOrder] = useState('Oldest first');
+  const [selectAll, setSelectAll] = useState(false);
+  const [draggedLead, setDraggedLead] = useState(null);
+  const [opportunityStatus, setOpportunityStatus] = useState('All statuses');
+  const [events, setEvents] = useState([]);
+  const [calls, setCalls] = useState([]);
+  const [meetings, setMeetings] = useState([]);
 
   const sortOptions = [
     { value: 'Newest first', label: 'Newest first' },
@@ -402,9 +37,227 @@ export default function Crm() {
     { value: 'Name Z - A', label: 'Name Z - A' }
   ];
 
+  const statusConfig = {
+    Discovery: { color: "bg-blue-100", textColor: "text-blue-700", icon: Users },
+    Evaluation: { color: "bg-yellow-100", textColor: "text-yellow-700", icon: FileText },
+    Proposal: { color: "bg-purple-100", textColor: "text-purple-700", icon: DollarSign },
+    Negotiation: { color: "bg-orange-100", textColor: "text-orange-700", icon: Handshake },
+    Commit: { color: "bg-green-100", textColor: "text-green-700", icon: CheckCircle },
+    Closed: { color: "bg-gray-100", textColor: "text-gray-700", icon: XCircle }
+  };
 
-  const [searchQuery, setSearchQuery] = useState("")
-  const [activeTab, setActiveTab] = useState("Accounts")
+  // Fetch leads and group them by company
+  useEffect(() => {
+    const fetchLeads = async () => {
+      try {
+        console.log('Attempting to fetch leads...');
+        const response = await axiosInstance.get("/lead/GetAllLeads");
+        console.log('API Response:', response);
+        
+        if (response.data.success) {
+          console.log('Leads data:', response.data.leads);
+          // Group leads by company for Accounts tab
+          const groupedLeads = response.data.leads.reduce((acc, lead) => {
+            const companyName = lead.Company || 'Unassigned';
+            if (!acc[companyName]) {
+              acc[companyName] = {
+                id: companyName,
+                name: companyName,
+                logo: null,
+                logoBackground: "bg-gray-100",
+                location: lead.Location || 'Not specified',
+                website: lead.Website || 'Not specified',
+                leads: []
+              };
+            }
+            acc[companyName].leads.push(lead);
+            return acc;
+          }, {});
+
+          // Convert to array and sort for Accounts tab
+          const accountsArray = Object.values(groupedLeads).map(company => ({
+            ...company,
+            contacts: company.leads.length,
+            contactAvatars: company.leads.slice(0, 3).map(lead => 
+              lead.Name.split(' ').map(n => n[0]).join('').toUpperCase()
+            )
+          }));
+
+          // Set people data for People tab
+          setPeople(response.data.leads.map(lead => ({
+            ...lead,
+            status: lead.Status || 'Not yet contacted',
+            provider: lead.Email?.includes('@gmail.com') ? 'Google' : 
+                     lead.Email?.includes('@outlook.com') ? 'Microsoft' : 
+                     lead.Email?.includes('@yahoo.com') ? 'Yahoo' : 'Other'
+          })));
+
+          // Group leads by status for Opportunities tab
+          const opportunitiesByStatus = response.data.leads.reduce((acc, lead) => {
+            const status = lead.Status || 'Discovery';
+            if (!acc[status]) {
+              acc[status] = [];
+            }
+            acc[status].push(lead);
+            return acc;
+          }, {
+            Discovery: [],
+            Evaluation: [],
+            Proposal: [],
+            Negotiation: [],
+            Commit: [],
+            Closed: []
+          });
+
+          setOpportunities(opportunitiesByStatus);
+          console.log('Processed accounts:', accountsArray);
+          setAccounts(accountsArray);
+        } else {
+          console.error('API returned unsuccessful response:', response.data);
+          toast.error(response.data.message || 'Failed to fetch leads');
+        }
+      } catch (error) {
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status,
+          config: error.config
+        });
+        
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          toast.error(error.response.data?.message || `Error ${error.response.status}: Failed to fetch leads`);
+        } else if (error.request) {
+          // The request was made but no response was received
+          toast.error('No response from server. Please check your connection.');
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          toast.error('Error setting up request: ' + error.message);
+        }
+      }
+    };
+
+    fetchLeads();
+  }, []);
+
+  // Fetch calls data (from /calls endpoint)
+  useEffect(() => {
+    const fetchCallsData = async () => {
+      try {
+        const response = await axiosInstance.get("/calls");
+        if (response.data.success) {
+          setCalls(response.data.calls || []);
+        } else {
+          toast.error(response.data.message || 'Failed to fetch calls');
+        }
+      } catch (error) {
+        console.error('Error fetching calls:', error);
+        toast.error('Failed to fetch calls');
+      }
+    };
+    fetchCallsData();
+  }, []);
+
+  // Fetch meetings data (from /meetings endpoint)
+  useEffect(() => {
+    const fetchMeetingsData = async () => {
+      try {
+        const response = await axiosInstance.get("/meetings");
+        if (response.data.success) {
+          setMeetings(response.data.meetings || []);
+        } else {
+          toast.error(response.data.message || 'Failed to fetch meetings');
+        }
+      } catch (error) {
+        console.error('Error fetching meetings:', error);
+        toast.error('Failed to fetch meetings');
+      }
+    };
+    fetchMeetingsData();
+  }, []);
+
+  const toggleCompanyExpand = (companyId) => {
+    setExpandedCompanies(prev => ({
+      ...prev,
+      [companyId]: !prev[companyId]
+    }));
+  };
+
+  const handleSortChange = (sort) => {
+    setSortOrder(sort);
+    setShowSortDropdown(false);
+    
+    const sortedAccounts = [...accounts];
+    switch (sort) {
+      case 'Newest first':
+        sortedAccounts.sort((a, b) => 
+          new Date(b.leads[0]?.createdAt) - new Date(a.leads[0]?.createdAt)
+        );
+        break;
+      case 'Oldest first':
+        sortedAccounts.sort((a, b) => 
+          new Date(a.leads[0]?.createdAt) - new Date(b.leads[0]?.createdAt)
+        );
+        break;
+      case 'Name A - Z':
+        sortedAccounts.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'Name Z - A':
+        sortedAccounts.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+    }
+    setAccounts(sortedAccounts);
+  };
+
+  const handleDragStart = (lead, status) => {
+    setDraggedLead({ ...lead, sourceStatus: status });
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = async (targetStatus) => {
+    if (!draggedLead || draggedLead.sourceStatus === targetStatus) {
+      setDraggedLead(null);
+      return;
+    }
+
+    try {
+      // Update the lead's status in the backend
+      const response = await axiosInstance.post(`/lead/UpdateLead/${draggedLead.id}`, {
+        Status: targetStatus
+      });
+
+      if (response.data.success) {
+        // Update local state
+        setOpportunities(prev => {
+          const newState = { ...prev };
+          // Remove from source status
+          newState[draggedLead.sourceStatus] = newState[draggedLead.sourceStatus].filter(
+            lead => lead.id !== draggedLead.id
+          );
+          // Add to target status
+          newState[targetStatus] = [...newState[targetStatus], { ...draggedLead, Status: targetStatus }];
+          return newState;
+        });
+
+        toast.success('Lead status updated successfully');
+      } else {
+        toast.error('Failed to update lead status');
+      }
+    } catch (error) {
+      console.error('Error updating lead status:', error);
+      toast.error('Failed to update lead status');
+    }
+
+    setDraggedLead(null);
+  };
+
+  // Filter helpers
+  const meetingEvents = events.filter(ev => ev.Meeting_Link || (ev.Task_Title && ev.Task_Title.toLowerCase().includes('meeting')));
+  const callEvents = events.filter(ev => (ev.Task_Title && ev.Task_Title.toLowerCase().includes('call')) || (ev.Description && ev.Description.toLowerCase().includes('call')));
 
   return (
     <div className="min-h-screen bg-[rgb(245,245,245)] md:ps-20">
@@ -429,7 +282,7 @@ export default function Crm() {
         </div>
 
         {/* Search and Filters */}
-        {activeTab !== "Meetings" && activeTab !== "Opportunities" && (
+        {(activeTab === "Accounts" || activeTab === "People" || activeTab === "Opportunities" || activeTab === "Calls" || activeTab === "Meetings") && (
           <div className="flex flex-wrap justify-center md:justify-between mb-6 gap-4">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -438,52 +291,35 @@ export default function Crm() {
               <input
                 type="text"
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-                placeholder="Search..."
+                placeholder={
+                  activeTab === "Accounts" ? "Search companies..." :
+                  activeTab === "People" ? "Search people..." :
+                  activeTab === "Opportunities" ? "Search opportunities..." :
+                  activeTab === "Calls" ? "Search calls..." :
+                  "Search meetings..."
+                }
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
             <div className="flex flex-col md:flex-row justify-center gap-4">
+              {activeTab === "Accounts" && (
               <div className="relative inline-block text-left">
                 <button
-                  onClick={() => setIsOpen(!isOpen)}  
-                  className="px-4 py-2 border border-gray-300 text-[15px] text-gray-400 cursor-pointer rounded-full flex gap-1 items-center">
-                 <Zap size={18} className="text-gray-400 " /> All Statuses <ChevronDown className="text-gray-400" />
-                </button>
-                {isOpen && (
-                  <div className="absolute z-10 mt-2 bg-white shadow-md w-full rounded-lg">
-                      {listItems.map((val) => (
-                        <>
-                        <button key={val.name} onClick={() => handleStatusChange(val.name)} className="px-4 py-2 w-full flex gap-2 cursor-pointer items-center hover:text-[#15a395] hover:bg-[#defffcf7]">
-                          {val.icon} {val.name}
-                        </button>
-                        <hr className="text-gray-100" />
-                        </>
-                      ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="relative inline-block text-left">
-                <button
-                  type="button"
                   onClick={() => setShowSortDropdown(!showSortDropdown)} 
                   className="px-4 py-2 border border-gray-300 cursor-pointer text-gray-600 rounded-full flex gap-1 items-center">
-                  <span className="text-gray-400"> Oldest first</span>
+                    <span className="text-gray-400">{sortOrder}</span>
                   <ChevronDown className="text-gray-400" />
                 </button>
                 {showSortDropdown && (
-                <div 
-                  className="origin-top-right absolute right-0  left-1 mt-2 w-56 rounded-md shadow-lg bg-white ring-opacity-5 focus:outline-none z-10"
-                >
+                    <div className="absolute z-10 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                   <div className="py-1">
                     {sortOptions.map((option) => (
                       <button
                         key={option.value}
-                        className={`w-full text-left px-4 cursor-pointer py-2 text-sm hover:bg-gray-100 flex items-center ${
-                           'text-gray-700'
-                        }`}
+                            onClick={() => handleSortChange(option.value)}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         {option.label}
                       </button>
@@ -492,60 +328,87 @@ export default function Crm() {
                 </div>
               )}
               </div>
+              )}
+
+              {(activeTab === "Calls" || activeTab === "Meetings") && (
+                <Menu as="div" className="relative inline-block text-left">
+                  <Menu.Button className="flex items-center px-4 py-2 border border-gray-300 rounded-full text-gray-600">
+                    {sortOrder}
+                    <ChevronDown className="ml-2 h-4 w-4 text-gray-400" />
+                  </Menu.Button>
+                  <Menu.Items className="absolute z-10 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                    {sortOptions.map(option => (
+                      <Menu.Item key={option.value}>
+                        {({ active }) => (
+                          <button
+                            className={`w-full text-left px-4 py-2 text-sm ${active ? "bg-gray-100" : ""}`}
+                            onClick={() => handleSortChange(option.value)}
+                          >
+                            {option.label}
+                          </button>
+                        )}
+                      </Menu.Item>
+                    ))}
+                  </Menu.Items>
+                </Menu>
+              )}
 
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-teal-600 cursor-pointer hover:bg-teal-700 focus:ring-teal-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:ring-teal-500"
               >
                 <Plus className="mr-2 h-5 w-5" />
                 Add new
               </button>
-
-              {activeTab !== "Meetings" && activeTab !== "Accounts" &&(
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-[rgb(224,140,23)] to-[rgb(84,156,110)] hover:from-[rgb(204,130,20)] hover:to-[rgb(184,120,18)] focus:ring-[rgb(224,140,23)]">
-                <PhoneOutgoing className="mr-2 h-5 w-5" />
-                Call with AI
-              </button>
-                )
-              }
             </div>
           </div>
         )}
 
         {/* Accounts Grid */}
-        <div className="flex flex-wrap justify-center md:justify-between gap-5 w-full">
-          {/* Accounts Grid */}
-          {activeTab === "Accounts" &&
-            accounts.map((account) => (
-              <div key={account.id} className="bg-white rounded-lg shadow overflow-hidden relative">
-                  <button className="text-gray-400 hover:text-gray-500 absolute top-2 right-2">
-                    <Ellipsis />
-                  </button>
-                <div className="w-60 h-52 p-2 mt-8">
-
-                  {/* Centering the logo container */}
-                  <div className="flex justify-center">
-                    <div
-                      className={`${account.logoBackground} w-12 h-12 rounded-md flex items-center justify-center text-white`}
-                    >
-                      <img src={account.logo || "/placeholder.svg"} alt={account.name} className="w-8 h-8" />
+        {activeTab === "Accounts" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {accounts
+              .filter(account => 
+                account.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                account.leads.some(lead => 
+                  lead.Name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  lead.Email?.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+              )
+              .map((account) => (
+                <div key={account.id} className="bg-white rounded-lg shadow overflow-hidden">
+                  <div className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-3">
+                        <div className={`${account.logoBackground} w-12 h-12 rounded-md flex items-center justify-center text-white`}>
+                          {account.logo ? (
+                            <img src={account.logo} alt={account.name} className="w-8 h-8" />
+                          ) : (
+                            <span className="text-xl font-bold">{account.name[0]}</span>
+                          )}
                     </div>
-                  </div>
-
-                  <h3 className="text-lg font-medium text-gray-900 text-center my-2">{account.name}</h3>
-                  <div className="flex items-center justify-center text-sm text-gray-500 mb-1">
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900">{account.name}</h3>
+                          <div className="flex items-center text-sm text-gray-500">
                     <MapPin className="h-4 w-4 mr-1" />
                     {account.location}
                   </div>
-                  <div className="flex items-center justify-center text-sm text-gray-500 mb-4">
-                    <Globe className="h-4 w-4 mr-1" />
-                    {account.website}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => toggleCompanyExpand(account.id)}
+                        className="text-gray-400 hover:text-gray-500"
+                      >
+                        {expandedCompanies[account.id] ? (
+                          <ChevronUp className="h-5 w-5" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5" />
+                        )}
+                      </button>
                   </div>
-                  <hr className="text-gray-200 py-1" />
+
+                    <div className="mt-4 flex items-center justify-between text-sm">
                   <div className="flex items-center">
                     <div className="flex -space-x-2 mr-2">
                       {account.contactAvatars.map((avatar, index) => (
@@ -559,296 +422,134 @@ export default function Crm() {
                         </div>
                       ))}
                     </div>
-                    <span className="text-sm text-gray-500">{account.contacts} Contacts</span>
+                        <span className="text-gray-500">{account.contacts} Contacts</span>
+                      </div>
+                      {account.website !== 'Not specified' && (
+                        <a
+                          href={account.website.startsWith('http') ? account.website : `https://${account.website}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-600 flex items-center"
+                        >
+                          <Globe className="h-4 w-4 mr-1" />
+                          Website
+                        </a>
+                      )}
+                  </div>
+
+                    {expandedCompanies[account.id] && (
+                      <div className="mt-4 border-t pt-4">
+                        <div className="space-y-3">
+                          {account.leads.map((lead) => (
+                            <div key={lead.id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                                  <span className="text-sm font-medium text-gray-600">
+                                    {lead.Name.split(' ').map(n => n[0]).join('')}
+                                  </span>
+                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">{lead.Name}</p>
+                                  <p className="text-xs text-gray-500">{lead.Title}</p>
+              </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {lead.Email && (
+                                  <a
+                                    href={`mailto:${lead.Email}`}
+                                    className="text-blue-500 hover:text-blue-600 text-sm"
+                                  >
+                                    {lead.Email}
+                                  </a>
+                          )}
+                        </div>
+                          </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          )}
 
-
-          {activeTab === "People" && (
-            <div className="col-span-full w-full overflow-x-auto">
-              <table className="w-full table-fixed">
+        {/* People Table */}
+        {activeTab === "People" && (
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="min-w-full overflow-auto">
+              <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-300 text-sm text-muted-foreground">
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium w-[40px]">
-                      <input type="checkbox" className="rounded border-muted cursor-pointer" />
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium">
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-muted cursor-pointer"
+                        checked={selectAll}
+                        onChange={(e) => setSelectAll(e.target.checked)}
+                      />
                     </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[160px]">EMAIL</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[160px]">
-                      CONTACT
-                    </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[160px]">
-                      EMAIL PROVIDER
-                    </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[240px]">
-                      STATUS
-                    </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[160px]">
-                      COMPANY
-                    </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[160px]">
-                      WEBSITE
-                    </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[160px]">TITLE</th>
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">EMAIL</th>
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">CONTACT</th>
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">COMPANY</th>
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">TITLE</th>
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">EMAIL PROVIDER</th>
+                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">STATUS</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {people.map((person, idx) => (
-                    <tr key={idx} className="border-b border-gray-300 text-sm">
-                      <td className="px-4 py-3">
-                        <input type="checkbox" className="rounded border-muted cursor-pointer" />
-                      </td>
-                      <td className="px-4 py-3 text-gray-600">{person.email}</td>
-                      <td className="px-4 py-3">{person.contact}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center">
-                          {person.provider === "Microsoft" ? (
-                            <>
-                              <div className="h-5 w-5 mr-2 flex items-center justify-center">
-                                <svg width="21" height="21" viewBox="0 0 21 21" fill="none">
-                                  <path d="M10 1H1V10H10V1Z" fill="#F25022" />
-                                  <path d="M20 1H11V10H20V1Z" fill="#7FBA00" />
-                                  <path d="M10 11H1V20H10V11Z" fill="#00A4EF" />
-                                  <path d="M20 11H11V20H20V11Z" fill="#FFB900" />
-                                </svg>
-                              </div>
-                              Microsoft
-                            </>
-                          ) : (
-                            <>
-                              <FcGoogle size={20} className="me-1" />
-                              Google
-                            </>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-3 py-3">
-                        <div className="flex flex-col sm:flex-row items-center sm:justify-start gap-2 w-full">
-                          {/* Verified Badge */}
-                          <div className="flex items-center gap-1 bg-blue-100 rounded-full px-3 py-1 whitespace-nowrap">
-                            <CircleCheck size={17} className="text-blue-500" />
-                            <span className="text-blue-500 text-sm">Verified</span>
-                          </div>
-
-                          {/* Status Text */}
-                          <div className="flex items-center gap-1 bg-gray-200 rounded-full px-3 py-1 whitespace-nowrap">
-                            <Clock className="h-4 w-4 text-gray-500" />
-                            <span className="text-xs text-gray-500">Not yet contacted</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-gray-400 font-medium">{person.company}</td>
-                      <td className="px-4 py-3 text-gray-400 font-medium">{person.website}</td>
-                      <td className="px-4 py-3 text-gray-400 font-medium">{person.title}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="flex items-center justify-center px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <button className="p-2 text-sm text-gray-400 border border-gray-400 rounded hover:text-gray-900 flex items-center gap-1">
-                    <ChevronLeft className="h-4 w-4" />
-                    Previous
-                  </button>
-                  <div className="flex items-center gap-1">
-                    <button className="px-3 py-1 text-sm bg-gray-300 border border-gray-300 text-gray-900 rounded">1</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">2</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">3</button>
-                    <span className="px-2 text-gray-600">...</span>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">45</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">46</button>
-                  </div>
-                  <button className="p-2 text-sm text-gray-400 border border-gray-400 rounded hover:text-gray-900 flex items-center gap-1">
-                    Next
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "Calls" && (
-            <div className="col-span-full w-full overflow-x-auto">
-              <table className="w-full table-fixed">
-                <thead>
-                  <tr className="border-b text-sm text-muted-foreground">
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium w-[40px]">
-                      <input type="checkbox" className="rounded border-muted cursor-pointer" />
-                    </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[200px]">Lead</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">Phone</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">Date</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">
-                      Call duration
-                    </th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[120px]">Notes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {calls.map((call) => (
-                    <tr key={call.id} className="border-b border-gray-300 text-sm">
-                      <td className="px-4 py-3">
-                        <input type="checkbox" className="rounded border-muted cursor-pointer" />
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          {call.initials ? (
-                            <div
-                              className={`w-8 h-8 rounded-full ${call.bgColor} flex items-center justify-center text-sm font-medium`}
-                            >
-                              {call.initials}
-                            </div>
-                          ) : (
-                            <img
-                              src={call.avatar || "/placeholder.svg"}
-                              alt={call.name}
-                              className="w-8 h-8 rounded-full object-cover"
-                            />
-                          )}
-                          <span className="font-medium">{call.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-gray-500">{call.phone}</td>
-                      <td className="px-4 py-3 text-gray-500">{call.date}</td>
-                      <td className="px-4 py-3 text-gray-500">{call.duration}</td>
-                      <td className="px-4 py-3">
-                        <button className="text-gray-400">View</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              
-            </div>
-          )}
-          {activeTab === "Opportunities" && (
-            <div className="col-span-full w-full overflow-x-auto">
-              <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-                <div className="relative flex-1 max-w-md mb-2">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    className="block w-full pl-10 pr-3 py-2 border rounded-full border-gray-300 leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-                    placeholder="Search..."
-                  />
-                </div>
-
-              <div className="flex flex-col md:flex-row gap-2">
-                <button
-                  onClick={() => setIsOpen(!isOpen)}  
-                  className="px-4 py-2 border border-gray-300 text-gray-400 rounded-full flex gap-1 items-center"
-                >
-                 <Zap size={18} className="text-gray-400" /> All Statuses <ChevronDown className="text-gray-400" />
-                </button>
-                {isOpen && (
-                  <div className="absolute z-10 mt-2 bg-white shadow-md w-44 rounded-lg">
-                    <ul className="py-2 text-sm text-gray-700">
-                      {listItems.map((val, index) => (
-                        <li key={index} className="px-4 py-2 flex gap-2 items-center hover:bg-gray-100">
-                          {val.icon} {val.name}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                <button
-                  type="button"
-                  className="px-4 py-2 border border-gray-300 text-gray-600 rounded-full flex gap-1 items-center">
-                  <span className="text-gray-400"> Oldest first</span>
-                  <ChevronDown className="text-gray-400" />
-                </button>
-                <button
-                type="button"
-                onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-[rgb(224,140,23)] to-[rgb(84,156,110)] hover:from-[rgb(204,130,20)] hover:to-[rgb(184,120,18)] focus:ring-[rgb(224,140,23)]"
-              >
-                <PhoneOutgoing className="mr-2 h-5 w-5" />
-                Call with AI
-              </button>
-                </div>
-              </div>
-              <div className="w-full overflow-x-auto">
-                <table className="w-full min-w-[600px] md:min-w-full border-collapse">
-                  <thead>
-                    <tr className="border-b border-gray-300 text-sm text-muted-foreground bg-gray-100">
-                      <th className="px-4 py-3 text-left font-medium w-[40px]">
-                        <input type="checkbox" className="rounded border-muted cursor-pointer" />
-                      </th>
-                      <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-gray-500">OPPORTUNITY</th>
-                      <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-gray-500">CONTACT NAME</th>
-                      <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-gray-500 hidden md:table-cell">
-                        AMOUNT
-                      </th>
-                      <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-gray-500">OWNER</th>
-                      <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-gray-500 hidden md:table-cell">
-                        SOURCE
-                      </th>
-                      <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-gray-500 hidden lg:table-cell">
-                        EXPECTED CLOSING DATE
-                      </th>
-                      <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-gray-500 hidden lg:table-cell">
-                        ACTUAL CLOSING DATE
-                      </th>
-                      <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-gray-500 hidden xl:table-cell">
-                        LAST INTERACTION
-                      </th>
-                      <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-gray-500">STAGE</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {opportunities.map((opp) => (
-                      <tr key={opp.id} className="border-b border-gray-300 text-sm hover:bg-gray-50">
+                  {people
+                    .filter(person => 
+                      person.Name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      person.Email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      person.Company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      person.Title?.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                    .map((person) => (
+                      <tr key={person.id} className="border-b border-gray-200 text-sm hover:bg-gray-50">
                         <td className="px-4 py-3">
                           <input type="checkbox" className="rounded border-muted cursor-pointer" />
                         </td>
-                        <td className="px-4 py-3 text-blue-500 hover:underline cursor-pointer">{opp.opportunity}</td>
-                        <td className="px-4 py-3 text-blue-500 hover:underline cursor-pointer">{opp.contact}</td>
-                        <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{opp.amount}</td>
+                        <td className="px-4 py-3 text-gray-600">
+                          <a href={`mailto:${person.Email}`} className="hover:text-blue-500">
+                            {person.Email}
+                          </a>
+                        </td>
+                        <td className="px-4 py-3 text-gray-600">{person.Name}</td>
+                        <td className="px-4 py-3 text-gray-600">{person.Company || 'Not specified'}</td>
+                        <td className="px-4 py-3 text-gray-600">{person.Title || 'Not specified'}</td>
+                        <td className="px-4 py-3 text-gray-600 flex items-center gap-1">
+                          {person.provider === 'Google' && <FcGoogle size={20} />}
+                          {person.provider}
+                        </td>
                         <td className="px-4 py-3">
-                          <div className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-600">
-                            {opp.owner}
+                          <div className="flex items-center gap-2">
+                            {person.status === 'Verified' ? (
+                              <div className="flex items-center gap-1 bg-blue-50 rounded-full px-2 py-0.5">
+                                <CircleCheck size={17} className="text-blue-500" />
+                                <span className="text-blue-500">Verified</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1.5">
+                                <Clock className="h-4 w-4 text-gray-400" />
+                                <span className="text-xs text-gray-400">Not yet contacted</span>
+                              </div>
+                            )}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{opp.source}</td>
-                        <td className="px-4 py-3 text-gray-500 hidden lg:table-cell">{opp.expectedClosing}</td>
-                        <td className="px-4 py-3 text-gray-500 hidden lg:table-cell">{opp.actualClosing}</td>
-                        <td className="px-4 py-3 text-xs text-gray-500 hidden xl:table-cell">{opp.lastInteraction}</td>
-                        <td className="px-4 py-3 text-gray-500">{opp.stage}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-
-              <div className="flex items-center justify-center px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <button className="p-2 text-sm text-gray-400 border border-gray-400 rounded hover:text-gray-900 flex items-center gap-1">
-                    <ChevronLeft className="h-4 w-4" />
-                    Previous
-                  </button>
-                  <div className="flex items-center gap-1">
-                    <button className="px-3 py-1 text-sm bg-gray-300 border border-gray-300 text-gray-900 rounded">1</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">2</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">3</button>
-                    <span className="px-2 text-gray-600">...</span>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">45</button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">46</button>
-                  </div>
-                  <button className="p-2 text-sm text-gray-400 border border-gray-400 rounded hover:text-gray-900 flex items-center gap-1">
-                    Next
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
             </div>
           )}
-          {activeTab === "Meetings" && (
-            <div className="col-span-full w-full overflow-x-auto">
-              <div className="flex flex-col md:flex-row gap-2 justify-between items-center mb-6">
-              <div className="relative">
+
+        {/* Opportunities Kanban Board */}
+        {activeTab === "Opportunities" && (
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
+            <div className="flex flex-wrap items-center justify-between gap-4 p-4 border-b">
+              <div className="relative w-full max-w-xs">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-gray-400" />
               </div>
@@ -860,67 +561,185 @@ export default function Crm() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
+              <div className="flex gap-2 flex-wrap items-center">
+                <Menu as="div" className="relative inline-block text-left">
+                  <Menu.Button className="flex items-center px-4 py-2 border border-gray-300 rounded-full text-gray-600">
+                    {opportunityStatus}
+                    <ChevronDown className="ml-2 h-4 w-4 text-gray-400" />
+                  </Menu.Button>
+                  <Menu.Items className="absolute z-10 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button
+                          className={`w-full text-left px-4 py-2 text-sm ${active ? "bg-gray-100" : ""}`}
+                          onClick={() => setOpportunityStatus('All statuses')}
+                        >
+                          All statuses
+                        </button>
+                      )}
+                    </Menu.Item>
+                    {Object.keys(statusConfig).map(status => (
+                      <Menu.Item key={status}>
+                        {({ active }) => (
+                          <button
+                            className={`w-full text-left px-4 py-2 text-sm ${active ? "bg-gray-100" : ""}`}
+                            onClick={() => setOpportunityStatus(status)}
+                          >
+                            {status}
+                          </button>
+                        )}
+                      </Menu.Item>
+                    ))}
+                  </Menu.Items>
+                </Menu>
+                <Menu as="div" className="relative inline-block text-left">
+                  <Menu.Button className="flex items-center px-4 py-2 border border-gray-300 rounded-full text-gray-600">
+                    {sortOrder}
+                    <ChevronDown className="ml-2 h-4 w-4 text-gray-400" />
+                  </Menu.Button>
+                  <Menu.Items className="absolute z-10 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                    {sortOptions.map(option => (
+                      <Menu.Item key={option.value}>
+                        {({ active }) => (
                 <button
-                  type="button"
-                  className="flex items-center px-4 py-2 border border-transparent text-[10px] font-medium rounded-full shadow-sm text-white bg-teal-600 hover:bg-teal-700 "
+                            className={`w-full text-left px-4 py-2 text-sm ${active ? "bg-gray-100" : ""}`}
+                            onClick={() => handleSortChange(option.value)}
                 >
-                  <Plus className="h-5 w-5" />
-                  New Meeting
+                            {option.label}
                 </button>
+                        )}
+                      </Menu.Item>
+                    ))}
+                  </Menu.Items>
+                </Menu>
+                <button className="bg-gradient-to-r from-teal-400 to-green-400 text-white px-6 py-2 rounded-full font-semibold shadow hover:from-teal-500 hover:to-green-500 transition">Call with AI</button>
               </div>
-              <table className="w-full table-fixed">
+            </div>
+            <table className="min-w-full divide-y divide-gray-200">
                 <thead>
-                  <tr className="border-none text-sm text-muted-foreground">
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[250px]">Lead</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">Date</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[180px]">Time</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400 w-[200px]">
-                      Created by
-                    </th>
-                    <th className="whitespace-nowrap px-4 py-3 flex items-center gap-1 text-left font-medium text-gray-400 w-[120px]">
-                      <Disc />
-                      Recording
-                    </th>
+                <tr className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left font-medium"><input type="checkbox" className="rounded border-muted cursor-pointer" /></th>
+                  <th className="px-4 py-3 text-left font-medium">Opportunity</th>
+                  <th className="px-4 py-3 text-left font-medium">Contact Name</th>
+                  <th className="px-4 py-3 text-left font-medium">Amount</th>
+                  <th className="px-4 py-3 text-left font-medium">Owner</th>
+                  <th className="px-4 py-3 text-left font-medium">Source</th>
+                  <th className="px-4 py-3 text-left font-medium">Expected Closing Date</th>
+                  <th className="px-4 py-3 text-left font-medium">Actual Closing Date</th>
+                  <th className="px-4 py-3 text-left font-medium">Last Interaction</th>
+                  <th className="px-4 py-3 text-left font-medium">Stage</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {meetings.map((meeting) => (
-                    <tr key={meeting.id} className="border cursor-pointer group hover:bg-[#dbf2ef]  border-gray-300 text-sm ">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full ${meeting.bgColor} flex items-center justify-center`}>
-                            <img
-                              src={meeting.avatar || "/placeholder.svg"}
-                              alt={meeting.lead}
-                              className="w-8 h-8 rounded-full object-cover"
-                            />
-                          </div>
-                          <span className="text-gray-600">{meeting.lead}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-gray-600">{meeting.date}</td>
-                      <td className="px-4 py-3 text-gray-600">{meeting.time}</td>
-                      <td className="px-4 py-3">
-                        {meeting.isAI ? (
-                          <div className="inline-flex items-center px-2 py-1 rounded-full text-[#15a395] bg-[#d1eeebf7] ">
-                            <Sparkles className="w-4 h-4 mr-1" />
-                            <span>{meeting.createdBy}</span>
-                          </div>
-                        ) : (
-                          <span className="text-orange-400 bg-orange-100 font-medium rounded-full p-2">{meeting.createdBy}</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <Play size={20} className="text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                      </td>
+              <tbody className="bg-white divide-y divide-gray-100 text-sm">
+                {people
+                  .filter(lead =>
+                    (opportunityStatus === 'All statuses' || lead.Status === opportunityStatus) &&
+                    (
+                      lead.Name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      lead.Company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      lead.Email?.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                  )
+                  .map(lead => (
+                    <tr key={lead.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3"><input type="checkbox" className="rounded border-muted cursor-pointer" /></td>
+                      <td className="px-4 py-3 font-medium text-gray-900">{lead.Company || '-'}</td>
+                      <td className="px-4 py-3 text-blue-600 underline cursor-pointer">{lead.Name}</td>
+                      <td className="px-4 py-3">{lead.Amount ? `$${lead.Amount}` : '-'}</td>
+                      <td className="px-4 py-3 text-blue-500">{lead.Owner || 'Beeto Leru'}</td>
+                      <td className="px-4 py-3">{lead.Source || '-'}</td>
+                      <td className="px-4 py-3">{lead.ExpectedClosingDate ? new Date(lead.ExpectedClosingDate).toLocaleDateString() : '-'}</td>
+                      <td className="px-4 py-3">{lead.ActualClosingDate ? new Date(lead.ActualClosingDate).toLocaleDateString() : '-'}</td>
+                      <td className="px-4 py-3">{lead.LastInteraction ? new Date(lead.LastInteraction).toLocaleString() : '-'}</td>
+                      <td className="px-4 py-3">{lead.Status || '-'}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
-        </div>
+
+        {/* Calls Table */}
+        {activeTab === "Calls" && (
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left font-medium">Contact Name</th>
+                  <th className="px-4 py-3 text-left font-medium">Call Date</th>
+                  <th className="px-4 py-3 text-left font-medium">Duration</th>
+                  <th className="px-4 py-3 text-left font-medium">Phone Number</th>
+                  <th className="px-4 py-3 text-left font-medium">Notes</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-100 text-sm">
+                {calls
+                  .filter(call => 
+                    call.Lead?.Name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    call.PhoneNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    call.Notes?.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                  .map(call => (
+                    <tr key={call.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 flex items-center gap-2 font-medium text-gray-900"><PhoneCall className="h-4 w-4 text-green-500" />{call.Lead ? call.Lead.Name : '-'}</td>
+                      <td className="px-4 py-3">{call.CallDate ? new Date(call.CallDate).toLocaleDateString() : '-'}</td>
+                      <td className="px-4 py-3">{call.CallDuration ? `${call.CallDuration} min` : '-'}</td>
+                      <td className="px-4 py-3">{call.PhoneNumber || '-'}</td>
+                      <td className="px-4 py-3">{call.Notes || '-'}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Meetings Table */}
+        {activeTab === "Meetings" && (
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left font-medium">Topic</th>
+                  <th className="px-4 py-3 text-left font-medium">Date</th>
+                  <th className="px-4 py-3 text-left font-medium">Time</th>
+                  <th className="px-4 py-3 text-left font-medium">Contact Name</th>
+                  <th className="px-4 py-3 text-left font-medium">Host</th>
+                  <th className="px-4 py-3 text-left font-medium">Meeting Link</th>
+                  <th className="px-4 py-3 text-left font-medium">Notes</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-100 text-sm">
+                {meetings
+                  .filter(meeting => 
+                    meeting.Topic?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    meeting.Lead?.Name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    meeting.User?.Name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    meeting.Notes?.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                  .map(meeting => (
+                    <tr key={meeting.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 flex items-center gap-2 font-medium text-gray-900"><CalendarDays className="h-4 w-4 text-blue-500" />{meeting.Topic}</td>
+                      <td className="px-4 py-3">{meeting.MeetingDate ? new Date(meeting.MeetingDate).toLocaleDateString() : '-'}</td>
+                      <td className="px-4 py-3">{meeting.MeetingTime || '-'}</td>
+                      <td className="px-4 py-3">{meeting.Lead ? meeting.Lead.Name : '-'}</td>
+                      <td className="px-4 py-3">{meeting.User ? meeting.User.Name : '-'}</td>
+                      <td className="px-4 py-3">
+                        {meeting.Meeting_Link ? <a href={meeting.Meeting_Link} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">Join</a> : '-'}</td>
+                      <td className="px-4 py-3">{meeting.Notes || '-'}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Other tabs content */}
+        {!["Accounts", "People", "Opportunities", "Calls", "Meetings"].includes(activeTab) && (
+          <div className="text-center py-10 text-gray-500">
+            {activeTab} tab content will be implemented soon
+          </div>
+        )}
       </div>
     </div>
-  )
+  );
 }
