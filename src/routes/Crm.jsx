@@ -4,6 +4,7 @@ import axiosInstance from "../services/axiosInstance";
 import { toast } from "react-hot-toast";
 import { FcGoogle } from "react-icons/fc";
 import { Menu } from '@headlessui/react';
+import { Link } from "react-router-dom";
 
 export default function Crm() {
   const [accounts, setAccounts] = useState([]);
@@ -377,6 +378,7 @@ export default function Crm() {
                 )
               )
               .map((account) => (
+                <Link to={`/Accounts/${account?.name}`}>
                 <div key={account.id} className="bg-white rounded-lg shadow overflow-hidden">
                   <div className="p-4">
                     <div className="flex justify-between items-start">
@@ -422,46 +424,45 @@ export default function Crm() {
                         </div>
                       ))}
                     </div>
-                        <span className="text-gray-500">{account.contacts} Contacts</span>
+                      <span className="text-gray-500">{account.contacts} Contacts</span>
                       </div>
                       {account.website !== 'Not specified' && (
                         <a
                           href={account.website.startsWith('http') ? account.website : `https://${account.website}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-500 hover:text-blue-600 flex items-center"
-                        >
+                          className="text-blue-500 hover:text-blue-600 flex items-center">
                           <Globe className="h-4 w-4 mr-1" />
                           Website
                         </a>
                       )}
                   </div>
 
-                    {expandedCompanies[account.id] && (
-                      <div className="mt-4 border-t pt-4">
-                        <div className="space-y-3">
-                          {account.leads.map((lead) => (
-                            <div key={lead.id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                                  <span className="text-sm font-medium text-gray-600">
-                                    {lead.Name.split(' ').map(n => n[0]).join('')}
-                                  </span>
-                </div>
+                {expandedCompanies[account.id] && (
+                  <div className="mt-4 border-t pt-4">
+                    <div className="space-y-3">
+                      {account.leads.map((lead) => (
+                      <div key={lead.id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                            <span className="text-sm font-medium text-gray-600">
+                              {lead.Name.split(' ').map(n => n[0]).join('')}
+                                            </span>
+                                </div>
                                 <div>
                                   <p className="text-sm font-medium text-gray-900">{lead.Name}</p>
                                   <p className="text-xs text-gray-500">{lead.Title}</p>
-              </div>
+                              </div>
                               </div>
                               <div className="flex items-center gap-2">
                                 {lead.Email && (
                                   <a
-                                    href={`mailto:${lead.Email}`}
-                                    className="text-blue-500 hover:text-blue-600 text-sm"
+                                  href={`mailto:${lead.Email}`}
+                                  className="text-blue-500 hover:text-blue-600 text-sm"
                                   >
                                     {lead.Email}
                                   </a>
-                          )}
+                              )}
                         </div>
                           </div>
                           ))}
@@ -470,6 +471,7 @@ export default function Crm() {
                     )}
                   </div>
                 </div>
+              </Link>
               ))}
             </div>
           )}

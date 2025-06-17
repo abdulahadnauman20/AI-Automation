@@ -28,6 +28,8 @@ import AILeadSearch from "./routes/AILeadSearch"
 import EmailDomain from './routes/EmailDomain';
 import EmailDomainOrder from './routes/EmailDomainOrder';
 import StripePaymentWrapper from './routes/StripePayment';
+import Accounts from './routes/Accounts';
+import DomainSetting from './routes/DomainSetting';
 
 function App() {
   const router = createBrowserRouter(
@@ -42,6 +44,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<DashboardPage />} />
           <Route path='/crm' element={<Crm />} />
+          <Route path='/Accounts/:name' element={<Accounts />} />
           <Route path='/campaigns' element={<Campaigns />} />
           <Route path='/campaigns/target/:campaignId' element={<CompaignTarget />} />
           <Route path="/calendar" element={<Calendar />} />
@@ -52,6 +55,7 @@ function App() {
           <Route path="/email-accounts" element={<EmailAccounts />} />
           <Route path="/email-domain" element={<EmailDomain />} />
           <Route path="/email-domain-order" element={<EmailDomainOrder />} />
+          <Route path='/domain-setting' element={ <DomainSetting /> } />
           <Route path="/ai-lead-scouts" element={<AILeadScouts />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/support" element={<Support />} />

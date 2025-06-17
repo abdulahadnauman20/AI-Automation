@@ -3,6 +3,7 @@ import { Check, CircleX, X, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEmailAccountQuery } from "../reactQuery/hooks/useEmailAccountsQuery";
 import { useNavigate } from "react-router-dom";
+import CreateDomain from "../components/CreateDomain";
 
 export default function EmailDomain() {
   const { getDomainSuggestionsMutation, getDomainPricingMutation } = useEmailAccountQuery();
@@ -218,7 +219,7 @@ export default function EmailDomain() {
     <div className="max-w-2xl mx-auto p-4 mb-12">
       {/* Tabs */}
       <div className="flex border-none">
-        {["new", "existing"].map((tab) => (
+        {["new", "existing", "create"].map((tab) => (
           <button
             key={tab}
             className={`py-2 px-4 font-medium cursor-pointer ${
@@ -226,7 +227,7 @@ export default function EmailDomain() {
             }`}
             onClick={() => setActiveTab(tab)}
           >
-            {tab === "new" ? "New Domain" : "Existing Domains"}
+            {tab === "new" ? "New Domain" : tab === "existing"? "Existing Domains" : "Create New Domain" }
           </button>
         ))}
       </div>
@@ -326,12 +327,9 @@ export default function EmailDomain() {
         </div>
       )}
 
-      {/* {activeTab === "existing" && (
-        <div className="py-8 text-center text-gray-500">Your existing domains will appear here.</div>
-      )} */}
 
       {activeTab === "existing" && (
-  <div className="py-8">
+        <div className="py-8">
     {existingLoading ? (
       <p className="text-center text-gray-500">Loading your domains...</p>
     ) : existingError ? (
@@ -359,6 +357,9 @@ export default function EmailDomain() {
   </div>
 )}
 
+        {activeTab === "create" && (
+          <CreateDomain />
+        )}
 
     
     {showConfirmModal && (
