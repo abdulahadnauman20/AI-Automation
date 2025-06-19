@@ -1,4 +1,4 @@
-import { Search } from "lucide-react"
+import { Search, EyeOff } from "lucide-react"
 import { FaBriefcase, FaMapMarkerAlt, FaIndustry, FaUsers, FaDollarSign, FaGlobe, FaCogs, FaMoneyCheckAlt, FaUser, FaBuilding } from "react-icons/fa";
 import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -71,6 +71,10 @@ export default function AILeadSearch() {
   const [leads, setLeads] = useState([]);
   const [perPage, setPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showJobTitles, setShowJobTitles] = useState(false);
+  const [showIndustry, setShowIndustry] = useState(false);
+  const [selectedJobTitles, setSelectedJobTitles] = useState([]);
+  const [selectedIndustries, setSelectedIndustries] = useState([]);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -95,11 +99,16 @@ export default function AILeadSearch() {
     return () => clearTimeout(debounceTimeout.current);
   }, [searchTerm, navigate]);
 
-  // Fetch leads with the debounced search query
+  // Always send a non-empty query
+  const safeSearchTerm = debouncedSearchTerm && debouncedSearchTerm.trim() ? debouncedSearchTerm : 'all';
+
+  // Fetch leads with the debounced search query, selected job titles, and selected industries
   const { data, isLoading, error, refetch } = useAILeadScoutQuery(
-    debouncedSearchTerm,
+    safeSearchTerm,
     currentPage,
-    perPage
+    perPage,
+    selectedJobTitles.length > 0 ? selectedJobTitles : undefined,
+    selectedIndustries.length > 0 ? selectedIndustries : undefined
   );
 
   useEffect(() => {
@@ -132,8 +141,9 @@ export default function AILeadSearch() {
   };
 
   const handlePageChange = (newPage) => {
+    if (newPage < 1 || (data?.pagination?.totalPages && newPage > data.pagination.totalPages)) return;
+    console.log('Changing to page:', newPage);
     setCurrentPage(newPage);
-    refetch();
   };
 
   const toggleSelectAll = () => {
@@ -190,6 +200,28 @@ export default function AILeadSearch() {
     toast.success(`Campaign "${campaignName}" created successfully!`);
   };
 
+  // Handler for job title checkbox
+  const handleJobTitleChange = (title) => {
+    setSelectedJobTitles((prev) => {
+      const updated = prev.includes(title)
+        ? prev.filter((t) => t !== title)
+        : [...prev, title];
+      setCurrentPage(1); // Reset to first page on filter change
+      return updated;
+    });
+  };
+
+  // Handler for industry checkbox
+  const handleIndustryChange = (industry) => {
+    setSelectedIndustries((prev) => {
+      const updated = prev.includes(industry)
+        ? prev.filter((i) => i !== industry)
+        : [...prev, industry];
+      setCurrentPage(1); // Reset to first page on filter change
+      return updated;
+    });
+  };
+
   return (
     <div className="flex min-h-screen w-full h-full flex-col md:flex-row gap-5 md:gap-0 pl-[10px] md:pl-[25px]">
       {/* Sidebar */}
@@ -211,11 +243,63 @@ export default function AILeadSearch() {
           </div>
         </div>
         <nav className="p-2 space-y-4">
-          {[
-            { icon: FaBriefcase, label: "Job titles" },
-            { icon: FaMapMarkerAlt, label: "Location" },
-            { icon: FaIndustry, label: "Industry & Keywords" },
-            { icon: FaUsers, label: "Employees" },
+          {/* Job Titles Dropdown */}
+          <div className="w-full p-2 rounded text-md md:text-lg text-gray-400 hover:bg-gray-100 cursor-pointer flex flex-col">
+            <div className="flex items-center space-x-2 justify-between" onClick={() => setShowJobTitles((prev) => !prev)}>
+              <span className="flex items-center space-x-2">
+                <FaBriefcase />
+                <span className="pl-[15px]">Job titles</span>
+              </span>
+              <span>{showJobTitles ? '▲' : '▼'}</span>
+            </div>
+            {showJobTitles && (
+              <div className="pl-8 pt-2 flex flex-col gap-2">
+                {["CEO", "PTO", "Manager", "Developer"].map((title, idx) => (
+                  <label key={idx} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4"
+                      checked={selectedJobTitles.includes(title)}
+                      onChange={() => handleJobTitleChange(title)}
+                    />
+                    <span>{title}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* Location (not a dropdown) */}
+          <div className="w-full p-2 rounded text-md md:text-lg text-gray-400 hover:bg-gray-100 cursor-pointer flex items-center space-x-2">
+            <FaMapMarkerAlt />
+            <span className="pl-[15px]">Location</span>
+          </div>
+          {/* Industry & Keywords Dropdown */}
+          <div className="w-full p-2 rounded text-md md:text-lg text-gray-400 hover:bg-gray-100 cursor-pointer flex flex-col">
+            <div className="flex items-center space-x-2 justify-between" onClick={() => setShowIndustry((prev) => !prev)}>
+              <span className="flex items-center space-x-2">
+                <FaIndustry />
+                <span className="pl-[15px]">Industry & Keywords</span>
+              </span>
+              <span>{showIndustry ? '▲' : '▼'}</span>
+            </div>
+            {showIndustry && (
+              <div className="pl-8 pt-2 flex flex-col gap-2">
+                {[ "Finance", "Healthcare", "Retail"].map((industry, idx) => (
+                  <label key={idx} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4"
+                      checked={selectedIndustries.includes(industry)}
+                      onChange={() => handleIndustryChange(industry)}
+                    />
+                    <span>{industry}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* The rest of the filters */}
+          {[{ icon: FaUsers, label: "Employees" },
             { icon: FaDollarSign, label: "Revenue" },
             { icon: FaGlobe, label: "Lookalike domain" },
             { icon: FaCogs, label: "Technologies" },
@@ -394,11 +478,8 @@ export default function AILeadSearch() {
 
               {/* Pagination */}
               {data?.pagination && (
-                <div className="flex justify-between items-center mt-6">
-                  <div className="text-gray-600">
-                    Showing {((currentPage - 1) * perPage) + 1} to {Math.min(currentPage * perPage, data.pagination.total)} of {data.pagination.total} results
-                  </div>
-                  <div className="flex gap-2">
+                <div className="flex justify-end items-center mt-6">
+                  <div className="flex gap-2 items-center">
                     <button
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
@@ -406,9 +487,10 @@ export default function AILeadSearch() {
                     >
                       Previous
                     </button>
+                    <span className="text-gray-600">Page {currentPage} of {data?.pagination?.totalPages ?? 1}</span>
                     <button
                       onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage * perPage >= data.pagination.total}
+                      disabled={currentPage === (data?.pagination?.totalPages ?? 1)}
                       className="px-3 py-1 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Next

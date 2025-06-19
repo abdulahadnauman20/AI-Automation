@@ -28,16 +28,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { searchLeads } from "../services/aiLeadScoutService";
 
-export const useAILeadScoutQuery = (query, page, per_page) => {
+export const useAILeadScoutQuery = (query, page, per_page, person_titles, industries) => {
   return useQuery({
-    queryKey: ["leads", query, page, per_page],
+    queryKey: ["leads", query, page, per_page, person_titles, industries],
     queryFn: async () => {
-      console.log('useAILeadScoutQuery called with:', { query, page, per_page });
-      const result = await searchLeads({ query, page, per_page });
+      console.log('useAILeadScoutQuery called with:', { query, page, per_page, person_titles, industries });
+      const result = await searchLeads({ query, page, per_page, person_titles, industries });
       console.log('Query result:', result);
       return result;
     },
-    enabled: !!query,
+    enabled: !!query || (person_titles && person_titles.length > 0) || (industries && industries.length > 0),
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 1,
   });
