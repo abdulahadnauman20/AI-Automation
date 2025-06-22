@@ -200,7 +200,7 @@ const EmailAccounts = () => {
     try {
       setError(null);
       // Get token from localStorage
-      const tokenData = localStorage.getItem('Token');
+      const tokenData = localStorage.getItem("Token")?.replace(/^"|"$/g, "");
       console.log('Token from localStorage:', tokenData);
 
       if (!tokenData) {
@@ -209,7 +209,7 @@ const EmailAccounts = () => {
         return;
       }
 
-      const { token } = JSON.parse(tokenData);
+      const token = tokenData;
       console.log('Extracted token:', token);
 
       // Get the Google OAuth URL from your backend
@@ -288,16 +288,15 @@ const EmailAccounts = () => {
     try {
       setError(null);
       // Get token from localStorage
-      const tokenData = localStorage.getItem('Token');
-      console.log('Token from localStorage:', tokenData);
+      const token = localStorage.getItem("Token")?.replace(/^"|"$/g, "");
+      console.log('Token from localStorage:', token);
 
-      if (!tokenData) {
+      if (!token) {
         setError('No authentication token found');
         console.error('No authentication token found');
         return;
       }
-
-      const { token } = JSON.parse(tokenData);
+      
       console.log('Extracted token:', token);
 
       // Get the Microsoft OAuth URL from your backend
