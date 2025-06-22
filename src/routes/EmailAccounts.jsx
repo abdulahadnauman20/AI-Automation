@@ -49,14 +49,11 @@ const OAuthCallback = () => {
         }
 
         // Get token from localStorage
-        const tokenData = localStorage.getItem('Token');
-        if (!tokenData) {
+        const token = localStorage.getItem("Token")?.replace(/^"|"$/g, "");
+        if (!token) {
           setStatus('No authentication token found');
           return;
         }
-
-        const { token } = JSON.parse(tokenData);
-
         console.log('Making callback request to:', callbackUrl);
 
         // Send the request to your backend
@@ -296,7 +293,7 @@ const EmailAccounts = () => {
         console.error('No authentication token found');
         return;
       }
-      
+
       console.log('Extracted token:', token);
 
       // Get the Microsoft OAuth URL from your backend
