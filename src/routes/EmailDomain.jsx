@@ -227,7 +227,7 @@ export default function EmailDomain() {
             }`}
             onClick={() => setActiveTab(tab)}
           >
-            {tab === "new" ? "New Domain" : tab === "existing"? "Existing Domains" : "Create New Domain" }
+            {tab === "new" ? "New Domain" : tab === "existing"? "Existing Domains" : "Create New Email" }
           </button>
         ))}
       </div>
@@ -341,10 +341,11 @@ export default function EmailDomain() {
         {existingDomains.map((d, idx) => (
           <div
             key={d.id || idx}
-            className="border border-teal-300 p-4 rounded-lg shadow-sm flex justify-between items-center hover:bg-teal-50 transition-colors"
+            onClick={() => navigate("/configure-domain", { state: d })}
+            className="border border-teal-300 p-4 rounded-lg shadow-sm flex justify-between items-center hover:bg-teal-50 transition-colors cursor-pointer"
           >
             <p>{d.DomainName}</p>
-            <SlidersHorizontal size={18} className="cursor-pointer hover:" />
+            <SlidersHorizontal size={18} className="cursor-pointer hover:text-teal-600" />
           </div>
         ))}
       </div>

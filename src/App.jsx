@@ -30,6 +30,7 @@ import EmailDomainOrder from './routes/EmailDomainOrder';
 import StripePaymentWrapper from './routes/StripePayment';
 import Accounts from './routes/Accounts';
 import DomainSetting from './routes/DomainSetting';
+import EmailConfiguration from './routes/EmailConfiguration';
 
 function App() {
   const router = createBrowserRouter(
@@ -55,6 +56,7 @@ function App() {
           <Route path="/email-accounts" element={<EmailAccounts />} />
           <Route path="/email-domain" element={<EmailDomain />} />
           <Route path="/email-domain-order" element={<EmailDomainOrder />} />
+          <Route path="/configure-domain" element={<EmailConfiguration />} />
           <Route path='/domain-setting' element={ <DomainSetting /> } />
           <Route path="/ai-lead-scouts" element={<AILeadScouts />} />
           <Route path="/settings" element={<Settings />} />
