@@ -57,7 +57,7 @@ const CheckoutForm = () => {
     ...(paymentIntentDomains.NonPremiumDomains || []).map(d => d.domain),
   ];
 
-    fetch(`${import.meta.env.VITE_API_URL}EmailAccount/CreatePaymentIntent`, {
+    fetch(`${import.meta.env.VITE_API_URL}/EmailAccount/CreatePaymentIntent`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
@@ -120,7 +120,7 @@ const token = localStorage.getItem("Token")?.replace(/^"|"$/g, "");
 
 // Step 3: Send AddOrder API request
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}EmailAccount/AddOrder`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/EmailAccount/AddOrder`, {
             method: "POST",
             headers: {
             "Content-Type": "application/json",
@@ -139,7 +139,7 @@ const token = localStorage.getItem("Token")?.replace(/^"|"$/g, "");
         setOrderId(orderId);
 
         // ✅ Call UpdateOrderStatus with StripeStatus only
-        await fetch(`${import.meta.env.VITE_API_URL}EmailAccount/UpdateOrderStatus`, {
+        await fetch(`${import.meta.env.VITE_API_URL}/EmailAccount/UpdateOrderStatus`, {
             method: "PUT",
             headers: {
             "Content-Type": "application/json",
@@ -206,7 +206,7 @@ const token = localStorage.getItem("Token")?.replace(/^"|"$/g, "");
 
     try {
       const token = localStorage.getItem("Token")?.replace(/^"|"$/g, "");
-      const res = await fetch(`${import.meta.env.VITE_API_URL}EmailAccount/PurchaseDomains`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/EmailAccount/PurchaseDomains`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -220,7 +220,7 @@ const token = localStorage.getItem("Token")?.replace(/^"|"$/g, "");
       setShowUserForm(false);
       setShowConfirmation(true);
 
-      await fetch(`${import.meta.env.VITE_API_URL}EmailAccount/UpdateOrderStatus`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/EmailAccount/UpdateOrderStatus`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -268,7 +268,7 @@ for (const domainName of data.Purchased || []) {
   };
 
   try {
-    await fetch(`${import.meta.env.VITE_API_URL}EmailAccount/AddDomain`, {
+    await fetch(`${import.meta.env.VITE_API_URL}/EmailAccount/AddDomain`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

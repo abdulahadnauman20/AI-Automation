@@ -36,7 +36,7 @@ export default function EmailDomain() {
       const token = localStorage.getItem("Token")?.replace(/^"|"$/g, "");
 
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}EmailAccount/GetDomains`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/EmailAccount/GetDomains`, {
           method: "GET",
           headers: {
             "Authorization": `Bearer ${token}`,
