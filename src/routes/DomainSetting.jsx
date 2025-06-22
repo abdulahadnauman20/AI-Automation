@@ -6,7 +6,7 @@ function DomainSetting() {
     const[isLoading, setIsLoading] = useState(true); 
     const[loading, setLoading] = useState(false);
 
-    {selectDomain === "mailing-configeration" && setTimeout(() => {
+    {selectDomain === "mailing-configuration" && setTimeout(() => {
         setIsLoading(false);
         console.log("OK");
     }, 20000); }   
@@ -21,7 +21,7 @@ function DomainSetting() {
         <select onClick={(e) => setSelectedDomains(e.target.value)} className="w-full p-2.5 mt-10 text-sm border border-[rgb(21,163,149)] bg-[rgb(243,250,249)] rounded-md outline-none">
             <option value="">Select Domain</option>
             <option value="forwarding-domain">Forwarding Domain</option>
-            <option value="mailing-configeration">Mailing Configeration</option>
+            <option value="mailing-configuration">Mailing Configuration</option>
         </select>
     </div>
         {selectDomain === "forwarding-domain" && 
@@ -37,7 +37,7 @@ function DomainSetting() {
                 </div>
             </div>
         )}
-        { selectDomain === "mailing-configeration" &&
+        { selectDomain === "mailing-configuration" &&
         (
             <div className='mt-10 mx-auto w-96'>
             <div>

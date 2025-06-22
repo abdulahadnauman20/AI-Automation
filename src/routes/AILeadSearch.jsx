@@ -491,7 +491,7 @@ export default function AILeadSearch() {
                     <button
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === (data?.pagination?.totalPages ?? 1)}
-                      className="px-3 py-1 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-3 cursor-pointer py-1 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Next
                     </button>

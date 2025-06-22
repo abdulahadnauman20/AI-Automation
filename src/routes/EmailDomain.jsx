@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Check, CircleX, X, RotateCcw } from "lucide-react";
+import { Check, CircleX, X, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEmailAccountQuery } from "../reactQuery/hooks/useEmailAccountsQuery";
 import { useNavigate } from "react-router-dom";
@@ -341,15 +341,10 @@ export default function EmailDomain() {
         {existingDomains.map((d, idx) => (
           <div
             key={d.id || idx}
-            className="border border-gray-300 p-4 rounded-lg shadow-sm"
+            className="border border-teal-300 p-4 rounded-lg shadow-sm flex justify-between items-center hover:bg-teal-50 transition-colors"
           >
-            <p><strong>Domain:</strong> {d.DomainName}</p>
-            <p><strong>Type:</strong> {d.Type}</p>
-            <p><strong>Price:</strong> ${d.Price}</p>
-            <p><strong>Renewal Price:</strong> ${d.RenewalPrice}</p>
-            <p><strong>Transfer Price:</strong> ${d.TransferPrice}</p>
-            {d.EapFee && <p><strong>EAP Fee:</strong> ${d.EapFee}</p>}
-            <p><strong>Renewal Date:</strong> {new Date(d.RenewalDate).toLocaleDateString()}</p>
+            <p>{d.DomainName}</p>
+            <SlidersHorizontal size={18} className="cursor-pointer hover:" />
           </div>
         ))}
       </div>
