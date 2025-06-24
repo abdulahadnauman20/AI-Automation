@@ -1,9 +1,17 @@
 import React from 'react';
 import Sidebar from '../components/Sidebar';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { useEffect } from 'react';
 
 function Layout() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem("Token"));
+    const token1 = token?.token || token 
+    if(!token1) navigate('/login');
+  }, [navigate])
+
   return (
     <div className="flex h-screen w-full">
       <Sidebar />

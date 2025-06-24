@@ -60,7 +60,10 @@ export const useSettingQuery = () => {
         }
     };
 
-    const isLoading = addDocumentMutation.isPending || addWebsiteMutation.isPending || updateBusinessNameMutation.isPending;
+    const isLoadingAddDoc = addDocumentMutation.isPending;
+    const isLoadingBusinessName = updateBusinessNameMutation.isPending;
+    const isLoadingWebUrl = addWebsiteMutation.isPending;
+
 
     return {
         businessDetails,
@@ -68,6 +71,8 @@ export const useSettingQuery = () => {
         addWebsiteMutation,
         updateBusinessNameMutation,
         handleSubmit,
-        isLoading, 
+        isLoadingAddDoc,
+        isLoadingBusinessName,
+        isLoadingWebUrl 
     };
 };

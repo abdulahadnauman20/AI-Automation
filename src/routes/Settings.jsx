@@ -192,7 +192,7 @@ const Settings = () => {
 
     // 
 
-    const { businessDetails, handleSubmit, isLoading } = useSettingQuery();
+    const { businessDetails, handleSubmit, isLoadingAddDoc, isLoadingBusinessName, isLoadingWebUrl, updateBusinessNameMutation, addWebsiteMutation, addDocumentMutation } = useSettingQuery();
     const [businessName, setBusinessName] = useState(""); // Changed from array to string
     const [websiteUrls, setWebsiteUrls] = useState([""]);
     const [documents, setDocuments] = useState([]);
@@ -241,6 +241,10 @@ const Settings = () => {
         // Handle file selection for new documents
         const handleFileChange = (e) => {
             const files = Array.from(e.target.files);
+             if (files.length === 0) {
+                toast.error('no new files selected.');
+                return;
+            }
             setDocuments((prev) => [...prev, ...files]);
         };
 
@@ -249,41 +253,66 @@ const Settings = () => {
             setDocuments((prev) => prev.filter((_, i) => i !== index));
         };
 
-        // Submit Handler
-        const onSubmit = () => {
-            const payload = {
-                BusinessName: businessName.trim(),
-                WebsiteUrls: websiteUrls.filter(url => url.trim() !== ""),
-                existingDocuments: existingDocuments.map(doc => doc.name),
-                newDocuments: documents
-            };
-            handleSubmit(payload);
-        };
+        
+        
+        const handleBusinessNameSubmit = () => {
+            const BusinessName = businessName.trim();
+            if(BusinessName.trim().length > 0){
+                updateBusinessNameMutation.mutate({BusinessName: businessName.trim()});
+                return
+            }
+            toast.error("Business Name required!")
+        }
 
+
+        const handleWebUrlSubmit = () => {
+            const validUrls = websiteUrls.map(url => url.trim()).filter(url => url != '' && url.startsWith('https://') )
+            if (validUrls.length === 0) {
+                toast.error('Field is empty OR provide a valid URL ( https:// )')
+                return
+            }
+            addWebsiteMutation.mutate({ WebsiteUrls: validUrls });
+        }
+        
+
+        const handleDocSubmit = () => {
+            const newDocuments = documents
+            if (newDocuments.length > 0) {
+                const formData = new FormData();
+                    newDocuments.forEach((file) => {
+                    formData.append('documents', file);
+                }
+            )
+            addDocumentMutation.mutate(formData);
+            } else {
+                toast.error("Please upload at least one new document");
+                return;
+            }
+        };
 
     return (
         <div className="p-2 md:p-6 bg-gray-50 min-h-screen justify-center ">
             {/* Navigation Tabs */}
             <div className="w-full max-w-3xl">
                 <div className="mb-8 ">
-                    <nav className="flex space-x-8">
+                    <nav className="flex flex-wrap justify-center md:justify-start gap-3">
                         <button
-                            className={`py-4 text-sm px-1 border-b-2 cursor-pointer font-medium ${activeTab === 'profile' ? 'border-green-500 text-green-500' : 'text-gray-500 border-white'}`}
+                            className={`py-4 text-[12px] md:text-sm px-1 border-b-2 cursor-pointer font-medium ${activeTab === 'profile' ? 'border-green-500 text-green-500' : 'text-gray-500 border-white'}`}
                             onClick={() => setActiveTab('profile')}>
                             Profile
                         </button>
                         <button
-                            className={`py-4 text-sm px-1 border-b-2 cursor-pointer font-medium ${activeTab === 'workspace' ? 'border-green-500 text-green-500' : 'text-gray-500 border-white'}`}
+                            className={`py-4 text-[12px] md:text-sm px-1 border-b-2 cursor-pointer font-medium ${activeTab === 'workspace' ? 'border-green-500 text-green-500' : 'text-gray-500 border-white'}`}
                             onClick={() => setActiveTab('workspace')}>
                             Workspace & members
                         </button>
                         <button
-                            className={`py-4 text-sm px-1 border-b-2 cursor-pointer font-medium ${activeTab === 'integrations' ? 'border-green-500 text-green-500' : 'text-gray-500 border-white'}`}
+                            className={`py-4 text-[12px] md:text-sm px-1 border-b-2 cursor-pointer font-medium ${activeTab === 'integrations' ? 'border-green-500 text-green-500' : 'text-gray-500 border-white'}`}
                             onClick={() => setActiveTab('integrations')}>
                             Integrations
                         </button>
                          <button
-                            className={`py-4 text-sm px-1 border-b-2 cursor-pointer font-medium ${activeTab === 'businessDetails' ? 'border-green-500 text-green-500' : 'text-gray-500 border-white'}`}
+                            className={`py-4 text-[12px] md:text-sm px-1 border-b-2 cursor-pointer font-medium ${activeTab === 'businessDetails' ? 'border-green-500 text-green-500' : 'text-gray-500 border-white'}`}
                             onClick={() => setActiveTab('businessDetails')}>
                             Bussiness Details
                         </button>
@@ -457,7 +486,7 @@ const Settings = () => {
                                     />
                                 </button>
                             </div>
-                        <button onClick={updateProfile} className='border-none text-sm absolute cursor-pointer right-7 bottom-0.5 border-gray-400 rounded-full p-2 bg-teal-400'>Update Profile</button>
+                        <button onClick={updateProfile} className='border-none text-[13px] absolute cursor-pointer md:right-7 -bottom-14 md:bottom-2 w-[300px] md:w-auto md:me-0 border-gray-400 rounded-full p-1.5 bg-teal-400'>Update Profile</button>
                         </div>
                     </>
                 ) : activeTab === 'workspace' ? (
@@ -497,12 +526,12 @@ const Settings = () => {
                                             type="text"
                                             value={workspaceData.id}
                                             readOnly
-                                            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+                                            className="w-full p-2 text-[12px] border border-gray-300 rounded-md bg-gray-100"
                                         />
                                         <button
                                             onClick={copyToClipboard}
                                             className="absolute cursor-pointer right-2 top-2 text-gray-500 hover:text-gray-700">
-                                        <Copy />
+                                        <Copy size={17} />
                                         </button>
                                     </div>
                                 </div>
@@ -778,6 +807,11 @@ const Settings = () => {
                     placeholder="Enter Business Name"
                 />
                 </div>
+                <button
+                    onClick={handleBusinessNameSubmit}
+                    className="bg-teal-500 w-full cursor-pointer hover:bg-teal-600 text-white py-2 px-4 rounded-md flex gap-2 items-center justify-center transition duration-200">
+                    { isLoadingBusinessName ? ( <BiLoaderCircle className="size-7 animate-spin" />) : "Submit"}
+                </button>
 
 
             {/* Website URLs */}
@@ -805,6 +839,11 @@ const Settings = () => {
                 className="text-teal-500 text-sm underline"
             >
                 + Add Another Website URL
+            </button>
+            <button
+                    onClick={handleWebUrlSubmit}
+                    className="bg-teal-500 w-full cursor-pointer hover:bg-teal-600 text-white py-2 px-4 rounded-md flex gap-2 items-center justify-center transition duration-200">
+                    { isLoadingWebUrl ? ( <BiLoaderCircle className="size-7 animate-spin" />) : "Submit"}
             </button>
 
             {/* Existing Documents (Display as Links) */}
@@ -870,10 +909,9 @@ const Settings = () => {
 
             {/* Submit Button */}
             <button
-                onClick={onSubmit}
-                className="bg-teal-500 w-full cursor-pointer hover:bg-teal-600 text-white py-2 px-4 rounded-md flex gap-2 items-center justify-center transition duration-200"
-            >
-                { isLoading ? ( <BiLoaderCircle className="size-7 animate-spin" />) : "Submit"}
+                onClick={handleDocSubmit}
+                className="bg-teal-500 w-full cursor-pointer hover:bg-teal-600 text-white py-2 px-4 rounded-md flex gap-2 items-center justify-center transition duration-200">
+                { isLoadingAddDoc ? ( <BiLoaderCircle className="size-7 animate-spin" />) : "Submit"}
             </button>
         </div>
 
