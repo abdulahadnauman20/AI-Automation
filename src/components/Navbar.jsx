@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, ChevronDown, User, HelpCircle, Settings, LogOut, Plus, X, Briefcase, Menu, Sparkles } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { QueryClient } from '@tanstack/react-query';
 import { useWorkspaceQuery } from '../reactQuery/hooks/useWorkspaceQuery';
@@ -86,6 +86,9 @@ const Navbar = () => {
 
 
   const location = useLocation();
+  const pathSegements = location.pathname.split('/').filter(Boolean);
+  const lastSegements = pathSegements[pathSegements.length - 1];
+  const formattedName = lastSegements?.replace(/-/g, ' ')?.split(' ').map(word => word?.charAt(0)?.toUpperCase() + word?.slice(1))?.join(' ');
 
   const filteredNotifications = selectedFilter === "All" 
     ? notifications 
@@ -115,27 +118,29 @@ const Navbar = () => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
+
+
   return (
     <>
       <nav className="border-b border-gray-200 bg-white w-full flex ">
-        <div className="max-w-9xl mx-auto px-2 ml-12 md:ml-16 sm:px-3 lg:px-8 w-full">
-          <div className="flex items-center justify-between h-16">
+        <div className="max-w-9xl mx-auto px-2 ml-12 md:ml-16 sm:px-3 lg:px-8 w-full pt-5 pb-1">
+          <div className="flex items-center justify-between h-10">
             
             {/* Left side - Logo */}
             <div className="flex items-center">
-              <span className="text-xl font-bold">Dashboard</span>
+              <span className="text-xl font-bold"> {formattedName || "Dashboard"} </span>
             </div>
             <div className="hidden md:flex">
-        <ul className="flex gap-5">
-          <Link to="/" className={`pb-2 ${location.pathname === "/" ? "border-b-2 border-green-500" : ""}`}>
-            <li>Home</li>
+        <ul className="flex gap-5 pb-0">
+          <Link to="/" className={`pb-3 ${location.pathname === "/" ? "border-b-2 border-green-500" : ""}`}>
+            <li className={`${location.pathname === "/" ? "text-green-500" : ""}`}>Home</li>
           </Link>
-          <Link to="/crm" className={`pb-2 flex items-center ${location.pathname === "/crm" ? "border-b-2 border-green-500" : ""}`}>
+          <Link to="/crm" className={`pb-3 flex items-center ${location.pathname === "/crm" ? "border-b-2 border-green-500" : ""}`}>
           <Sparkles className="w-4 h-4 mr-1 text-yellow-500" />
-            <li>AI CRM</li>
+            <li className={`${location.pathname === "/crm" ? "text-green-500" : ""}`}>AI CRM</li>
           </Link>
-          <Link to="/campaigns" className={`pb-2 ${location.pathname === "/campaigns" ? "border-b-2 border-green-500" : ""}`}>
-            <li>Campaigns</li>
+          <Link to="/campaigns" className={`pb-3 ${location.pathname === "/campaigns" ? "border-b-2 border-green-500" : ""}`}>
+            <li className={`${location.pathname === "/campaigns" ? "text-green-500" : ""}`}>Campaigns</li>
           </Link>
         </ul>
       </div>

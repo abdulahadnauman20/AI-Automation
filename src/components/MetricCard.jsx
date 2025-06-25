@@ -1,12 +1,12 @@
-import { MdMail, MdPeople, MdCalendarMonth, MdWork } from "react-icons/md";
+import { Book, Calendar, Mail, UsersRound } from "lucide-react";
 import { MdKeyboardArrowRight } from "react-icons/md";
 
 function MetricCard({ icon, label, value, iconColor = "text-gray-700", bgColor = "bg-gray-200", className }) {
   const Icon = {
-    mail: MdMail,
-    users: MdPeople,
-    calendar: MdCalendarMonth,
-    briefcase: MdWork,
+    mail: Mail,
+    users: UsersRound,
+    calendar: Calendar,
+    briefcase: Book,
   }[icon];
 
   return (
@@ -17,7 +17,7 @@ function MetricCard({ icon, label, value, iconColor = "text-gray-700", bgColor =
 
         <div className="flex items-center gap-4">
           <div className={`p-3 rounded-full ${bgColor}`}>
-            <Icon className={`h-6 w-6 ${iconColor}`} />
+            <Icon className={`h-5 w-5 ${iconColor}`} />
           </div>
           <div>
             <div className="text-2xl font-semibold">{value}</div>

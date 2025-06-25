@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useAuthQuery } from '../reactQuery/hooks/useAuthQuery';
-import { Copy, Download, Lock, Mail, Phone, User } from 'lucide-react';
+import { Copy, Download, Lock, Mail, Phone, Search, Settings as setting, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useWorkspaceQuery } from '../reactQuery/hooks/useWorkspaceQuery';
-// import { BiLoaderCircle } from 'react-icons/bi';
-// import { GrDocumentWord } from "react-icons/gr";
 import { FileText, XCircle } from "lucide-react";
 import { useSettingQuery } from '../reactQuery/hooks/useSetting';
 import { BiLoaderCircle } from 'react-icons/bi';
+import { IoSettingsOutline } from 'react-icons/io5';
 
 const Settings = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -291,7 +290,7 @@ const Settings = () => {
         };
 
     return (
-        <div className="p-2 md:p-6 bg-gray-50 min-h-screen justify-center ">
+        <div className="p-2 md:p-6 bg-[#f5f5f5] min-h-screen justify-center ">
             {/* Navigation Tabs */}
             <div className="w-full max-w-3xl">
                 <div className="mb-8 ">
@@ -321,7 +320,7 @@ const Settings = () => {
             </div>
 
             {/* Content Based on Active Tab */}
-            <div className="bg-white rounded-2xl shadow md:p-6 p-3 ">
+            <div className= "px-3 ">
                 {activeTab === 'profile' ? (
                     <>
                         {/* Profile Picture */}
@@ -347,7 +346,7 @@ const Settings = () => {
                                         name="FirstName"
                                         value={profileData.FirstName}
                                         onChange={handleProfileChange}
-                                        className="w-full p-2 border border-gray-200 rounded-md"
+                                        className="w-full p-2 border border-gray-200 rounded-md focus:bg-[#f3faf9] focus:ring focus:outline-none  focus:ring-teal-500"
                                     />
                                 </div>
                                 <div>
@@ -360,7 +359,7 @@ const Settings = () => {
                                         name="LastName"
                                         value={profileData.LastName}
                                         onChange={handleProfileChange}
-                                        className="w-full p-2 border border-gray-200 rounded-md"
+                                        className="w-full p-2 border border-gray-200 rounded-md focus:bg-[#f3faf9] focus:ring focus:outline-none  focus:ring-teal-500"
                                     />
                                 </div>
                             </div>
@@ -376,7 +375,7 @@ const Settings = () => {
                                     name="Email"
                                     value={profileData.Email}
                                     onChange={handleProfileChange}
-                                    className="w-full p-2 border border-gray-200 rounded-md"
+                                    className="w-full p-2 border border-gray-200 rounded-md focus:bg-[#f3faf9] focus:ring focus:outline-none  focus:ring-teal-500"
                                 />
                             </div>
 
@@ -391,7 +390,7 @@ const Settings = () => {
                                     name="PhoneNumber"
                                     value={profileData.PhoneNumber}
                                     onChange={handleProfileChange}
-                                    className="w-full p-2 border border-gray-200 rounded-md"
+                                    className="w-full p-2 border border-gray-200 rounded-md focus:bg-[#f3faf9] focus:ring focus:outline-none  focus:ring-teal-500"
                                 />
                             </div>
 
@@ -424,7 +423,7 @@ const Settings = () => {
                                                     name="OldPassword"
                                                     value={passwords.OldPassword}
                                                     onChange={handlePasswordChange}
-                                                    className="w-full p-2 border border-gray-300 outline-none rounded-md"
+                                                    className="w-full p-2 border border-gray-200 rounded-md focus:bg-[#f3faf9] focus:ring focus:outline-none  focus:ring-teal-500"
                                                 />
                                             </div>
                                             <div>
@@ -434,7 +433,7 @@ const Settings = () => {
                                                     name="NewPassword"
                                                     value={passwords.NewPassword}
                                                     onChange={handlePasswordChange}
-                                                    className="w-full p-2 border border-gray-300 outline-none rounded-md"
+                                                    className="w-full p-2 border border-gray-200 rounded-md focus:bg-[#f3faf9] focus:ring focus:outline-none  focus:ring-teal-500"
                                                 />
                                             </div>
                                             <div>
@@ -444,7 +443,7 @@ const Settings = () => {
                                                     name="RetypePassword"
                                                     value={passwords.RetypePassword}
                                                     onChange={handlePasswordChange}
-                                                    className="w-full p-2 border border-gray-300 outline-none rounded-md"
+                                                    className="w-full p-2 border border-gray-200 rounded-md focus:bg-[#f3faf9] focus:ring focus:outline-none  focus:ring-teal-500"
                                                 />
                                             </div>
                                         </div>
@@ -509,7 +508,7 @@ const Settings = () => {
                                         name="WorkspaceName"
                                         value={workspaceData.WorkspaceName}
                                         onChange={handleWorkspaceChange}
-                                        className="w-full p-2 border outline-none border-gray-300 rounded-md"
+                                        className="w-full p-2 border border-gray-200 rounded-md focus:bg-[#f3faf9] focus:ring focus:outline-none  focus:ring-teal-500"
                                     />
                                     <button onClick={handleUpdateWorkspace} className={`bg-teal-300 py-1 absolute top-4 right-2 px-3 cursor-pointer my-4 rounded-full transition-opacity duration-300 ${ workspaceData.WorkspaceName ? "opacity-100" : "opacity-0"}`}>Update</button>
                                 </div>
@@ -526,7 +525,7 @@ const Settings = () => {
                                             type="text"
                                             value={workspaceData.id}
                                             readOnly
-                                            className="w-full p-2 text-[12px] border border-gray-300 rounded-md bg-gray-100"
+                                            className="w-full p-2 text-[12px] border border-gray-200 rounded-md focus:bg-[#f3faf9] focus:ring focus:outline-none  focus:ring-teal-500"
                                         />
                                         <button
                                             onClick={copyToClipboard}
@@ -654,19 +653,17 @@ const Settings = () => {
                     </>
                 ) : activeTab === 'integrations' ? (
                     // Placeholder for Integrations (you can expand this later)
-                    <div className="bg-white md:p-6">
-                        <div className="relative mb-6">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
-                            </div>
-                            <input
-                                type="search"
-                                className="block w-full p-2 pl-10 text-sm text-gray-700 border border-gray-200 rounded-full bg-gray-50"
-                                placeholder="Search..."
-                            />
+                    <div className="px-14">
+                    <div className="relative mb-6">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <Search size={18} className='text-gray-600' />
                         </div>
+                        <input
+                            type="search"
+                            className="block w-80 p-2 pl-10 text-sm text-gray-700 border border-gray-200 rounded-full bg-gray-50 focus:ring focus:outline-none  focus:ring-teal-500"
+                            placeholder="Search..."
+                        />
+                    </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {/* Slack */}
@@ -682,21 +679,18 @@ const Settings = () => {
                                 <h3 className="text-base font-semibold text-gray-900 mb-1">Slack</h3>
                                 <p className="text-sm text-gray-600 mb-4 leading-relaxed">Connect Quickpipe AI with Slack to get instant lead updates, follow-up reminders, and notifications in your team's channels for seamless collaboration.</p>
                                 <div className="flex items-center justify-between gap-2">
-                                    <button className="flex items-center justify-center text-xs text-gray-500 bg-white px-3 py-1.5 rounded-full border border-gray-200">
-                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        </svg>
+                                    <button className="flex items-center justify-center text-[14px] gap-1 text-gray-500 px-3 py-1.5 rounded-full ">
+                                        <IoSettingsOutline size={18} />
                                         Manage
                                     </button>
-                                    <button className="flex items-center justify-center text-xs text-gray-500 bg-white group-hover:bg-[#15A395] group-hover:text-white px-3 py-1.5 rounded-full border border-gray-200 group-hover:border-[#15A395] transition-colors duration-200">
+                                    <button className="flex items-center justify-center text-xs text-gray-900 font-semibold bg-white group-hover:bg-[#15A395] group-hover:text-white px-5 py-2.5  rounded-full border border-gray-400 group-hover:border-[#15A395] transition-colors duration-200 cursor-pointer">
                                         Connect
                                     </button>
                                 </div>
                             </div>
 
                             {/* Google Calendar */}
-                            <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm group hover:border-[#15A395] transition-colors duration-200">
+                            <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm group hover:border-[#15A395] transition-colors duration-200">
                                 <div className="mb-3">
                                     <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <rect x="4" y="6" width="24" height="20" rx="2" fill="#4285F4" />
@@ -707,22 +701,19 @@ const Settings = () => {
                                 </div>
                                 <h3 className="text-base font-semibold text-gray-900 mb-1">Google Calendar</h3>
                                 <p className="text-sm text-gray-600 mb-4 leading-relaxed">Automatically sync meetings, follow-ups, and reminders from Quickpipe AI to Google Calendar, ensuring you never miss an important event.</p>
-                                <div className="flex items-center justify-between gap-2">
-                                    <button className="flex items-center justify-center text-xs text-gray-500 bg-white px-3 py-1.5 rounded-full border border-gray-200">
-                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        </svg>
+                                 <div className="flex items-center justify-between gap-2">
+                                    <button className="flex items-center justify-center text-[14px] gap-1 text-gray-500 px-3 py-1.5 rounded-full ">
+                                        <IoSettingsOutline size={18} />
                                         Manage
                                     </button>
-                                    <button onClick={handleConnectCalendar} className="flex items-center cursor-pointer justify-center text-xs text-gray-500 bg-white group-hover:bg-[#15A395] group-hover:text-white px-3 py-1.5 rounded-full border border-gray-200 group-hover:border-[#15A395] transition-colors duration-200">
+                                    <button className="flex items-center justify-center text-xs text-gray-900 font-semibold bg-white group-hover:bg-[#15A395] group-hover:text-white px-5 py-2.5  rounded-full border border-gray-400 group-hover:border-[#15A395] transition-colors duration-200 cursor-pointer">
                                         Connect
                                     </button>
                                 </div>
                             </div>
 
                             {/* Open AI */}
-                            <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm group hover:border-[#15A395] transition-colors duration-200">
+                            <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm group hover:border-[#15A395] transition-colors duration-200">
                                 <div className="mb-3">
                                     <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M26 16a10 10 0 1 1-20 0 10 10 0 0 1 20 0z" stroke="#000" strokeWidth="1.5" />
@@ -732,21 +723,18 @@ const Settings = () => {
                                 <h3 className="text-base font-semibold text-gray-900 mb-1">Open AI</h3>
                                 <p className="text-sm text-gray-600 mb-4 leading-relaxed">Leverage AI to draft emails, summarize notes, and predict lead conversions directly within Quickpipe AI. Boosting efficiency and personalization.</p>
                                 <div className="flex items-center justify-between gap-2">
-                                    <button className="flex items-center justify-center text-xs text-gray-500 bg-white px-3 py-1.5 rounded-full border border-gray-200">
-                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        </svg>
+                                    <button className="flex items-center justify-center text-[14px] gap-1 text-gray-500 px-3 py-1.5 rounded-full ">
+                                        <IoSettingsOutline size={18} />
                                         Manage
                                     </button>
-                                    <button className="flex items-center justify-center text-xs text-gray-500 bg-white group-hover:bg-[#15A395] group-hover:text-white px-3 py-1.5 rounded-full border border-gray-200 group-hover:border-[#15A395] transition-colors duration-200">
+                                    <button className="flex items-center justify-center text-xs text-gray-900 font-semibold bg-white group-hover:bg-[#15A395] group-hover:text-white px-5 py-2.5  rounded-full border border-gray-400 group-hover:border-[#15A395] transition-colors duration-200 cursor-pointer">
                                         Connect
                                     </button>
                                 </div>
                             </div>
 
                             {/* Hubspot */}
-                            <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm group hover:border-[#15A395] transition-colors duration-200">
+                            <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm group hover:border-[#15A395] transition-colors duration-200">
                                 <div className="mb-3">
                                     <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M5.41 13.714v4.572H8.53v-4.572H5.41zm9.143 0v4.572h3.122v-4.572h-3.122zm9.143 0v4.572h3.122v-4.572h-3.122zM10.133 22.857v-3.122H5.562a4.572 4.572 0 0 0 4.571 3.122zm3.2-3.122v3.122a4.571 4.571 0 0 0 4.572-4.572h-1.371v1.45h-3.2zm9.142 0v3.122a4.571 4.571 0 0 0 4.572-4.572H25.6v1.45h-3.124z" fill="#FF7A59" />
@@ -755,22 +743,19 @@ const Settings = () => {
                                 </div>
                                 <h3 className="text-base font-semibold text-gray-900 mb-1">Hubspot</h3>
                                 <p className="text-sm text-gray-600 mb-4 leading-relaxed">Integrate HubSpot with Quickpipe AI to sync lead data, track interactions, and access HubSpot's analytics for a seamless sales workflow.</p>
-                                <div className="flex items-center justify-between gap-2">
-                                    <button className="flex items-center justify-center text-xs text-gray-500 bg-white px-3 py-1.5 rounded-full border border-gray-200">
-                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        </svg>
+                                 <div className="flex items-center justify-between gap-2">
+                                    <button className="flex items-center justify-center text-[14px] gap-1 text-gray-500 px-3 py-1.5 rounded-full ">
+                                        <IoSettingsOutline size={18} />
                                         Manage
                                     </button>
-                                    <button className="flex items-center justify-center text-xs text-gray-500 bg-white group-hover:bg-[#15A395] group-hover:text-white px-3 py-1.5 rounded-full border border-gray-200 group-hover:border-[#15A395] transition-colors duration-200">
+                                    <button className="flex items-center justify-center text-xs text-gray-900 font-semibold bg-white group-hover:bg-[#15A395] group-hover:text-white px-5 py-2.5  rounded-full border border-gray-400 group-hover:border-[#15A395] transition-colors duration-200 cursor-pointer">
                                         Connect
                                     </button>
                                 </div>
                             </div>
 
                             {/* Salesforce */}
-                            <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm group hover:border-[#15A395] transition-colors duration-200">
+                            <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm group hover:border-[#15A395] transition-colors duration-200">
                                 <div className="mb-3">
                                     <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M16.847 7.84c1.017-1.08 2.45-1.747 4.045-1.747 3.05 0 5.547 2.44 5.547 5.427 0 .48-.067.933-.187 1.373 1.627.587 2.8 2.147 2.8 3.96 0 2.333-1.947 4.227-4.347 4.227-.24 0-.48-.013-.707-.053-.573 1.373-1.933 2.347-3.52 2.347-.667 0-1.293-.174-1.84-.467-.6 2.053-2.52 3.547-4.773 3.547-2.293 0-4.227-1.534-4.8-3.627-.28.053-.573.08-.867.08-2.413 0-4.387-1.893-4.387-4.227 0-1.813 1.173-3.373 2.827-3.96-.12-.44-.187-.893-.187-1.373 0-2.987 2.493-5.427 5.56-5.427 1.307 0 2.493.453 3.44 1.213.4-.306.84-.573 1.293-.786.04-.133.093-.267.133-.413z" fill="#00A1E0" />
@@ -778,15 +763,12 @@ const Settings = () => {
                                 </div>
                                 <h3 className="text-base font-semibold text-gray-900 mb-1">Salesforce</h3>
                                 <p className="text-sm text-gray-600 mb-4 leading-relaxed">Sync leads and contact data between Quickpipe AI and Salesforce. Track progress, update records, and access CRM insights without leaving the app.</p>
-                                <div className="flex items-center justify-between gap-2">
-                                    <button className="flex items-center justify-center text-xs text-gray-500 bg-white px-3 py-1.5 rounded-full border border-gray-200">
-                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        </svg>
+                                 <div className="flex items-center justify-between gap-2">
+                                    <button className="flex items-center justify-center text-[14px] gap-1 text-gray-500 px-3 py-1.5 rounded-full ">
+                                        <IoSettingsOutline size={18} />
                                         Manage
                                     </button>
-                                    <button className="flex items-center justify-center text-xs text-gray-500 bg-white group-hover:bg-[#15A395] group-hover:text-white px-3 py-1.5 rounded-full border border-gray-200 group-hover:border-[#15A395] transition-colors duration-200">
+                                    <button className="flex items-center justify-center text-xs text-gray-900 font-semibold bg-white group-hover:bg-[#15A395] group-hover:text-white px-5 py-2.5  rounded-full border border-gray-400 group-hover:border-[#15A395] transition-colors duration-200 cursor-pointer">
                                         Connect
                                     </button>
                                 </div>

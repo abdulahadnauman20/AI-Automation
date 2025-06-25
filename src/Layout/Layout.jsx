@@ -9,7 +9,15 @@ function Layout() {
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem("Token"));
     const token1 = token?.token || token 
-    if(!token1) navigate('/login');
+    if(!token1){
+      navigate('/login');
+      return;
+    } 
+
+    if(token1) {
+      navigate('/');
+      return;
+    } 
   }, [navigate])
 
   return (

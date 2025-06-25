@@ -1,4 +1,4 @@
-import { Hand } from "lucide-react";
+import { Flame, Hand } from "lucide-react";
 import { FiCircle } from "react-icons/fi"
 
 function LiveFeed() {
@@ -10,7 +10,7 @@ function LiveFeed() {
       subject: "Re: Meeting with Lead",
       status: "Clicked",
       color: "text-purple-500",
-      bg: "bg-purple-200",
+      bg: "bg-[#f5edff]",
       time: "5s ago",
     },
     {
@@ -20,7 +20,7 @@ function LiveFeed() {
       subject: "Re: sales marketing",
       status: "Hot Lead",
       color: "text-orange-500",
-      bg: "bg-orange-200",
+      bg: "bg-[#fff3e6]",
       time: "7 hrs ago",
     },
     {
@@ -30,7 +30,7 @@ function LiveFeed() {
       subject: "Re: Email about design work",
       status: "Opened",
       color: "text-green-300",
-      bg: "bg-green-200",
+      bg: "bg-[#ebf6ee]",
       time: "2 days ago",
     },
   ]
@@ -48,8 +48,8 @@ function LiveFeed() {
             </div>
             <div className="text-sm">{item.subject}</div>
             <div className="flex items-center gap-2">
-              <div className={`${item.bg} rounded-full flex gap-1 p-1 items-center`}>
-                <Hand size={20} className={`fill-current ${item.color}`}/>
+              <div className={`${item.bg} rounded-full flex gap-1 p-1.5 items-center`}>
+                <Flame size={20} className={`fill-current ${item.color}`}/>
                 <span className="text-xs">{item.status}</span>
               </div>
               <span className="text-xs text-muted-foreground">{item.time}</span>

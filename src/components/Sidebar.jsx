@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Calendar, Camera, BarChartIcon as ChartBar, Eye, Inbox, LineChart, Mail, User, Settings, HelpCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import logo from '../assets/logo.png'
+import logo2 from '../assets/logo2.png'
 
 const menuItems = [ 
   { name: "Dashboard", icon: Camera, slug: "/" },
@@ -27,14 +29,17 @@ function Sidebar() {
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
-      <div className={`p-4 px-0 flex  ${isExpanded ? "justify-start px-4" : "justify-center"} `}>
-        <div className={`flex items-center gap-2 overflow-hidden whitespace-nowrap font-semibold `}>
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-orange-500 shrink-0">
-            Q
-          </div>
-          {isExpanded && <span>QuickPipe.Ai</span>}
-        </div>
+    <div className={`p-4 flex ${isExpanded ? "justify-start px-4" : "justify-center px-0"}`}>
+      <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap font-semibold">
+        {isExpanded ? (
+          <>
+            <img src={logo} alt="Logo" />
+          </>
+        ) : (
+          <img src={logo2} alt="Logo" className="h-6 w-full" />
+        )}
       </div>
+    </div>
 
       <nav className="mt-4 space-y-2 px-2 flex flex-col h-auto">
         <div className="space-y-2">

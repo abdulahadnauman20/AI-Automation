@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Check, CircleX, X, RotateCcw, SlidersHorizontal } from "lucide-react";
+import { Check, CircleX, X, RotateCcw, SlidersHorizontal, ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEmailAccountQuery } from "../reactQuery/hooks/useEmailAccountsQuery";
 import { useNavigate } from "react-router-dom";
@@ -217,6 +217,7 @@ export default function EmailDomain() {
 
   return (
     <div className="max-w-2xl mx-auto p-4 mb-12">
+      <button onClick={() => navigate(-1)} className="flex gap-1 items-center cursor-pointer text-gray-600"> <ChevronLeft size={18} /> Go Back</button>
       {/* Tabs */}
       <div className="flex border-none">
         {["new", "existing", "create"].map((tab) => (

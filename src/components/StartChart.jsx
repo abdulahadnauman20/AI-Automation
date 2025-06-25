@@ -58,32 +58,59 @@ function StatsChart() {
           <div className="text-sm text-muted-foreground">Replies</div>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-4 text-center">
+      <div className="grid grid-cols-3 text-center">
+        {[
+          { value: 200, label: "No's. Dialed", color: "#7a858b" },
+          { value: 1200, label: 'Emails sent', color: "#4285f4" },
+          { value: 520, label: 'Replied', color: "#fb8805" },
+          { value: 30, label: 'Calls Clicked', color: "#1baf6b", },
+          { value: 600, label: 'Opened', color: "#9747ff", },
+          { value: 10, label: 'Opportunities', color: "#fbbc05"},
+        ].map((item, index) => (
+          <div
+            key={index}
+            className={`px-4 py-3 ${
+              (index + 1) % 3 !== 0 ? 'border-r border-gray-300' : ''
+            }`}
+          >
+            <div className="flex items-center">
+              <div className="w-2 h-2 rounded-full" style={{backgroundColor: item?.color}}></div>
+              <div className="flex flex-col gap-2 items-center">
+                <div className="text-xl font-semibold">{item.value}</div>
+                <div className="text-[12px] text-gray-500">{item.label}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+
+      {/* <div className="grid grid-cols-3 gap-4 text-center">
         <div>
-          <div className="text-2xl font-semibold">200</div>
+          <div className="text-xl font-semibold">200</div>
           <div className="text-sm text-muted-foreground">No's. Dialed</div>
         </div>
         <div>
-          <div className="text-2xl font-semibold">1200</div>
+          <div className="text-xl font-semibold">1200</div>
           <div className="text-sm text-muted-foreground">Emails sent</div>
         </div>
         <div>
-          <div className="text-2xl font-semibold">520</div>
+          <div className="text-xl font-semibold">520</div>
           <div className="text-sm text-muted-foreground">Replied</div>
         </div>
         <div>
-          <div className="text-2xl font-semibold">30</div>
+          <div className="text-xl font-semibold">30</div>
           <div className="text-sm text-muted-foreground">Calls Clicked</div>
         </div>
         <div>
-          <div className="text-2xl font-semibold">600</div>
+          <div className="text-xl font-semibold">600</div>
           <div className="text-sm text-muted-foreground">Opened</div>
         </div>
         <div>
-          <div className="text-2xl font-semibold">10</div>
+          <div className="text-xl font-semibold">10</div>
           <div className="text-sm text-muted-foreground">Opportunities</div>
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }

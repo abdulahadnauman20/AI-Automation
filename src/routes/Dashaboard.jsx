@@ -18,9 +18,9 @@ export default function DashboardPage() {
     <div className="pl-[10px] md:pl-[20px] bg-[rgb(251,251,251)]">
       <div className="min-h-screen bg-background">
         <main className="container mx-auto p-3 md:p-6">
-          <div className="mb-8 flex items-center justify-between flex-col md:flex-row gap-4">
-            <div>
-              <h2 className="text-2xl font-bold">Evening, Beetoo 👋</h2>
+          <div className="mb-2 flex items-center justify-between flex-col md:flex-row gap-4">
+            <div className="ps-6">
+              <h2 className="text-2xl font-semibold">Evening, Beetoo 👋🏻</h2>
               <p className="text-sm text-gray-400 text-semibold">
                 Track your activities, leads, analytics, and more
               </p>
@@ -90,10 +90,10 @@ export default function DashboardPage() {
 
 
           <div className="mb-8 grid gap-3 md:p-6 sm:grid-cols-2 lg:grid-cols-4">
-            <MetricCard icon="mail" label="Emails Sent" value="1,245" iconColor="text-blue-600" bgColor="bg-blue-100" />
-            <MetricCard icon="users" label="New Users" value="312" iconColor="text-green-600" bgColor="bg-green-100" />
-            <MetricCard icon="calendar" label="Meetings" value="27" iconColor="text-purple-600" bgColor="bg-purple-100" />
-            <MetricCard icon="briefcase" label="Projects" value="8" iconColor="text-orange-600" bgColor="bg-orange-100" />
+            <MetricCard icon="mail" label="Active emails" value="12" iconColor="text-[#6ca1f7]" bgColor="bg-[#ecf3fe]" />
+            <MetricCard icon="users" label="People Reached" value="1,264" iconColor="text-[#fcbd75]" bgColor="bg-[#fff3e6]" />
+            <MetricCard icon="calendar" label="Meetings Booked" value="156" iconColor="text-[#34a853]" bgColor="bg-[#ebf6ee]" />
+            <MetricCard icon="briefcase" label="Opporotunities" value="156" iconColor="text-[#ae70ff]" bgColor="bg-[#f5edff]" />
           </div>
 
           <div className="grid gap-3 md:p-6 lg:grid-cols-3">
@@ -151,13 +151,13 @@ export default function DashboardPage() {
           </div>
 
           {isPlusModalOpen && (
-            <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 z-50">
+            <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 z-50 bg-[#6c696991]">
               <div className="relative bg-white rounded-lg shadow-lg w-[90%] md:w-[400px] p-3 md:p-6">
                 <div className="flex items-center justify-between pb-3">
                   <h3 className="text-xl font-semibold">Add Task</h3>
                   <button
                     onClick={() => setIsPlusModalOpen(false)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-gray-600 cursor-pointer"
                   >
                     <X />
                   </button>
@@ -168,41 +168,41 @@ export default function DashboardPage() {
                     <div>
                       <div className="flex gap-1 items-center mb-3">
                           <RiEditCircleLine size={22} className="text-gray-400" />
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-400">Task Title</label>
+                          <label className="block text-sm font-medium ">Task Title</label>
                       </div>
-                      <input type="text" className="mt-1 block w-full p-2 border outline-none border-gray-300 rounded-lg dark:bg-gray-700 dark:text-white" />
+                      <input type="text" className="mt-1 block w-full p-2 cursor-pointer border border-gray-300 rounded-md focus:bg-[#f3faf9] focus:ring focus:outline-none  focus:ring-teal-500" />
                     </div>
                     <div>
                     <div className="flex gap-1 items-center mb-3">
                       <FileText size={22} className="text-gray-400" />
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-400">Description</label>
+                      <label className="block text-sm font-medium ">Description</label>
                     </div>
-                      <textarea className="mt-1 block w-full p-2 border outline-none border-gray-300 rounded-lg dark:bg-gray-700 dark:text-white"></textarea>
+                      <textarea className="mt-1 block w-full p-2 cursor-pointer border border-gray-300 rounded-md focus:bg-[#f3faf9] focus:ring focus:outline-none  focus:ring-teal-500"></textarea>
                     </div>
                     <div className="flex items-center gap-2">
                     <div>
                     <div className="flex gap-1 items-center mb-3">
                       <Calendar size={21} className="text-gray-400"  />
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-400">Date</label>
+                      <label className="block text-sm font-medium ">Date</label>
                     </div>
-                      <input type="text" className="mt-1 block w-full p-2 border outline-none border-gray-300 rounded-lg dark:bg-gray-700 dark:text-white" />
+                      <input type="date" className="mt-1 block cursor-pointer w-full p-2 border border-gray-300 rounded-md focus:bg-[#f3faf9] focus:ring focus:outline-none focus:ring-teal-500" />
                     </div>
                     <div>
                     <div className="flex gap-1 items-center mb-3">
                       <Clock3 size={21} className="text-gray-400"  />
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-400">Time</label>
+                      <label className="block text-sm font-medium ">Time</label>
                     </div>
-                      <input type="text" className="mt-1 block w-full p-2 border outline-none border-gray-300 rounded-lg dark:bg-gray-700 dark:text-white" />
+                      <input type= "time" className="mt-1 blockcursor-pointer w-full p-2 border border-gray-300 rounded-md focus:bg-[#f3faf9] focus:ring focus:outline-none focus:ring-teal-500" />
                     </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-400">Assign to Person</label>
-                      <input type="text" className="mt-1 block w-full p-2 border outline-none border-gray-300 rounded-lg dark:bg-gray-700 dark:text-white" />
+                      <label className="block text-sm font-medium">Assign to Person</label>
+                      <input type="text" className="mt-1 block cursor-pointer w-full p-2 border border-gray-300 rounded-md focus:bg-[#f3faf9] focus:ring focus:outline-none focus:ring-teal-500" />
                     </div>
                     <div>
                     </div>
                     <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => setIsPlusModalOpen(false)} type="button" class="text-gray-900 cursor-pointer bg-white border border-gray-300 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">Cancel</button>
+                        <button onClick={() => setIsPlusModalOpen(false)} type="button" class="text-gray-900 cursor-pointer bg-white border border-gray-300 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2 ">Cancel</button>
                         <button onClick={() => setIsPlusModalOpen(false)} type="button" class="text-white cursor-pointer flex gap-2 items-center bg-[rgb(21,163,149)] focus:outline-none font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2"> <FileText size={18} /> Save Task</button>
                     </div>
                   </form>

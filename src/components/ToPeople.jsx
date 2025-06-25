@@ -42,7 +42,7 @@ export default function TopPeople() {
         <h3 className="font-semibold">Top Lead</h3>
         <button className="ml-auto">
           <Link to='/analytics'>
-            <MdArrowOutward className="h-5 w-5 text-muted-foreground" />
+            <MdArrowOutward className="h-5 w-5 text-gray-400" />
           </Link>
         </button>
       </div>
@@ -53,12 +53,12 @@ export default function TopPeople() {
           <input
             type="text"
             placeholder="Search..."
-            className="w-full rounded-full border border-gray-200 bg-background px-9 py-2 text-sm focus:outline-none cursor-pointer"
+            className="w-96 rounded-full border border-gray-400 bg-background px-9 py-2 text-sm focus:outline-none cursor-pointer"
           />
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-1 rounded-full border border-gray-300 px-4 py-2 text-sm hover:bg-accent cursor-pointer"
+          className="flex items-center gap-1 rounded-full border border-gray-400 hover:bg-gray-100 px-4 py-2 text-sm hover:bg-accent cursor-pointer"
         >
           <FiPlus className="h-4 w-4" />
           Add People
@@ -66,7 +66,7 @@ export default function TopPeople() {
       </div>
 
       <div className="min-w-full overflow-auto">
-        <table className="w-full">
+        <table className="w-full ">
           <thead>
             <tr className="border-b border-gray-300 text-sm text-muted-foreground">
               <th className="whitespace-nowrap px-4 py-3 text-left font-medium">
@@ -172,7 +172,7 @@ export default function TopPeople() {
         </div>
       )}
 
-      Second Modal (MailOpen Click)
+      {/* Second Modal (MailOpen Click) */}
       {isSecondModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-[#3a3939a3] bg-opacity-50">
           <div className="rounded-lg bg-white p-6 shadow-lg">

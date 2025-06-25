@@ -70,7 +70,7 @@ const Support = () => {
                                     type="checkbox"
                                     checked={formData.Type === Type}
                                     onChange={() => handleTypeChange(Type)}
-                                    className="w-4 h-4 mr-2 border-gray-300 rounded"
+                                    className="w-4 h-4 mr-2 border-gray-300 rounded focus:bg-[#f3faf9] focus:ring"
                                 />
                                 {Type.charAt(0).toUpperCase() + Type.slice(1)}
                             </label>
@@ -86,7 +86,7 @@ const Support = () => {
                             value={formData.Subject}
                             onChange={handleInputChange}
                             placeholder="Subject"
-                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:bg-[#f3faf9] focus:ring focus:outline-none  focus:ring-teal-500"
                         />
                     </div>
 
@@ -99,7 +99,7 @@ const Support = () => {
                             onChange={handleInputChange}
                             placeholder="Type your message here..."
                             rows="5"
-                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:bg-[#f3faf9] focus:ring focus:ring-teal-500"
                         ></textarea>
                     </div>
 
