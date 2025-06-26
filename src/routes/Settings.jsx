@@ -272,22 +272,28 @@ const Settings = () => {
             }
             addWebsiteMutation.mutate({ WebsiteUrls: validUrls });
         }
-        
 
         const handleDocSubmit = () => {
-            const newDocuments = documents
-            if (newDocuments.length > 0) {
-                const formData = new FormData();
-                    newDocuments.forEach((file) => {
-                    formData.append('documents', file);
-                }
-            )
-            addDocumentMutation.mutate(formData);
-            } else {
-                toast.error("Please upload at least one new document");
-                return;
-            }
-        };
+        const newDocuments = documents;
+
+        if (newDocuments.length === 0 && existingDocuments.length === 0) {
+            toast.error("Please upload or keep at least one document");
+            return;
+        }
+
+        const formData = new FormData();
+
+        newDocuments.forEach((file) => {
+            formData.append('documents', file);
+        });
+
+        const keepFiles = existingDocuments.map((doc) => doc.name);
+
+        formData.append('keepFiles', JSON.stringify(keepFiles));
+
+        addDocumentMutation.mutate(formData);
+    };
+
 
     return (
         <div className="p-2 md:p-6 bg-[#f5f5f5] min-h-screen justify-center ">
