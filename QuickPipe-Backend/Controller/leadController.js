@@ -349,26 +349,31 @@ exports.SearchLeads = asyncError(async (req, res, next) => {
       // Enrich each lead using Apollo's enrichment API
       for (const lead of leads) {
         try {
+          let enrichedLead = null;
           if (lead.id) {
-            const enrichedLead = await EnrichLeadWithApollo(lead.id);
+            try {
+              enrichedLead = await EnrichLeadWithApollo(lead.id);
+            } catch (enrichErr) {
+              console.error(`Failed to enrich lead with ID ${lead.id}: ${enrichErr.message}`);
+            }
             enrichedLeads.push({
               id: lead.id,
-              name: enrichedLead.name || `${enrichedLead.first_name || ''} ${enrichedLead.last_name || ''}`.trim(),
-              email: enrichedLead.email || null,
-              phone: enrichedLead.organization?.phone || null,
-              company: enrichedLead.organization?.name || null,
-              title: enrichedLead.title || null,
-              location: [enrichedLead.city, enrichedLead.state, enrichedLead.country]
+              name: (enrichedLead?.name || `${enrichedLead?.first_name || lead.first_name || ''} ${enrichedLead?.last_name || lead.last_name || ''}`.trim() || lead.name || null),
+              email: enrichedLead?.email || lead.email || null,
+              phone: enrichedLead?.organization?.phone || lead.organization?.phone || null,
+              company: enrichedLead?.organization?.name || lead.organization?.name || null,
+              title: enrichedLead?.title || lead.title || null,
+              location: ([enrichedLead?.city || lead.city, enrichedLead?.state || lead.state, enrichedLead?.country || lead.country]
                 .filter(Boolean)
-                .join(', ') || null,
-              website: enrichedLead.organization?.website_url || null,
-              employeeCount: enrichedLead.organization?.estimated_num_employees || null
+                .join(', ')) || null,
+              website: enrichedLead?.organization?.website_url || lead.organization?.website_url || null,
+              employeeCount: enrichedLead?.organization?.estimated_num_employees || lead.organization?.estimated_num_employees || null
             });
           } else {
             console.warn(`Lead with missing ID skipped: ${JSON.stringify(lead)}`);
           }
         } catch (error) {
-          console.error(`Failed to enrich lead with ID ${lead.id}: ${error.message}`);
+          console.error(`Failed to process lead with ID ${lead.id}: ${error.message}`);
         }
       }
 
@@ -474,26 +479,31 @@ exports.SearchLeadsByFilter = asyncError(async (req, res, next) => {
       // Enrich each lead using Apollo's enrichment API
       for (const lead of leads) {
         try {
+          let enrichedLead = null;
           if (lead.id) {
-            const enrichedLead = await EnrichLeadWithApollo(lead.id);
+            try {
+              enrichedLead = await EnrichLeadWithApollo(lead.id);
+            } catch (enrichErr) {
+              console.error(`Failed to enrich lead with ID ${lead.id}: ${enrichErr.message}`);
+            }
             enrichedLeads.push({
               id: lead.id,
-              name: enrichedLead.name || `${enrichedLead.first_name || ''} ${enrichedLead.last_name || ''}`.trim(),
-              email: enrichedLead.email || null,
-              phone: enrichedLead.organization?.phone || null,
-              company: enrichedLead.organization?.name || null,
-              title: enrichedLead.title || null,
-              location: [enrichedLead.city, enrichedLead.state, enrichedLead.country]
+              name: (enrichedLead?.name || `${enrichedLead?.first_name || lead.first_name || ''} ${enrichedLead?.last_name || lead.last_name || ''}`.trim() || lead.name || null),
+              email: enrichedLead?.email || lead.email || null,
+              phone: enrichedLead?.organization?.phone || lead.organization?.phone || null,
+              company: enrichedLead?.organization?.name || lead.organization?.name || null,
+              title: enrichedLead?.title || lead.title || null,
+              location: ([enrichedLead?.city || lead.city, enrichedLead?.state || lead.state, enrichedLead?.country || lead.country]
                 .filter(Boolean)
-                .join(', ') || null,
-              website: enrichedLead.organization?.website_url || null,
-              employeeCount: enrichedLead.organization?.estimated_num_employees || null,
+                .join(', ')) || null,
+              website: enrichedLead?.organization?.website_url || lead.organization?.website_url || null,
+              employeeCount: enrichedLead?.organization?.estimated_num_employees || lead.organization?.estimated_num_employees || null,
             });
           } else {
             console.warn(`Lead with missing ID skipped: ${JSON.stringify(lead)}`);
           }
         } catch (error) {
-          console.error(`Failed to enrich lead with ID ${lead.id}: ${error.message}`);
+          console.error(`Failed to process lead with ID ${lead.id}: ${error.message}`);
         }
       }
 

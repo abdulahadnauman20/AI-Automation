@@ -1,126 +1,139 @@
 import { ChevronDown, ChevronUp, CircleCheck, Clock, Globe, MapPin, Search } from 'lucide-react'
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FcGoogle } from 'react-icons/fc';
 import { useParams } from 'react-router-dom';
 import { axiosInstance } from '../api/axios';
 
 function Accounts() {
   const [searchQuery, setSearchQuery] = useState("");
-
-  const [selectAll, setSelectAll] = useState(false);
-  const [people, setPeople] = useState([]);
-  const [filteredPeople, setFilteredPeople] = useState([]);
-
+  const [people, setPeople] = useState({});
   const param = useParams();
 
   useEffect(() => {
     const fetchData = async () => {
-        try {
-                const response = await axiosInstance.get("/lead/GetAllLeads");
-                const updatedLeads = response.data.leads.map((lead) => ({
-                ...lead,
-                status: lead.Status || "Not yet contacted",
-                provider: lead.Email?.includes("@gmail.com")
-                ? "Google"
-                : lead.Email?.includes("@outlook.com")
-                ? "Microsoft"
-                : lead.Email?.includes("@yahoo.com")
-                ? "Yahoo"
-                : "Other",
-            }));
-
-            setPeople(updatedLeads);
-
-            if(param.name){
-                const filtered = updatedLeads.filter(lead => ( lead.provider.toLowerCase() === param.name.toLowerCase()));
-                setFilteredPeople(filtered);
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
+      try {
+        const response = await axiosInstance.get("/lead/GetAllLeads");
+        const updatedLeads = response.data.leads.map((lead) => ({
+          ...lead,
+          status: lead.Status || "Not yet contacted",
+          provider: lead.Email?.includes("@gmail.com")
+            ? "Google"
+            : lead.Email?.includes("@outlook.com")
+            ? "Microsoft"
+            : lead.Email?.includes("@yahoo.com")
+            ? "Yahoo"
+            : "Other",
+        }));
+        // Group by company
+        const groupedByCompany = updatedLeads.reduce((acc, lead) => {
+          const company = lead.Company || 'Unassigned';
+          if (!acc[company]) acc[company] = [];
+          acc[company].push(lead);
+          return acc;
+        }, {});
+        setPeople(groupedByCompany);
+      } catch (error) {
+        console.log(error);
+      }
+    };
     fetchData();
-  }, [param.name])
+  }, [param.name]);
 
   return (
-   <div className="bg-white rounded-lg shadow overflow-hidden">
-    <div className="relative">
+    <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <Search className="h-5 w-5 text-gray-400" />
+          <Search className="h-5 w-5 text-gray-400" />
         </div>
         <input
-        type="text"
-        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-        placeholder='Search emails...'
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+          type="text"
+          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
+          placeholder='Search emails...'
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
-    </div>
-    <div className="min-w-full overflow-auto">
-        <table className="w-full">
-        <thead>
-            <tr className="border-b border-gray-300 text-sm text-muted-foreground">
-            <th className="whitespace-nowrap px-4 py-3 text-left font-medium">
-                <input 
-                type="checkbox" 
-                className="rounded border-muted cursor-pointer"
-                checked={selectAll}
-                onChange={(e) => setSelectAll(e.target.checked)}
-                />
-            </th>
-            <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">EMAIL</th>
-            <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">CONTACT</th>
-            <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">COMPANY</th>
-            <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">TITLE</th>
-            <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">EMAIL PROVIDER</th>
-            <th className="whitespace-nowrap px-4 py-3 text-left font-medium text-gray-400">STATUS</th>
-            </tr>
-        </thead>
-        <tbody>
-            {filteredPeople
-            .filter(person => 
-                person.Name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                person.Email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                person.Company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                person.Title?.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-            .map((person) => (
-                <tr key={person.id} className="border-b border-gray-200 text-sm hover:bg-gray-50">
-                <td className="px-4 py-3">
-                    <input type="checkbox" className="rounded border-muted cursor-pointer" />
-                </td>
-                <td className="px-4 py-3 text-gray-600">
-                    <a href={`mailto:${person.Email}`} className="hover:text-blue-500">
-                    {person.Email}
-                    </a>
-                </td>
-                <td className="px-4 py-3 text-gray-600">{person.Name}</td>
-                <td className="px-4 py-3 text-gray-600">{person.Company || 'Not specified'}</td>
-                <td className="px-4 py-3 text-gray-600">{person.Title || 'Not specified'}</td>
-                <td className="px-4 py-3 text-gray-600 flex items-center gap-1">
-                    {person.provider === 'Google' && <FcGoogle size={20} />}
-                    {person.provider}
-                </td>
-                <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                    {person.status === 'Verified' ? (
-                        <div className="flex items-center gap-1 bg-blue-50 rounded-full px-2 py-0.5">
-                        <CircleCheck size={17} className="text-blue-500" />
-                        <span className="text-blue-500">Verified</span>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1.5">
-                        <Clock className="h-4 w-4 text-gray-400" />
-                        <span className="text-xs text-gray-400">Not yet contacted</span>
-                        </div>
-                    )}
-                    </div>
-                </td>
-                </tr>
-            ))}
-            </tbody>
-        </table>
-        </div>
+      </div>
+      <div className="min-w-full overflow-auto">
+        {(() => {
+          const companyName = param.name || Object.keys(people)[0];
+          const leads = people[companyName] || [];
+          return (
+            <div className="mb-8">
+              {/* Company Card Header */}
+              <div className="flex items-center gap-4 bg-gradient-to-r from-teal-100 to-green-100 rounded-xl p-6 mb-4 shadow">
+                <div className="w-16 h-16 rounded-full bg-teal-400 flex items-center justify-center text-2xl font-bold text-white shadow">
+                  {companyName[0]}
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-1">{companyName}</h2>
+                  <div className="text-gray-500 text-sm">{leads.length} Contact{leads.length !== 1 ? 's' : ''}</div>
+                </div>
+              </div>
+              <div className="overflow-x-auto rounded-lg shadow">
+                <table className="w-full bg-white rounded-lg">
+                  <thead>
+                    <tr className="bg-gray-50 text-gray-600 text-sm">
+                      <th className="px-6 py-3 text-left font-semibold">Contact</th>
+                      <th className="px-6 py-3 text-left font-semibold">Email</th>
+                      <th className="px-6 py-3 text-left font-semibold">Company</th>
+                      <th className="px-6 py-3 text-left font-semibold">Title</th>
+                      <th className="px-6 py-3 text-left font-semibold">Provider</th>
+                      <th className="px-6 py-3 text-left font-semibold">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leads
+                      .filter(person =>
+                        person.Name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        person.Email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        person.Company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        person.Title?.toLowerCase().includes(searchQuery.toLowerCase())
+                      )
+                      .map((person, idx) => (
+                        <tr key={person.id} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                          {/* Contact Avatar and Name */}
+                          <td className="px-6 py-4 flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-teal-200 flex items-center justify-center text-lg font-semibold text-teal-700">
+                              {person.Name ? person.Name.split(' ').map(n => n[0]).join('').toUpperCase() : '?'}
+                            </div>
+                            <span className="font-medium text-gray-800">{person.Name}</span>
+                          </td>
+                          {/* Email */}
+                          <td className="px-6 py-4">
+                            <a href={`mailto:${person.Email}`} className="text-blue-600 hover:underline">
+                              {person.Email}
+                            </a>
+                          </td>
+                          {/* Company */}
+                          <td className="px-6 py-4 text-gray-700">{person.Company || 'Not specified'}</td>
+                          {/* Title */}
+                          <td className="px-6 py-4 text-gray-700">{person.Title || 'Not specified'}</td>
+                          {/* Provider */}
+                          <td className="px-6 py-4 flex items-center gap-2">
+                            {person.provider === 'Google' && <FcGoogle size={20} />}
+                            <span className="text-gray-600">{person.provider}</span>
+                          </td>
+                          {/* Status */}
+                          <td className="px-6 py-4">
+                            {person.status === 'Verified' ? (
+                              <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-600 rounded-full px-3 py-1 text-xs font-semibold">
+                                <CircleCheck size={15} /> Verified
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-500 rounded-full px-3 py-1 text-xs font-medium">
+                                <Clock className="h-4 w-4" /> Not yet contacted
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          );
+        })()}
+      </div>
     </div>
   )
 }

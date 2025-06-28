@@ -28,7 +28,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { searchLeads } from "../services/aiLeadScoutService";
 
-export const useAILeadScoutQuery = (query, page, per_page, person_titles, industries, locations, employees, revenues, technologies, fundingTypes, names, companies) => {
+export const useAILeadScoutQuery = (query, page, per_page, person_titles, industries, locations, employees, revenues, technologies, fundingTypes, names, companies, forceSearch = false) => {
   const isEnabled = !!query || 
                     (person_titles && person_titles.length > 0) || 
                     (industries && industries.length > 0) || 
@@ -38,11 +38,30 @@ export const useAILeadScoutQuery = (query, page, per_page, person_titles, indust
                     (technologies && technologies.length > 0) || 
                     (fundingTypes && fundingTypes.length > 0) || 
                     (names && names.length > 0) || 
-                    (companies && companies.length > 0);
+                    (companies && companies.length > 0) ||
+                    forceSearch;
+  
+  const queryKey = [
+    "leads", 
+    query, 
+    page, 
+    per_page, 
+    JSON.stringify(person_titles), 
+    JSON.stringify(industries), 
+    JSON.stringify(locations), 
+    JSON.stringify(employees), 
+    JSON.stringify(revenues), 
+    JSON.stringify(technologies), 
+    JSON.stringify(fundingTypes), 
+    JSON.stringify(names), 
+    JSON.stringify(companies), 
+    forceSearch
+  ];
   
   console.log('=== useAILeadScoutQuery called ===');
   console.log('useAILeadScoutQuery - Query enabled:', isEnabled);
   console.log('useAILeadScoutQuery - Parameters:', { query, page, per_page, person_titles, industries, locations, employees, revenues, technologies, fundingTypes, names, companies });
+  console.log('useAILeadScoutQuery - Query Key:', queryKey);
   console.log('useAILeadScoutQuery - isEnabled breakdown:', {
     hasQuery: !!query,
     hasPersonTitles: person_titles && person_titles.length > 0,
@@ -57,10 +76,10 @@ export const useAILeadScoutQuery = (query, page, per_page, person_titles, indust
   });
   
   return useQuery({
-    queryKey: ["leads", query, page, per_page, person_titles, industries, locations, employees, revenues, technologies, fundingTypes, names, companies],
+    queryKey: queryKey,
     queryFn: async () => {
       console.log('=== queryFn executing ===');
-      console.log('useAILeadScoutQuery called with:', { query, page, per_page, person_titles, industries, locations, employees, revenues, technologies, fundingTypes, names, companies });
+      console.log('useAILeadScoutQuery called with:', { query, page, per_page, person_titles, industries, locations, employees, revenues, technologies, fundingTypes, names, companies, forceSearch });
       const result = await searchLeads({ query, page, per_page, person_titles, industries, locations, employees, revenues, technologies, fundingTypes, names, companies });
       console.log('Query result:', result);
       return result;
@@ -68,5 +87,7 @@ export const useAILeadScoutQuery = (query, page, per_page, person_titles, indust
     enabled: isEnabled,
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 1,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 };

@@ -1,10 +1,12 @@
+import React, { useState, useEffect, useRef } from 'react'
 import { Search, EyeOff } from "lucide-react"
 import { FaBriefcase, FaMapMarkerAlt, FaIndustry, FaUsers, FaDollarSign, FaGlobe, FaCogs, FaMoneyCheckAlt, FaUser, FaBuilding, FaSearch, FaTimes, FaFilter, FaUserPlus } from "react-icons/fa";
-import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAILeadScoutQuery } from "../reactQuery/hooks/useAILeadScoutQuery";
 import { toast } from "react-hot-toast";
 import axiosInstance from "../services/axiosInstance";
+import { summarizeMainKeywords } from "../utils/nlpParser";
+import { useCampaignQuery } from "../reactQuery/hooks/useCampaignQuery";
 
 function CustomCheckbox({ id, checked = false, onChange = () => {}, disabled = false }) {
   return (
@@ -119,9 +121,14 @@ export default function AILeadSearch() {
   const [showOnlyAlternatives, setShowOnlyAlternatives] = useState(false);
   const [backToLeads, setBackToLeads] = useState(false);
   const [jobTitleInput, setJobTitleInput] = useState("");
+  const [forceSearch, setForceSearch] = useState(false);
+  const [isFromAILeadScouts, setIsFromAILeadScouts] = useState(false);
+  const [currentLeadSource, setCurrentLeadSource] = useState(null); // Track current source
   const allJobTitles = [
     "CEO", "CTO", "CFO", "COO", "CMO", "Manager", "Developer", "Engineer", "Designer", "Product Manager", "Sales", "Marketing", "HR", "Recruiter", "Data Scientist", "Analyst", "Consultant", "Director", "VP", "President", "Founder", "Owner"
   ];
+  const { campaignsObject, isCampaignsLoading } = useCampaignQuery();
+  const [selectedCampaignId, setSelectedCampaignId] = useState("");
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -146,9 +153,31 @@ export default function AILeadSearch() {
   const initialLocationInput = queryParams.get("locationInput") || "";
   const initialNameInput = queryParams.get("nameInput") || "";
   const initialCompanyInput = queryParams.get("companyInput") || "";
+  const initialJobTitleInput = queryParams.get("jobTitleInput") || "";
+  const initialLookalikeDomain = queryParams.get("lookalikeDomain") || "";
+  const initialOriginalQuery = queryParams.get("originalQuery") || "";
 
   // Initialize state from URL params on mount
   useEffect(() => {
+    console.log('=== INITIALIZING STATE FROM URL PARAMS ===');
+    console.log('URL params:', location.search);
+    console.log('Initial values from URL:');
+    console.log('- initialSearchQuery:', initialSearchQuery);
+    console.log('- initialJobTitles:', initialJobTitles);
+    console.log('- initialIndustries:', initialIndustries);
+    console.log('- initialLocations:', initialLocations);
+    console.log('- initialEmployees:', initialEmployees);
+    console.log('- initialRevenues:', initialRevenues);
+    console.log('- initialTechnologies:', initialTechnologies);
+    console.log('- initialFundingTypes:', initialFundingTypes);
+    console.log('- initialNames:', initialNames);
+    console.log('- initialCompanies:', initialCompanies);
+    console.log('- initialLocationInput:', initialLocationInput);
+    console.log('- initialNameInput:', initialNameInput);
+    console.log('- initialCompanyInput:', initialCompanyInput);
+    console.log('- initialJobTitleInput:', initialJobTitleInput);
+    console.log('- initialLookalikeDomain:', initialLookalikeDomain);
+    
     setSearchTerm(initialSearchQuery);
     setSelectedJobTitles(initialJobTitles);
     setSelectedIndustries(initialIndustries);
@@ -165,6 +194,51 @@ export default function AILeadSearch() {
     setDebouncedNameInput(initialNameInput);
     setCompanyInput(initialCompanyInput);
     setDebouncedCompanyInput(initialCompanyInput);
+    setJobTitleInput(initialJobTitleInput);
+    setLookalikeDomain(initialLookalikeDomain);
+    
+    console.log('State variables set. Current state:');
+    console.log('- selectedJobTitles:', initialJobTitles);
+    console.log('- selectedIndustries:', initialIndustries);
+    console.log('- selectedLocations:', initialLocations);
+    console.log('- selectedEmployees:', initialEmployees);
+    console.log('- selectedRevenues:', initialRevenues);
+    console.log('- selectedTechnologies:', initialTechnologies);
+    console.log('- selectedFundingTypes:', initialFundingTypes);
+    console.log('- selectedNames:', initialNames);
+    console.log('- selectedCompanies:', initialCompanies);
+    
+    // Trigger immediate search if we have filters from URL
+    const hasFilters = initialJobTitles.length > 0 || 
+                      initialIndustries.length > 0 || 
+                      initialLocations.length > 0 || 
+                      initialEmployees.length > 0 || 
+                      initialRevenues.length > 0 || 
+                      initialTechnologies.length > 0 || 
+                      initialFundingTypes.length > 0 || 
+                      initialNames.length > 0 || 
+                      initialCompanies.length > 0 || 
+                      initialLocationInput || 
+                      initialNameInput || 
+                      initialCompanyInput || 
+                      initialJobTitleInput || 
+                      initialLookalikeDomain;
+    
+    console.log('Has filters from URL:', hasFilters);
+    
+    if (hasFilters) {
+      console.log('Filters detected from URL, triggering immediate search');
+      // Set debounced search term immediately if we have a search query
+      if (initialSearchQuery) {
+        setDebouncedSearchTerm(initialSearchQuery);
+      }
+      // Reset to first page
+      setCurrentPage(1);
+      // Force search to happen
+      setForceSearch(true);
+      // Mark that this search is coming from AILeadScouts
+      setIsFromAILeadScouts(true);
+    }
   }, [initialSearchQuery, location.search]);
 
   // Debounce searchTerm
@@ -240,15 +314,15 @@ export default function AILeadSearch() {
 
   // Always send a non-empty query
   const safeSearchTerm = debouncedSearchTerm && debouncedSearchTerm.trim() ? debouncedSearchTerm : 'all';
-
+  
   // Prepare location array for the query
-  const locationArray = locationInput ? [locationInput] : selectedLocations;
+  const locationArray = locationInput ? [...selectedLocations, locationInput] : selectedLocations;
   
   // Prepare name array for the query
-  const nameArray = debouncedNameInput ? [debouncedNameInput] : selectedNames;
+  const nameArray = debouncedNameInput ? [...selectedNames, debouncedNameInput] : selectedNames;
   
   // Prepare company array for the query
-  const companyArray = debouncedCompanyInput ? [debouncedCompanyInput] : selectedCompanies;
+  const companyArray = debouncedCompanyInput ? [...selectedCompanies, debouncedCompanyInput] : selectedCompanies;
   
   console.log('AILeadSearch - Current state:', {
     locationInput,
@@ -264,47 +338,99 @@ export default function AILeadSearch() {
     debouncedCompanyInput,
     companyArray,
     selectedCompanies,
-    hasCompany: debouncedCompanyInput ? true : false
+    hasCompany: debouncedCompanyInput ? true : false,
+    selectedJobTitles,
+    selectedIndustries,
+    selectedEmployees,
+    selectedRevenues,
+    selectedTechnologies,
+    selectedFundingTypes,
+    safeSearchTerm
+  });
+
+  // If we have filters but no search term, ensure we have a default query
+  let finalSearchTerm = (selectedJobTitles.length > 0 || selectedIndustries.length > 0 || 
+                          locationArray.length > 0 || selectedEmployees.length > 0 || 
+                          selectedRevenues.length > 0 || selectedTechnologies.length > 0 || 
+                          selectedFundingTypes.length > 0 || nameArray.length > 0 || 
+                          companyArray.length > 0) && !debouncedSearchTerm ? 'all' : safeSearchTerm;
+
+  // Debug: Show filters sent to backend
+  console.log('Filters sent to backend:', {
+    selectedJobTitles,
+    selectedIndustries,
+    locationArray,
+    selectedEmployees,
+    selectedRevenues,
+    selectedTechnologies,
+    selectedFundingTypes,
+    nameArray,
+    companyArray
   });
 
   // Fetch leads with the debounced search query, selected job titles, and selected industries
   const { data, isLoading, error, refetch } = useAILeadScoutQuery(
-    safeSearchTerm,
+    finalSearchTerm,
     currentPage,
     perPage,
-    selectedJobTitles.length > 0 ? selectedJobTitles : undefined,
-    selectedIndustries.length > 0 ? selectedIndustries : undefined,
+    selectedJobTitles,
+    selectedIndustries,
     locationArray,
     selectedEmployees,
-    selectedRevenues.length > 0 ? selectedRevenues : undefined,
-    selectedTechnologies.length > 0 ? selectedTechnologies : undefined,
-    selectedFundingTypes.length > 0 ? selectedFundingTypes : undefined,
+    selectedRevenues,
+    selectedTechnologies,
+    selectedFundingTypes,
     nameArray,
     companyArray,
+    forceSearch
   );
 
+  // Always update leads when backend data changes
   useEffect(() => {
+    console.log('Raw API response data:', data);
     if (data?.results) {
-      console.log('Setting leads from data:', data.results);
-      setLeads(
-        data.results.map(lead =>
-          lead.person
-            ? {
-                id: lead.person.id,
-                name: lead.person.name,
-                email: lead.person.email,
-                company: lead.person.organization?.name,
-                title: lead.person.title,
-                location: [lead.person.city, lead.person.state, lead.person.country].filter(Boolean).join(', '),
-                website: lead.person.organization?.website_url,
-                employeeCount: lead.person.organization?.estimated_num_employees,
-                checked: false
-              }
-            : { ...lead, checked: false }
-        )
-      );
+      // If the first result has a 'person' property, map as before
+      if (data.results.length > 0 && data.results[0].person) {
+        setLeads(
+          data.results.map(lead =>
+            lead.person
+              ? {
+                  id: lead.person.id,
+                  name: lead.person.name,
+                  email: lead.person.email,
+                  company: lead.person.organization?.name,
+                  title: lead.person.title,
+                  location: [lead.person.city, lead.person.state, lead.person.country].filter(Boolean).join(', '),
+                  website: lead.person.organization?.website_url,
+                  employeeCount: lead.person.organization?.estimated_num_employees,
+                  checked: false
+                }
+              : { ...lead, checked: false }
+          )
+        );
+      } else {
+        // Otherwise, assume flat structure from backend
+        setLeads(
+          data.results.map(lead => ({
+            id: lead.id,
+            name: lead.name,
+            email: lead.email,
+            company: lead.company,
+            title: lead.title,
+            location: lead.location,
+            website: lead.website,
+            employeeCount: lead.employeeCount,
+            checked: false
+          }))
+        );
+      }
     }
   }, [data]);
+
+  // Log leads before rendering
+  useEffect(() => {
+    console.log('Leads to render:', leads);
+  }, [leads]);
 
   useEffect(() => {
     if (error) {
@@ -312,6 +438,50 @@ export default function AILeadSearch() {
       toast.error(error.message || "Failed to fetch leads");
     }
   }, [error]);
+
+  // Reset forceSearch flag after search is triggered
+  useEffect(() => {
+    if (forceSearch && (data || error)) {
+      console.log('Search completed, resetting forceSearch flag');
+      setForceSearch(false);
+      // Keep isFromAILeadScouts true to maintain priority of these results
+    }
+  }, [forceSearch, data, error]);
+
+  // Debug forceSearch changes
+  useEffect(() => {
+    console.log('forceSearch changed:', forceSearch);
+  }, [forceSearch]);
+
+  // Debug query parameters changes
+  useEffect(() => {
+    console.log('=== QUERY PARAMETERS CHANGED ===');
+    console.log('finalSearchTerm:', finalSearchTerm);
+    console.log('selectedJobTitles:', selectedJobTitles);
+    console.log('selectedIndustries:', selectedIndustries);
+    console.log('locationArray:', locationArray);
+    console.log('selectedEmployees:', selectedEmployees);
+    console.log('selectedRevenues:', selectedRevenues);
+    console.log('selectedTechnologies:', selectedTechnologies);
+    console.log('selectedFundingTypes:', selectedFundingTypes);
+    console.log('nameArray:', nameArray);
+    console.log('companyArray:', companyArray);
+    console.log('forceSearch:', forceSearch);
+  }, [finalSearchTerm, selectedJobTitles, selectedIndustries, locationArray, selectedEmployees, selectedRevenues, selectedTechnologies, selectedFundingTypes, nameArray, companyArray, forceSearch]);
+
+  // Reset isFromAILeadScouts when user manually searches on AILeadSearch page
+  useEffect(() => {
+    if (!forceSearch && (debouncedSearchTerm || locationInput || debouncedNameInput || debouncedCompanyInput)) {
+      console.log('Manual search detected, resetting isFromAILeadScouts');
+      setIsFromAILeadScouts(false);
+      setCurrentLeadSource(null); // Reset current source
+      // Clear leads when switching from AILeadScout to manual search
+      if (isFromAILeadScouts) {
+        console.log('Clearing AILeadScout results for manual search');
+        setLeads([]);
+      }
+    }
+  }, [debouncedSearchTerm, locationInput, debouncedNameInput, debouncedCompanyInput, forceSearch, isFromAILeadScouts]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -367,22 +537,47 @@ export default function AILeadSearch() {
     setShowCampaignForm(true);
   };
 
-  const handleCampaignSubmit = (e) => {
+  const handleCampaignSubmit = async (e) => {
     e.preventDefault();
-    if (!campaignName.trim()) {
+    if (!selectedCampaignId && !campaignName.trim()) {
       toast.error("Please enter a campaign name");
       return;
     }
-    
-    console.log("Creating campaign:", campaignName);
-    console.log("With leads:", leads.filter((lead) => lead.checked));
+
+    const selectedLeads = leads
+      .filter((lead) => lead.checked)
+      .map((lead) => ({
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        company: lead.company,
+        title: lead.title,
+        location: lead.location,
+        website: lead.website,
+        employeeCount: lead.employeeCount
+      }));
+
+    try {
+      let campaignId = selectedCampaignId;
+      // If creating a new campaign, create it first
+      if (!campaignId) {
+        const createRes = await axiosInstance.post("/campaigns", { Name: campaignName });
+        campaignId = createRes.data.campaign?.id || createRes.data.id;
+      }
+      // Now add leads to the campaign
+      await axiosInstance.post("/lead/AddLeadsToCampaign", {
+        Leads: selectedLeads,
+        CampaignId: campaignId
+      });
+      toast.success("Leads added to campaign!");
+    } catch (err) {
+      toast.error("Failed to add leads to campaign");
+    }
 
     setCampaignName("");
     setShowCampaignForm(false);
     setLeads(leads.map((lead) => ({ ...lead, checked: false })));
     setSelectAll(false);
-
-    toast.success(`Campaign "${campaignName}" created successfully!`);
   };
 
   // Handler for job title checkbox
@@ -529,6 +724,27 @@ export default function AILeadSearch() {
       setAlternatives([]);
     }
   }, [location.search]);
+
+  // If no search query but filters are selected, build a query string from filters
+  if (!finalSearchTerm || finalSearchTerm.trim() === "" || finalSearchTerm === "all") {
+    let filterQueryParts = [];
+    if (selectedJobTitles.length > 0) filterQueryParts.push(selectedJobTitles.join(", "));
+    if (selectedIndustries.length > 0) filterQueryParts.push("industry: " + selectedIndustries.join(", "));
+    if (locationArray.length > 0) filterQueryParts.push("location: " + locationArray.join(", "));
+    if (selectedEmployees.length > 0) filterQueryParts.push("company size: " + selectedEmployees.join(", "));
+    if (selectedRevenues.length > 0) filterQueryParts.push("revenue: " + selectedRevenues.join(", "));
+    if (selectedTechnologies.length > 0) filterQueryParts.push("technology: " + selectedTechnologies.join(", "));
+    if (selectedFundingTypes.length > 0) filterQueryParts.push("funding type: " + selectedFundingTypes.join(", "));
+    if (nameArray.length > 0) filterQueryParts.push("name: " + nameArray.join(", "));
+    if (companyArray.length > 0) filterQueryParts.push("company: " + companyArray.join(", "));
+    if (filterQueryParts.length > 0) {
+      finalSearchTerm = filterQueryParts.join(" ");
+    }
+  }
+
+  useEffect(() => {
+    if (selectedCampaignId) setCampaignName("");
+  }, [selectedCampaignId]);
 
   return (
     <div className="flex min-h-screen w-full h-full flex-col md:flex-row gap-5 md:gap-0 pl-[10px] md:pl-[25px]">
@@ -932,6 +1148,74 @@ export default function AILeadSearch() {
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <h2 className="text-xl font-bold mb-4">Search Results</h2>
           
+          {/* Show the full search query entered by the user */}
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <span className="font-semibold text-blue-800">Full Search Entered:</span>
+            <span className="ml-2 text-blue-900">{initialOriginalQuery || searchTerm || initialSearchQuery}</span>
+          </div>
+
+          {/* Main Words/Keywords Display */}
+          {(selectedJobTitles.length > 0 || selectedIndustries.length > 0 || selectedLocations.length > 0 || selectedEmployees.length > 0 || selectedRevenues.length > 0 || selectedTechnologies.length > 0 || selectedFundingTypes.length > 0 || selectedNames.length > 0 || selectedCompanies.length > 0) && (
+            <div className="mb-6 bg-green-50 border-2 border-green-400 rounded-lg p-4">
+              <h3 className="font-bold text-green-900 mb-2 flex items-center gap-2">
+                <span>🔑</span>
+                Main Words / Keywords
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {/* Use summarizeMainKeywords for concise display */}
+                {summarizeMainKeywords({
+                  person_titles: selectedJobTitles,
+                  industries: selectedIndustries,
+                  companies: selectedCompanies,
+                  locations: selectedLocations,
+                  technologies: selectedTechnologies,
+                  funding_types: selectedFundingTypes,
+                  employees: selectedEmployees,
+                  revenues: selectedRevenues,
+                  names: selectedNames,
+                  lookalike_domains: []
+                }).map((kw, idx) => (
+                  <span key={idx} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-300">
+                    {kw}
+                  </span>
+                ))}
+              </div>
+              <p className="text-xs text-green-700 mt-2">
+                These are the main words/keywords extracted from your search and filters.
+              </p>
+            </div>
+          )}
+
+          {/* Source Indicator */}
+          {isFromAILeadScouts && (
+            <div className="mb-4 p-3 bg-gradient-to-r from-amber-50 to-emerald-50 border border-amber-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-amber-800">
+                  <span className="text-lg">🤖</span>
+                  <span className="font-semibold">AI Lead Scout Results</span>
+                  <span className="text-xs bg-amber-200 px-2 py-1 rounded-full">
+                    {currentLeadSource === 'aiLeadScouts' ? 'ACTIVE' : 'PENDING'}
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsFromAILeadScouts(false);
+                    setCurrentLeadSource(null);
+                    setLeads([]);
+                    console.log('AI Scout results cleared manually');
+                  }}
+                  className="px-3 py-1 text-xs bg-amber-200 text-amber-800 rounded-lg hover:bg-amber-300 transition-colors"
+                >
+                  Clear Results
+                </button>
+              </div>
+              <p className="text-sm text-amber-700 mt-1">
+                These leads were generated using your selected filters from the AI Lead Scout page.
+                {currentLeadSource === 'aiLeadScouts' && ' ✅ Currently displaying AI Lead Scout results.'}
+              </p>
+            </div>
+          )}
+          
           {/* Search Input */}
           <form onSubmit={handleSearchSubmit} className="mb-6">
             <div className="flex items-center gap-2">
@@ -950,7 +1234,76 @@ export default function AILeadSearch() {
                 {isLoading ? "Searching..." : "Search"}
               </button>
             </div>
-              </form>
+          </form>
+
+          {/* Extracted Parameters Display */}
+          {(selectedJobTitles.length > 0 || selectedIndustries.length > 0 || selectedLocations.length > 0 || selectedEmployees.length > 0 || selectedRevenues.length > 0 || selectedTechnologies.length > 0 || selectedFundingTypes.length > 0 || selectedNames.length > 0 || selectedCompanies.length > 0) && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+              <h3 className="font-semibold text-green-800 mb-2 flex items-center gap-2">
+                <span>🤖</span>
+                AI Extracted Parameters
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {selectedJobTitles.length > 0 && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <FaBriefcase className="mr-1" />
+                    Job Titles: {selectedJobTitles.join(', ')}
+                  </span>
+                )}
+                {selectedIndustries.length > 0 && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <FaIndustry className="mr-1" />
+                    Industries: {selectedIndustries.join(', ')}
+                  </span>
+                )}
+                {selectedLocations.length > 0 && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                    <FaMapMarkerAlt className="mr-1" />
+                    Locations: {selectedLocations.join(', ')}
+                  </span>
+                )}
+                {selectedEmployees.length > 0 && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                    <FaUsers className="mr-1" />
+                    Company Size: {selectedEmployees.join(', ')}
+                  </span>
+                )}
+                {selectedRevenues.length > 0 && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    <FaDollarSign className="mr-1" />
+                    Revenue: {selectedRevenues.join(', ')}
+                  </span>
+                )}
+                {selectedTechnologies.length > 0 && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                    <FaCogs className="mr-1" />
+                    Technologies: {selectedTechnologies.join(', ')}
+                  </span>
+                )}
+                {selectedFundingTypes.length > 0 && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
+                    <FaMoneyCheckAlt className="mr-1" />
+                    Funding: {selectedFundingTypes.join(', ')}
+                  </span>
+                )}
+                {selectedNames.length > 0 && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
+                    <FaUser className="mr-1" />
+                    Names: {selectedNames.join(', ')}
+                  </span>
+                )}
+                {selectedCompanies.length > 0 && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    <FaBuilding className="mr-1" />
+                    Companies: {selectedCompanies.join(', ')}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-green-700 mt-2">
+                These parameters were automatically extracted from your natural language query.
+              </p>
+            </div>
+          )}
 
           {/* Alternatives display (moved from sidebar) */}
           {alternatives.length > 0 && !showOnlyAlternatives && (
@@ -1074,8 +1427,8 @@ export default function AILeadSearch() {
                     <option value="100">100</option>
                   </select>
                   <span className="text-gray-600">contacts per page</span>
-          </div>
-        </div>
+                </div>
+              </div>
 
               {/* Leads List */}
               {leads.map((lead) => (
@@ -1095,6 +1448,16 @@ export default function AILeadSearch() {
                         <div>
                           <h3 className="font-semibold text-lg">{lead.name}</h3>
                           <p className="text-gray-600 font-medium">{lead.title}</p>
+                          {/* Source Badge */}
+                          {lead.source && (
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1 ${
+                              lead.source === 'aiLeadScouts' 
+                                ? 'bg-amber-100 text-amber-800' 
+                                : 'bg-blue-100 text-blue-800'
+                            }`}>
+                              {lead.source === 'aiLeadScouts' ? '🤖 AI Scout' : '🔍 AI Search'}
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-2 text-gray-500">
                           <FaMapMarkerAlt className="text-gray-400" />
@@ -1200,7 +1563,7 @@ export default function AILeadSearch() {
               >
                 Add Selected to Campaign
               </button>
-          </div>
+            </div>
           )}
         </div>
       </div>
@@ -1209,15 +1572,31 @@ export default function AILeadSearch() {
       {showCampaignForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Create New Campaign</h3>
+            <h3 className="text-xl font-bold mb-4">Add to Campaign</h3>
             <form onSubmit={handleCampaignSubmit}>
-              <input
-                type="text"
-                value={campaignName}
-                onChange={(e) => setCampaignName(e.target.value)}
-                placeholder="Campaign Name"
-                className="w-full px-4 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <label className="block mb-2 text-sm font-medium text-gray-900">Select Existing Campaign</label>
+              <select
+                className="w-full p-2 border border-gray-300 rounded mb-4"
+                value={selectedCampaignId}
+                onChange={e => setSelectedCampaignId(e.target.value)}
+              >
+                <option value="">Select a campaign</option>
+                {campaignsObject?.campaigns?.map(camp => (
+                  <option key={camp.id} value={camp.id}>{camp.Name}</option>
+                ))}
+              </select>
+              <div className="flex items-center my-2">
+                <span className="text-gray-400 text-xs">or create new:</span>
+              </div>
+              {!selectedCampaignId && (
+                <input
+                  type="text"
+                  value={campaignName}
+                  onChange={(e) => setCampaignName(e.target.value)}
+                  placeholder="New Campaign Name"
+                  className="w-full px-4 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              )}
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
@@ -1230,7 +1609,7 @@ export default function AILeadSearch() {
                   type="submit"
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
                 >
-                  Create Campaign
+                  Add to Campaign
                 </button>
               </div>
             </form>

@@ -28,13 +28,14 @@ export default function CompaignTarget() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isOpen2, setIsOpen2] = useState(false)
-  const { getCampaignLeadsQuery, getCampaignSequenceQuery, generateEmailWithAI, generateSequenceWithAI, updateCampaignSequenceMutation, generateAIScheduleQuery } = useCampaignQuery();
+  const { getCampaignLeadsQuery, getCampaignSequenceQuery, generateEmailWithAI, generateSequenceWithAI, updateCampaignSequenceMutation, generateAIScheduleQuery, campaignsObject, isCampaignsLoading } = useCampaignQuery();
   const [scheduleMadeByAI, setScheduleMadeByAI] = useState(null);
   const [selectStep, setSelectStep] = useState(null);
   const [steps, setSteps] = useState([]);
   const [content, setContent] = useState("");
   const [subject, setSubject] = useState("");
   const [delay, setDelay] = useState(0);
+  const [selectedCampaignId, setSelectedCampaignId] = useState("");
 
   const { 
     data: leads, // Now directly the array of leads
@@ -533,6 +534,20 @@ const data = [
                       </button>
                     </div>
                     <div className="mt-4 space-y-4">
+                      {/* Campaign dropdown */}
+                      <div>
+                        <label className="block mb-2 text-sm font-medium text-gray-900">Select Campaign</label>
+                        <select
+                          className="w-full p-2 border border-gray-300 rounded"
+                          value={selectedCampaignId}
+                          onChange={e => setSelectedCampaignId(e.target.value)}
+                        >
+                          <option value="">Select a campaign</option>
+                          {campaignsObject?.campaigns?.map(camp => (
+                            <option key={camp.id} value={camp.id}>{camp.Name}</option>
+                          ))}
+                        </select>
+                      </div>
                       <div className="shadow-lg p-2">
                         <div className="flex gap-4 cursor-pointer items-center px-10">
                           <div>

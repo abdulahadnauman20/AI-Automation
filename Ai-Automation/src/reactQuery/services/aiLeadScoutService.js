@@ -44,6 +44,23 @@ export const searchLeads = async ({ query, page, per_page, person_titles, indust
     
     const response = await axiosInstance.post("/lead/SearchLeads", requestBody);
     console.log('API Response:', response.data);
+    console.log('API Response results length:', response.data?.results?.length || 0);
+    console.log('API Response pagination:', response.data?.pagination);
+    
+    // Log a few sample results to see if they match the filters
+    if (response.data?.results && response.data.results.length > 0) {
+      console.log('Sample results:');
+      response.data.results.slice(0, 3).forEach((lead, index) => {
+        console.log(`Sample ${index + 1}:`, {
+          name: lead.person?.name,
+          title: lead.person?.title,
+          company: lead.person?.organization?.name,
+          location: `${lead.person?.city}, ${lead.person?.state}, ${lead.person?.country}`,
+          industry: lead.person?.organization?.industry
+        });
+      });
+    }
+    
     return response.data;
   } catch (error) {
     console.error('Error in searchLeads:', JSON.stringify(error.response?.data || error, null, 2));
