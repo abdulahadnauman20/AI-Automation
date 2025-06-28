@@ -47,13 +47,13 @@ export default function TopPeople() {
         </button>
       </div>
 
-      <div className="mb-6 flex items-center gap-4">
+      <div className="mb-6 flex items-center gap-4 flex-col md:flex-row">
         <div className="relative flex-1">
           <Search size={20} className="absolute text-gray-400 left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search..."
-            className="w-96 rounded-full border border-gray-400 bg-background px-9 py-2 text-sm focus:outline-none cursor-pointer"
+            className="md:w-96 rounded-full border border-gray-400 bg-background px-9 py-2 text-sm focus:outline-none cursor-pointer"
           />
         </div>
         <button
