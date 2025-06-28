@@ -1,7 +1,8 @@
 import axios from 'axios';
 
+// base url from  vite env named VITE_API_URL
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:4000', // Updated to match backend port
+    baseURL: import.meta.env.VITE_API_URL,
     headers: {
         'Content-Type': 'application/json',
     },
