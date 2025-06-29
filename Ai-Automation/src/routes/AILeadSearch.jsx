@@ -7,6 +7,7 @@ import { toast } from "react-hot-toast";
 import axiosInstance from "../services/axiosInstance";
 import { summarizeMainKeywords } from "../utils/nlpParser";
 import { useCampaignQuery } from "../reactQuery/hooks/useCampaignQuery";
+import { searchLeads } from "../reactQuery/services/aiLeadScoutService";
 
 function CustomCheckbox({ id, checked = false, onChange = () => {}, disabled = false }) {
   return (
@@ -78,6 +79,47 @@ async function fetchDomainAlternatives(domain) {
   }
 }
 
+// Helper function to split array into batches
+function chunkArray(array, size) {
+  const result = [];
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
+}
+
+// Helper function to send batches in parallel (up to N at a time) with error handling
+async function sendBatchesInParallel(batches, campaignId, updateProgress, alreadyAddedEmails = null) {
+  const CONCURRENCY = 3; // Reduced for stability
+  let totalAdded = 0;
+  let hadError = false;
+  for (let i = 0; i < batches.length; i += CONCURRENCY) {
+    const batchGroup = batches.slice(i, i + CONCURRENCY);
+    const promises = batchGroup.map(async (batch) => {
+      if (batch.length > 0) {
+        try {
+          await axiosInstance.post("/lead/AddLeadsToCampaign", {
+            Leads: batch,
+            CampaignId: campaignId
+          });
+          if (alreadyAddedEmails) batch.forEach(lead => alreadyAddedEmails.add(lead.email));
+          totalAdded += batch.length;
+          updateProgress(totalAdded);
+        } catch (err) {
+          hadError = true;
+          console.error('Batch add failed:', err);
+          toast.error('Failed to add a batch of leads to campaign.');
+        }
+      }
+    });
+    await Promise.all(promises);
+  }
+  if (hadError) {
+    toast.error('Some batches failed to add. Please check your connection or try again.');
+  }
+  return totalAdded;
+}
+
 export default function AILeadSearch() {
   const [selectAll, setSelectAll] = useState(false);
   const [skipOwned, setSkipOwned] = useState(true);
@@ -129,6 +171,16 @@ export default function AILeadSearch() {
   ];
   const { campaignsObject, isCampaignsLoading } = useCampaignQuery();
   const [selectedCampaignId, setSelectedCampaignId] = useState("");
+  // Add state for select all mode
+  const [selectAllMode, setSelectAllMode] = useState('page'); // 'page' or 'all'
+  // Add state to track if all leads are loaded
+  const [allLeadsLoaded, setAllLeadsLoaded] = useState(false);
+  // Add state for custom per page input
+  const [customPerPage, setCustomPerPage] = useState(perPage);
+  const [selectedLeadsForCampaign, setSelectedLeadsForCampaign] = useState([]);
+  const [allLeadsLoadedAndChecked, setAllLeadsLoadedAndChecked] = useState(false);
+  const [addToCampaignProgress, setAddToCampaignProgress] = useState({ total: 0, added: 0, inProgress: false });
+  const BATCH_SIZE = 100;
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -136,6 +188,7 @@ export default function AILeadSearch() {
   const locationDebounceTimeout = useRef();
   const nameDebounceTimeout = useRef();
   const companyDebounceTimeout = useRef();
+  const [dropdown2, setdropdown2] = useState(false);
 
   // Extract the initial search query and filters from the URL
   const queryParams = new URLSearchParams(location.search);
@@ -488,11 +541,16 @@ export default function AILeadSearch() {
     // No need to manually refetch, as debouncedSearchTerm will trigger it
   };
 
-  const handlePerPageChange = (e) => {
-    const newPerPage = parseInt(e.target.value);
-    setPerPage(newPerPage);
-    setCurrentPage(1); // Reset to first page when changing per page
-    refetch();
+  // Update handlePerPageChange to support both input and suggestions
+  const handlePerPageChange = (value) => {
+    const newPerPage = parseInt(value);
+    if (!isNaN(newPerPage) && newPerPage > 0) {
+      setPerPage(newPerPage);
+      setCustomPerPage(newPerPage);
+      setCurrentPage(1);
+      setAllLeadsLoaded(false);
+      refetch();
+    }
   };
 
   const handlePageChange = (newPage) => {
@@ -504,10 +562,19 @@ export default function AILeadSearch() {
   const toggleSelectAll = () => {
     const newSelectAll = !selectAll;
     setSelectAll(newSelectAll);
-    setLeads(leads.map((lead) => ({
-      ...lead,
-      checked: newSelectAll && (!skipOwned || !lead.owned),
-    })));
+    if (selectAllMode === 'all' && newSelectAll) {
+      if (data?.results) {
+        setLeads(data.results.map(lead => ({
+          ...lead,
+          checked: !skipOwned || !lead.owned,
+        })));
+      }
+    } else {
+      setLeads(leads.map((lead) => ({
+        ...lead,
+        checked: newSelectAll && (!skipOwned || !lead.owned),
+      })));
+    }
   };
 
   const toggleLeadSelection = (id) => {
@@ -528,25 +595,41 @@ export default function AILeadSearch() {
     }
   };
 
-  const handleAddToCampaign = () => {
-    const selectedLeads = leads.filter((lead) => lead.checked);
-    if (selectedLeads.length === 0) {
-      toast.error("Please select at least one lead");
+  const handleAddToCampaign = async () => {
+    // If selectAllMode is 'all' and not all leads are loaded, do progressive batch add
+    if (selectAll && selectAllMode === 'all' && !allLeadsLoaded && data?.pagination?.totalResults > leads.length) {
+      // Open campaign form immediately
+      setShowCampaignForm(true);
+      setAddToCampaignProgress({ total: data.pagination.totalResults, added: 0, inProgress: false });
       return;
     }
-    setShowCampaignForm(true);
+    actuallyAddToCampaign(leads);
   };
 
-  const handleCampaignSubmit = async (e) => {
-    e.preventDefault();
-    if (!selectedCampaignId && !campaignName.trim()) {
-      toast.error("Please enter a campaign name");
-      return;
-    }
+  // Progressive batch add-to-campaign logic
+  const handleProgressiveAddToCampaign = async (campaignId) => {
+    setAddToCampaignProgress({ total: data.pagination.totalResults, added: 0, inProgress: true });
+    let currentPage = 1;
+    let totalAdded = 0;
+    let totalResults = data.pagination.totalResults;
+    let finished = false;
 
-    const selectedLeads = leads
-      .filter((lead) => lead.checked)
-      .map((lead) => ({
+    while (!finished) {
+      const batchResult = await searchLeads({
+        query: finalSearchTerm,
+        page: currentPage,
+        per_page: BATCH_SIZE,
+        person_titles: selectedJobTitles,
+        industries: selectedIndustries,
+        locations: locationArray,
+        employees: selectedEmployees,
+        revenues: selectedRevenues,
+        technologies: selectedTechnologies,
+        fundingTypes: selectedFundingTypes,
+        names: nameArray,
+        companies: companyArray
+      });
+      const batchLeads = batchResult.results.map(lead => ({
         name: lead.name,
         email: lead.email,
         phone: lead.phone,
@@ -556,28 +639,134 @@ export default function AILeadSearch() {
         website: lead.website,
         employeeCount: lead.employeeCount
       }));
+      if (batchLeads.length === 0) break;
+      await axiosInstance.post("/lead/AddLeadsToCampaign", {
+        Leads: batchLeads,
+        CampaignId: campaignId
+      });
+      totalAdded += batchLeads.length;
+      setAddToCampaignProgress(prev => ({ ...prev, added: totalAdded }));
+      if (totalAdded >= totalResults) finished = true;
+      currentPage++;
+    }
+    setAddToCampaignProgress(prev => ({ ...prev, inProgress: false }));
+    toast.success("All leads added to campaign!");
+    setShowCampaignForm(false);
+    setLeads(leads.map((lead) => ({ ...lead, checked: false })));
+    setSelectAll(false);
+    setSelectedLeadsForCampaign([]);
+  };
 
-    try {
+  // Modified handleCampaignSubmit to support progressive add
+  const handleCampaignSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedCampaignId && !campaignName.trim()) {
+      toast.error("Please enter a campaign name");
+      return;
+    }
+
+    // If progressive add is needed
+    if (selectAll && selectAllMode === 'all' && !allLeadsLoaded && data?.pagination?.totalResults > leads.length) {
       let campaignId = selectedCampaignId;
-      // If creating a new campaign, create it first
       if (!campaignId) {
         const createRes = await axiosInstance.post("/campaigns", { Name: campaignName });
         campaignId = createRes.data.campaign?.id || createRes.data.id;
       }
-      // Now add leads to the campaign
-      await axiosInstance.post("/lead/AddLeadsToCampaign", {
-        Leads: selectedLeads,
-        CampaignId: campaignId
-      });
-      toast.success("Leads added to campaign!");
-    } catch (err) {
-      toast.error("Failed to add leads to campaign");
+      // 1. Immediately add currently fetched/checked leads in batches of 100, in parallel
+      const visibleSelectedLeads = leads.filter(lead => lead.checked).map(lead => ({
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        company: lead.company,
+        title: lead.title,
+        location: lead.location,
+        website: lead.website,
+        employeeCount: lead.employeeCount
+      }));
+      const visibleBatches = chunkArray(visibleSelectedLeads, 100);
+      let totalAdded = 0;
+      totalAdded += await sendBatchesInParallel(visibleBatches, campaignId, (added) => setAddToCampaignProgress(prev => ({ ...prev, added })));
+      // 2. Start progressive batch add for the rest
+      setAddToCampaignProgress({ total: data.pagination.totalResults, added: totalAdded, inProgress: true });
+      let currentPage = 1;
+      let totalResults = data.pagination.totalResults;
+      let finished = false;
+      // Build a set of emails already added to avoid duplicates
+      const alreadyAddedEmails = new Set(visibleSelectedLeads.map(l => l.email));
+      while (!finished) {
+        const batchResult = await searchLeads({
+          query: finalSearchTerm,
+          page: currentPage,
+          per_page: BATCH_SIZE,
+          person_titles: selectedJobTitles,
+          industries: selectedIndustries,
+          locations: locationArray,
+          employees: selectedEmployees,
+          revenues: selectedRevenues,
+          technologies: selectedTechnologies,
+          fundingTypes: selectedFundingTypes,
+          names: nameArray,
+          companies: companyArray
+        });
+        let batchLeads = batchResult.results.map(lead => ({
+          name: lead.name,
+          email: lead.email,
+          phone: lead.phone,
+          company: lead.company,
+          title: lead.title,
+          location: lead.location,
+          website: lead.website,
+          employeeCount: lead.employeeCount
+        }));
+        // Filter out leads already added
+        batchLeads = batchLeads.filter(lead => !alreadyAddedEmails.has(lead.email));
+        // Send in batches of 100, in parallel
+        const backgroundBatches = chunkArray(batchLeads, 100);
+        totalAdded += await sendBatchesInParallel(backgroundBatches, campaignId, (added) => setAddToCampaignProgress(prev => ({ ...prev, added })), alreadyAddedEmails);
+        if (totalAdded >= totalResults) finished = true;
+        currentPage++;
+      }
+      setAddToCampaignProgress(prev => ({ ...prev, inProgress: false }));
+      toast.success("All leads added to campaign!");
+      setShowCampaignForm(false);
+      setLeads(leads.map((lead) => ({ ...lead, checked: false })));
+      setSelectAll(false);
+      setSelectedLeadsForCampaign([]);
+      return;
     }
 
+    // Use the selectedLeadsForCampaign state for normal add
+    const selectedLeads = selectedLeadsForCampaign.map((lead) => ({
+      name: lead.name,
+      email: lead.email,
+      phone: lead.phone,
+      company: lead.company,
+      title: lead.title,
+      location: lead.location,
+      website: lead.website,
+      employeeCount: lead.employeeCount
+    }));
+    // Send in batches of 100, in parallel
+    const normalBatches = chunkArray(selectedLeads, 100);
+    let totalAdded = 0;
+    totalAdded += await sendBatchesInParallel(normalBatches, selectedCampaignId, (added) => setAddToCampaignProgress(prev => ({ ...prev, added })));
+    toast.success("Leads added to campaign!");
     setCampaignName("");
     setShowCampaignForm(false);
     setLeads(leads.map((lead) => ({ ...lead, checked: false })));
     setSelectAll(false);
+    setSelectedLeadsForCampaign([]);
+  };
+
+  // The actual add-to-campaign logic
+  const actuallyAddToCampaign = (leadsArray) => {
+    const selectedLeads = leadsArray.filter((lead) => lead.checked);
+    if (selectedLeads.length === 0) {
+      toast.error("Please select at least one lead");
+      return;
+    }
+    setSelectedLeadsForCampaign(selectedLeads);
+    setShowCampaignForm(true);
   };
 
   // Handler for job title checkbox
@@ -745,6 +934,77 @@ export default function AILeadSearch() {
   useEffect(() => {
     if (selectedCampaignId) setCampaignName("");
   }, [selectedCampaignId]);
+
+  // Optionally, set selectAllMode to 'all' by default if the checkbox is present
+  useEffect(() => {
+    if (data?.pagination?.totalPages > 1) {
+      setSelectAllMode('all');
+    }
+  }, [data?.pagination?.totalPages]);
+
+  // Handler for 'Select all (N)' checkbox
+  const handleSelectAllN = async () => {
+    const newSelectAll = !(selectAll && selectAllMode === 'all');
+    setSelectAllMode('all');
+    setSelectAll(newSelectAll);
+    if (newSelectAll) {
+      // Instantly select all leads on the current page for UI feedback
+      setLeads(leads.map(lead => ({
+        ...lead,
+        checked: !skipOwned || !lead.owned,
+      })));
+      // Then fetch all leads from backend and select all
+      if (!allLeadsLoaded && data?.pagination?.totalResults > leads.length) {
+        const allLeadsResult = await searchLeads({
+          query: finalSearchTerm,
+          page: 1,
+          per_page: 'all', // Always request all leads
+          person_titles: selectedJobTitles,
+          industries: selectedIndustries,
+          locations: locationArray,
+          employees: selectedEmployees,
+          revenues: selectedRevenues,
+          technologies: selectedTechnologies,
+          fundingTypes: selectedFundingTypes,
+          names: nameArray,
+          companies: companyArray
+        });
+        setLeads(allLeadsResult.results.map(lead => ({
+          ...lead,
+          checked: !skipOwned || !lead.owned,
+        })));
+        setAllLeadsLoaded(true);
+      }
+    } else {
+      setLeads(leads.map(lead => ({ ...lead, checked: false })));
+    }
+  };
+
+  // Add a computed variable for selection state
+  const allSelected = selectAll && selectAllMode === 'all' && leads.length > 0 && leads.every(lead => lead.checked);
+  const noneSelected = leads.every(lead => !lead.checked);
+
+  // Handler for 'Select All From Page' checkbox
+  const handleSelectAllPage = () => {
+    const newSelectAll = !(selectAll && selectAllMode === 'page');
+    setSelectAllMode('page');
+    setSelectAll(newSelectAll);
+    if (newSelectAll) {
+      setLeads(leads.map(lead => ({
+        ...lead,
+        checked: !skipOwned || !lead.owned,
+      })));
+    } else {
+      setLeads(leads.map(lead => ({ ...lead, checked: false })));
+    }
+  };
+
+  useEffect(() => {
+    if (allLeadsLoadedAndChecked) {
+      actuallyAddToCampaign(leads); // Use the fully updated leads array
+      setAllLeadsLoadedAndChecked(false); // Reset for next time
+    }
+  }, [allLeadsLoadedAndChecked, leads]);
 
   return (
     <div className="flex min-h-screen w-full h-full flex-col md:flex-row gap-5 md:gap-0 pl-[10px] md:pl-[25px]">
@@ -1408,27 +1668,68 @@ export default function AILeadSearch() {
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
-                    checked={selectAll}
-                    onChange={toggleSelectAll}
+                    checked={selectAll && selectAllMode === 'page'}
+                    onChange={handleSelectAllPage}
                     className="h-4 w-4 text-blue-500"
                   />
-                  <span>Select All</span>
+                  <span>Select All From Page </span>
+                  {data?.pagination?.totalPages > 1 && (
+                    <div className="flex items-center ml-2 gap-2">
+                      <label className="flex items-center gap-1">
+                        <input
+                          type="checkbox"
+                          checked={selectAll && selectAllMode === 'all'}
+                          onChange={handleSelectAllN}
+                        />
+                        <span className="text-sm">Select all ({data.pagination.totalResults})</span>
+                      </label>
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-gray-600">Show:</span>
-                  <select
-                    value={perPage}
-                    onChange={handlePerPageChange}
-                    className="px-2 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="10">10</option>
-                    <option value="20">20</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                  </select>
+                  <input
+                    type="number"
+                    min="1"
+                    value={customPerPage}
+                    onChange={e => setCustomPerPage(e.target.value)}
+                    onBlur={e => handlePerPageChange(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') handlePerPageChange(e.target.value);
+                    }}
+                    className="w-20 px-2 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Per page"
+                  />
+                  {/* Suggestions */}
+                  {[10, 20, 50, 100].map(opt => (
+                    <button
+                      key={opt}
+                      type="button"
+                      className={`px-2 py-1 rounded ${customPerPage == opt ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'} ml-1`}
+                      onClick={() => handlePerPageChange(opt)}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                  {data?.pagination?.totalResults && data.pagination.totalResults > 100 && (
+                    <button
+                      type="button"
+                      className={`px-2 py-1 rounded ${customPerPage == data.pagination.totalResults ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'} ml-1`}
+                      onClick={() => handlePerPageChange(data.pagination.totalResults)}
+                    >
+                      All ({data.pagination.totalResults})
+                    </button>
+                  )}
                   <span className="text-gray-600">contacts per page</span>
                 </div>
               </div>
+
+              {/* In the render, above the leads list, show a message if all or none are selected */}
+              {(allSelected || noneSelected) && (
+                <div className={`mb-4 p-3 rounded-lg text-center font-semibold ${allSelected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                  {allSelected ? `All ${data?.pagination?.totalResults || leads.length} leads are selected.` : 'No leads are selected.'}
+                </div>
+              )}
 
               {/* Leads List */}
               {leads.map((lead) => (
@@ -1581,9 +1882,11 @@ export default function AILeadSearch() {
                 onChange={e => setSelectedCampaignId(e.target.value)}
               >
                 <option value="">Select a campaign</option>
-                {campaignsObject?.campaigns?.map(camp => (
-                  <option key={camp.id} value={camp.id}>{camp.Name}</option>
-                ))}
+                {campaignsObject?.campaigns
+                  ?.filter(camp => camp.Name && camp.Name.toLowerCase() !== 'new campaign' && camp.id && typeof camp.id === 'string' && !camp.id.toLowerCase().includes('login'))
+                  .map(camp => (
+                    <option key={camp.id} value={camp.id}>{camp.Name}</option>
+                  ))}
               </select>
               <div className="flex items-center my-2">
                 <span className="text-gray-400 text-xs">or create new:</span>

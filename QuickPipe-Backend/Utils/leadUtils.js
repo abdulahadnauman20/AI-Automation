@@ -2,70 +2,84 @@ const moment = require("moment-timezone");
 const axios = require("axios");
 
 exports.ExtractTitleAndLocation = (description) => {
-    // Common job title patterns - improved to capture standalone titles
-    const titlePatterns = [
-        // Standalone common titles
-        /\b(Developer|Software Engineer|Architect|Designer|Analyst|Specialist|Manager|Director|Consultant)\b/i,
-
-        // C-level executives
-        /\b(CEO|CTO|CFO|COO|CMO|CIO|CHRO|CSO)\b/i,
-
-        // Chief titles
-        /\b(Chief\s+[A-Za-z]+(\s+Officer)?)\b/i,
-
-        // VP titles
-        /\b(VP|Vice\s+President)(\s+of)?\s+([A-Za-z]+(\s+[A-Za-z]+)?)\b/i,
-
-        // Director titles
-        /\b(Director)(\s+of)?\s+([A-Za-z]+(\s+[A-Za-z]+)?)\b/i,
-
-        // Head titles
-        /\b(Head)(\s+of)?\s+([A-Za-z]+(\s+[A-Za-z]+)?)\b/i,
-
-        // Manager titles
-        /\b(Manager)(\s+of)?\s+([A-Za-z]+(\s+[A-Za-z]+)?)\b/i,
-
-        // Specialized roles
-        /\b([A-Za-z]+)\s+(Engineer|Developer|Architect|Designer|Analyst|Specialist)\b/i,
-
-        // Engineer/Developer with specialization
-        /\b(([A-Za-z]+(\s+[A-Za-z]+)?)\s+)?(Engineer|Developer)\b/i
-    ];
-
-    // Common location patterns (city, state, country)
-    const locationPatterns = [
-        /\b([A-Za-z\s]+),\s+([A-Za-z]{2})\b/i, // City, State abbreviation
-        /\b([A-Za-z\s]+),\s+([A-Za-z\s]+)\b/i, // City, State/Country
-        /\b(in|at|from)\s+([A-Za-z\s]+),\s+([A-Za-z\s]+)\b/i, // in/at/from City, State/Country
-        /\b(in|at|from)\s+([A-Za-z\s]+)\b/i // in/at/from Location
-    ];
-
+    // Improved: handle 'all [title]' and 'search all [title]' patterns
     let title = null;
     let location = null;
 
-    // Extract title
-    for (const pattern of titlePatterns) {
-        const match = description.match(pattern);
-        if (match) {
-            title = match[0].trim();
-            break;
+    // Check for 'all [title]' or 'search all [title]' patterns
+    const allTitlePattern = /^(search\s+)?all\s+([a-zA-Z ]+)$/i;
+    const allTitleMatch = description.match(allTitlePattern);
+    if (allTitleMatch) {
+        title = allTitleMatch[2].trim();
+    }
+
+    // If not matched, try to extract both title and location from patterns like 'TITLE in LOCATION'
+    if (!title) {
+        // Try to match '[title] in [location]' or '[title] at [location]' or '[title] from [location]'
+        const titleLocationPattern = /^([a-zA-Z\s]+?)\s+(in|at|from)\s+([a-zA-Z\s]+)$/i;
+        const titleLocationMatch = description.match(titleLocationPattern);
+        if (titleLocationMatch) {
+            title = titleLocationMatch[1].trim();
+            location = titleLocationMatch[3].trim();
         }
     }
 
-    // Extract location
-    for (const pattern of locationPatterns) {
-        const match = description.match(pattern);
-        if (match) {
-            // If the pattern includes a preposition (in/at/from), grab the location part
-            if (match[1] && (match[1].toLowerCase() === 'in' || match[1].toLowerCase() === 'at' || match[1].toLowerCase() === 'from')) {
-                location = match.slice(2).join(', ').trim();
-            } else {
-                location = match[0].trim();
+    // If still not matched, use existing patterns
+    if (!title) {
+        // Common job title patterns - improved to capture standalone titles
+        const titlePatterns = [
+            /\b(Developer|Software Engineer|Architect|Designer|Analyst|Specialist|Manager|Director|Consultant|Engineer|Scientist)\b/i,
+            /\b(CEO|CTO|CFO|COO|CMO|CIO|CHRO|CSO)\b/i,
+            /\b(Chief\s+[A-Za-z]+(\s+Officer)?)\b/i,
+            /\b(VP|Vice\s+President)(\s+of)?\s+([A-Za-z]+(\s+[A-Za-z]+)?)\b/i,
+            /\b(Director)(\s+of)?\s+([A-Za-z]+(\s+[A-Za-z]+)?)\b/i,
+            /\b(Head)(\s+of)?\s+([A-Za-z]+(\s+[A-Za-z]+)?)\b/i,
+            /\b(Manager)(\s+of)?\s+([A-Za-z]+(\s+[A-Za-z]+)?)\b/i,
+            /\b([A-Za-z]+)\s+(Engineer|Developer|Architect|Designer|Analyst|Specialist|Scientist)\b/i,
+            /\b(([A-Za-z]+(\s+[A-Za-z]+)?)\s+)?(Engineer|Developer|Scientist)\b/i
+        ];
+        // Try to find the longest match for title
+        let longestMatch = null;
+        for (const pattern of titlePatterns) {
+            const match = description.match(pattern);
+            if (match && (!longestMatch || match[0].length > longestMatch.length)) {
+                longestMatch = match[0];
             }
-            break;
+        }
+        if (longestMatch) {
+            title = longestMatch.trim();
         }
     }
 
+    // Location extraction: look for 'in [location]' or 'at [location]' or 'from [location]' if not already set
+    if (!location) {
+        const locationPattern = /\b(?:in|at|from)\s+([A-Za-z\s]+)$/i;
+        const locationMatch = description.match(locationPattern);
+        if (locationMatch) {
+            location = locationMatch[1].trim();
+        }
+    }
+
+    // Fallback to previous location patterns if still not set
+    if (!location) {
+        const locationPatterns = [
+            /\b([A-Za-z\s]+),\s+([A-Za-z]{2})\b/i, // City, State abbreviation
+            /\b([A-Za-z\s]+),\s+([A-Za-z\s]+)\b/i, // City, State/Country
+            /\b(in|at|from)\s+([A-Za-z\s]+),\s+([A-Za-z\s]+)\b/i, // in/at/from City, State/Country
+            /\b(in|at|from)\s+([A-Za-z\s]+)\b/i // in/at/from Location
+        ];
+        for (const pattern of locationPatterns) {
+            const match = description.match(pattern);
+            if (match) {
+                if (match[1] && (match[1].toLowerCase() === 'in' || match[1].toLowerCase() === 'at' || match[1].toLowerCase() === 'from')) {
+                    location = match.slice(2).join(', ').trim();
+                } else {
+                    location = match[0].trim();
+                }
+                break;
+            }
+        }
+    }
     return { title, location };
 }
 
@@ -109,28 +123,29 @@ exports.getRandomSendingTime = (schedule, delay = 0) => {
 
 exports.EnrichLeadWithApollo = async (apolloId) => {
     const APOLLO_ENRICH_URL = 'https://api.apollo.io/v1/people/match';
-
+    if (!process.env.APOLLO_API_KEY) {
+        console.error('Apollo API key is missing for enrichment!');
+        throw new Error('Apollo API key is not set on the server.');
+    }
     try {
         const response = await axios.post(APOLLO_ENRICH_URL, {
             api_key: process.env.APOLLO_API_KEY,
             id: apolloId,
             reveal_personal_emails: false
         });
-        console.log(response.data);
         if (!response.data || !response.data.person) {
             throw new Error('Invalid response from Apollo enrichment API');
         }
-
         return response.data.person;
     } catch (error) {
-        console.error('Apollo enrichment API error:', error.message);
-        throw new Error(`Failed to enrich lead: ${error.message}`);
+        console.error('Apollo enrichment API error:', error?.response?.data || error.message || error);
+        throw new Error(`Failed to enrich lead: ${error?.response?.data?.message || error.message || error}`);
     }
 }
 
 // Flexible extraction for quick/general searches
 exports.ExtractAllPossible = (description) => {
-    // Use the existing title and location extraction
+    // Use the improved title and location extraction
     const { title, location } = exports.ExtractTitleAndLocation(description);
 
     // Company extraction: look for words after 'at', 'from', or 'in' if not already used for location

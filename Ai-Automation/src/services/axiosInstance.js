@@ -12,8 +12,19 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
     (config) => {
         console.log('Making request to:', config.url);
-        // You can add auth token here if needed
-        const token = localStorage.getItem('token');
+        // Robustly get auth token from localStorage (check both 'token' and 'Token')
+        const storedToken = localStorage.getItem('token') || localStorage.getItem('Token');
+        let token = null;
+        if (storedToken) {
+            try {
+                // Try to parse as JSON (in case it's an object)
+                const tokenObject = JSON.parse(storedToken);
+                token = tokenObject?.token || tokenObject;
+            } catch (e) {
+                // If parsing fails, it's likely a plain token string
+                token = storedToken;
+            }
+        }
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }

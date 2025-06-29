@@ -6,12 +6,16 @@ const { Op } = require('sequelize');
 require('dotenv').config();
 
 const { ExtractTitleAndLocation, EnrichLeadWithApollo, ExtractAllPossible } = require('../Utils/leadUtils');
+const { enqueueApolloJob } = require('../Utils/apolloRateLimiter');
 
 const LeadModel = require("../Model/leadModel");
 const CampaignModel = require("../Model/campaignModel");
 
 exports.AddLeadsToCampaign = asyncError(async (req, res, next) => {
   const { Leads, CampaignId } = req.body;
+
+  // Debug log
+  console.log('AddLeadsToCampaign called. Leads received:', Array.isArray(Leads) ? Leads.length : Leads, 'CampaignId:', CampaignId, 'First 3 leads:', Array.isArray(Leads) ? Leads.slice(0,3) : Leads);
 
   // Validate inputs
   if (!Leads || !Array.isArray(Leads) || Leads.length === 0) {
@@ -171,14 +175,20 @@ exports.UpdateLeadStatus = asyncError(async (req, res, next) => {
 
 exports.SearchLeads = asyncError(async (req, res, next) => {
   try {
-    const { query, page = 1, per_page = 10, person_titles, industries, employees, revenues, names, companies, locations } = req.body;
+    // 1. API Key Check
+    if (!process.env.APOLLO_API_KEY) {
+      console.error('Apollo API key is missing!');
+      return res.status(500).json({ error: 'Apollo API key is not set on the server.' });
+    }
+
+    // 2. Request Validation
+    let { query, page = 1, per_page = 10, person_titles, industries, employees, revenues, names, companies, locations } = req.body;
+    if (!query || typeof query !== 'string' || query.trim().length === 0) {
+      return res.status(400).json({ error: 'No search query provided or query is not a valid string.' });
+    }
 
     console.log('Backend received request body:', req.body);
     console.log('Backend received query:', query);
-
-    if (!query) {
-      return res.status(400).json({ error: 'No search query provided' });
-    }
 
     // Extract as much as possible from the query
     const { title, location, company, keyword } = ExtractAllPossible(query);
@@ -186,7 +196,7 @@ exports.SearchLeads = asyncError(async (req, res, next) => {
     console.log('Backend extracted parameters:', { title, location, company, keyword });
 
     // Prepare Apollo API parameters (only supported ones)
-    const apolloParams = {
+    let apolloParams = {
       per_page: parseInt(per_page),
       page: parseInt(page)
     };
@@ -325,11 +335,44 @@ exports.SearchLeads = asyncError(async (req, res, next) => {
       });
     }
 
-    // Make a single call to Apollo API
-    const APOLLO_API_URL = 'https://api.apollo.io/v1/mixed_people/search';
+    // If per_page is 'all' or > 100, fetch all pages from Apollo with per_page=100
+    let fetchAll = false;
+    if (per_page === 'all' || parseInt(per_page) > 100) {
+      fetchAll = true;
+      apolloParams.per_page = 100; // Apollo's safe max per_page
+      apolloParams.page = 1;
+    }
 
-    try {
-      const apolloResponse = await axios.get(APOLLO_API_URL, {
+    let allLeads = [];
+    let totalPages = 1;
+    let totalResults = 0;
+    let apolloResponse;
+    let firstPageDone = false;
+    let currentPage = 1;
+
+    if (fetchAll) {
+      console.log('Fetching all leads from Apollo in a loop...');
+      do {
+        apolloParams.page = currentPage;
+        apolloResponse = await axios.get('https://api.apollo.io/v1/mixed_people/search', {
+          params: apolloParams,
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+            'X-Api-Key': process.env.APOLLO_API_KEY,
+          }
+        });
+        if (!firstPageDone) {
+          totalPages = apolloResponse.data.pagination?.total_pages || 1;
+          totalResults = apolloResponse.data.pagination?.total_entries || 0;
+          firstPageDone = true;
+        }
+        allLeads = allLeads.concat(apolloResponse.data.people || []);
+        currentPage++;
+      } while (currentPage <= totalPages);
+      console.log('Total leads fetched:', allLeads.length);
+    } else {
+      apolloResponse = await axios.get('https://api.apollo.io/v1/mixed_people/search', {
         params: apolloParams,
         headers: {
           'Content-Type': 'application/json',
@@ -337,83 +380,63 @@ exports.SearchLeads = asyncError(async (req, res, next) => {
           'X-Api-Key': process.env.APOLLO_API_KEY,
         }
       });
-
-      console.log('Apollo API response status:', apolloResponse.status);
-      console.log('Apollo API response data keys:', Object.keys(apolloResponse.data));
-      console.log('Apollo API total entries:', apolloResponse.data.pagination?.total_entries);
-      console.log('Apollo API people count:', apolloResponse.data.people?.length || 0);
-
-      const leads = apolloResponse.data.people || [];
-      const enrichedLeads = [];
-
-      // Enrich each lead using Apollo's enrichment API
-      for (const lead of leads) {
-        try {
-          let enrichedLead = null;
-          if (lead.id) {
-            try {
-              enrichedLead = await EnrichLeadWithApollo(lead.id);
-            } catch (enrichErr) {
-              console.error(`Failed to enrich lead with ID ${lead.id}: ${enrichErr.message}`);
-            }
-            enrichedLeads.push({
-              id: lead.id,
-              name: (enrichedLead?.name || `${enrichedLead?.first_name || lead.first_name || ''} ${enrichedLead?.last_name || lead.last_name || ''}`.trim() || lead.name || null),
-              email: enrichedLead?.email || lead.email || null,
-              phone: enrichedLead?.organization?.phone || lead.organization?.phone || null,
-              company: enrichedLead?.organization?.name || lead.organization?.name || null,
-              title: enrichedLead?.title || lead.title || null,
-              location: ([enrichedLead?.city || lead.city, enrichedLead?.state || lead.state, enrichedLead?.country || lead.country]
-                .filter(Boolean)
-                .join(', ')) || null,
-              website: enrichedLead?.organization?.website_url || lead.organization?.website_url || null,
-              employeeCount: enrichedLead?.organization?.estimated_num_employees || lead.organization?.estimated_num_employees || null
-            });
-          } else {
-            console.warn(`Lead with missing ID skipped: ${JSON.stringify(lead)}`);
-          }
-        } catch (error) {
-          console.error(`Failed to process lead with ID ${lead.id}: ${error.message}`);
-        }
-      }
-
-      // Get pagination info from Apollo response
-      const paginationInfo = {
-        currentPage: parseInt(page),
-        perPage: parseInt(per_page),
-        totalResults: apolloResponse.data.pagination?.total_entries || 0,
-        totalPages: apolloResponse.data.pagination?.total_pages || 1
-      };
-
-      // Return the enriched leads along with pagination info
-      return res.json({
-        originalQuery: query,
-        extractedParameters: {
-          titles: title ? [title] : [],
-          locations: location ? [location] : [],
-          companies: company ? [company] : [],
-          keywords: keyword ? [keyword] : []
-        },
-        pagination: paginationInfo,
-        results: enrichedLeads
-      });
-
-    } catch (error) {
-      // Log and return Apollo API error details for easier debugging
-      console.error('Apollo API error:', error?.response?.data || error.message);
-      return res.status(500).json({
-        error: 'Failed to retrieve data from Apollo API',
-        details: error?.response?.data || error.message,
-        extractedParameters: {
-          titles: title ? [title] : [],
-          locations: location ? [location] : [],
-          companies: company ? [company] : [],
-          keywords: keyword ? [keyword] : []
-        }
-      });
+      allLeads = apolloResponse.data.people || [];
+      totalPages = apolloResponse.data.pagination?.total_pages || 1;
+      totalResults = apolloResponse.data.pagination?.total_entries || 0;
+      console.log('Single page leads fetched:', allLeads.length);
     }
-  } catch (error) {
-    return next(new ErrorHandler('Failed to process search query', 500));
+
+    // Enrich each lead using Apollo's enrichment API
+    const enrichedLeads = [];
+    for (const lead of allLeads) {
+      try {
+        let enrichedLead = null;
+        if (lead.id) {
+          try {
+            enrichedLead = await enqueueApolloJob(() => EnrichLeadWithApollo(lead.id));
+          } catch (enrichErr) {
+            console.error(`Failed to enrich lead with ID ${lead.id}:`, enrichErr);
+          }
+          enrichedLeads.push({
+            id: lead.id,
+            name: (enrichedLead?.name || `${enrichedLead?.first_name || lead.first_name || ''} ${enrichedLead?.last_name || lead.last_name || ''}`.trim() || lead.name || null),
+            email: enrichedLead?.email || lead.email || null,
+            phone: enrichedLead?.organization?.phone || lead.organization?.phone || null,
+            company: enrichedLead?.organization?.name || lead.organization?.name || null,
+            title: enrichedLead?.title || lead.title || null,
+            location: ([enrichedLead?.city || lead.city, enrichedLead?.state || lead.state, enrichedLead?.country || lead.country].filter(Boolean).join(', ')) || null,
+            website: enrichedLead?.organization?.website_url || lead.organization?.website_url || null,
+            employeeCount: enrichedLead?.organization?.estimated_num_employees || lead.organization?.estimated_num_employees || null
+          });
+        } else {
+          console.warn(`Lead with missing ID skipped:`, lead);
+        }
+      } catch (error) {
+        console.error(`Failed to process lead with ID ${lead.id}:`, error);
+      }
+    }
+
+    // Return the enriched leads along with pagination info
+    return res.json({
+      originalQuery: query,
+      extractedParameters: {
+        titles: title ? [title] : [],
+        locations: location ? [location] : [],
+        companies: company ? [company] : [],
+        keywords: keyword ? [keyword] : []
+      },
+      pagination: {
+        currentPage: 1,
+        perPage: fetchAll ? allLeads.length : parseInt(per_page),
+        totalResults,
+        totalPages: fetchAll ? 1 : totalPages
+      },
+      results: enrichedLeads
+    });
+  } catch (err) {
+    // Catch-all for any other errors
+    console.error('Unexpected error in SearchLeads:', err);
+    return res.status(500).json({ error: 'Internal server error', details: err.message || err });
   }
 });
 
@@ -482,7 +505,7 @@ exports.SearchLeadsByFilter = asyncError(async (req, res, next) => {
           let enrichedLead = null;
           if (lead.id) {
             try {
-              enrichedLead = await EnrichLeadWithApollo(lead.id);
+              enrichedLead = await enqueueApolloJob(() => EnrichLeadWithApollo(lead.id));
             } catch (enrichErr) {
               console.error(`Failed to enrich lead with ID ${lead.id}: ${enrichErr.message}`);
             }

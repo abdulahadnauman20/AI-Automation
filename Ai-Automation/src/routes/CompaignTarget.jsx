@@ -310,6 +310,9 @@ const data = [
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("People")
 
+  const [dropdown1, setdropdown1] = useState(false);
+  const [dropdown2, setdropdown2] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-50 ps-20">
       <div className="container mx-auto px-4 py-6">

@@ -75,11 +75,22 @@ exports.UpdateWorkspace = catchAsyncError(async (req, res, next) => {
 });
 
 exports.GetCurrentWorkspace = catchAsyncError(async (req, res, next) => {
+    // Check for user object
+    if (!req.user || !req.user.User) {
+        console.error('User object missing in request.');
+        return res.status(401).json({ error: 'User not authenticated.' });
+    }
     const WorkspaceId = req.user.User.CurrentWorkspaceId;
-
+    if (!WorkspaceId) {
+        console.error('CurrentWorkspaceId is not set for user:', req.user.User.id);
+        return res.status(400).json({ error: 'No current workspace set for user.' });
+    }
     const Workspace = await WorkspaceModel.findByPk(WorkspaceId);
-
-    res.status(201).json({
+    if (!Workspace) {
+        console.error('Workspace not found for id:', WorkspaceId);
+        return res.status(404).json({ error: 'Workspace not found.' });
+    }
+    res.status(200).json({
         success: true,
         message: "Current workspace retrieved successfully",
         Workspace
